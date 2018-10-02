@@ -1,7 +1,7 @@
 # XBMC Media Center language file
 # Addon Name: VDR Recordings
 # Addon id: plugin.video.vdr.recording
-# Addon version: 0.0.01
+# Addon version: 0.0.2
 # Addon Provider: Markus Ehrnsperger
 msgid ""
 msgstr ""
