@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 # Copyright: GNU GPLv3
+# pylint: disable=E0401
+# Disable import error: E0401
 
 import os
 import string
@@ -7,6 +10,8 @@ import xbmc
 from array import array
 import time
 import datetime
+from resources.lib.bookmarks import bookmarks
+import xbmcplugin
 
 
 class VdrRecordingFolder:
@@ -19,6 +24,7 @@ class VdrRecordingFolder:
     self.resumeInitialized = False
     self.newResumeFormat = True
     self.initializeInfo()
+    self.oBookmarks = bookmarks()
 
   def initializeInfo(self):
     if self.infoInitialized == False:
@@ -112,17 +118,17 @@ class VdrRecordingFolder:
       index_file_length = os.path.getsize(os.path.join(self.path, "index"))
     except OSError:
       index_file_length = os.path.getsize(os.path.join(self.path, "index.vdr"))
-    duration = int(index_file_length / 8 / self.framerate)
+    self.duration = int(index_file_length / 8 / self.framerate)
     numVidStreams = 0
     for streamInfoLine in self.streamInfo:
       if(streamInfoLine[0] == "video"):
         numVidStreams = numVidStreams  + 1
-        streamInfoLine[1]['duration'] = duration
+        streamInfoLine[1]['duration'] = self.duration
         li.addStreamInfo(streamInfoLine[0], streamInfoLine[1])
     if numVidStreams == 0:
-      li.addStreamInfo('video', {'duration': duration})
+      li.addStreamInfo('video', {'duration': self.duration})
     for streamInfoLine in self.streamInfo:
-      if(streamInfoLine[0] <> "video"):
+      if(streamInfoLine[0] != "video"):
         li.addStreamInfo(streamInfoLine[0], streamInfoLine[1])
 
 #   li.addStreamInfo('video',
@@ -205,3 +211,53 @@ class VdrRecordingFolder:
         f_resume.close()
         self.resume = int(resume_content[0])
     return
+  def addDirectoryItem(self, addon_handle):
+    li = self.getListitem()
+    url = self.getStackUrl()
+    self.marksToBookmarks(url, self.duration)
+    xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
+                                listitem=li, isFolder=False)
+
+  def addDirectoryItem2(self):
+    li = self.getListitem()
+    url = self.getStackUrl()
+    self.marksToBookmarks(url, self.duration)
+
+  def marksToBookmarks(self, url, totalTimeInSeconds):
+    fileId = self.oBookmarks.getFileId(url)
+    if fileId == -2:
+# database format not supported      
+      return
+    if fileId == -1:
+      self.oBookmarks.insertFile(url)
+      xbmc.log("file inserted: " + str(url), xbmc.LOGERROR)   
+      fileId = self.oBookmarks.getFileId(url)
+      if fileId == -1:      
+        xbmc.log("Error, file Id still -1: " + str(url), xbmc.LOGERROR)   
+        return
+    xbmc.log("marks, path: " + str(self.path), xbmc.LOGERROR)        
+    bm = self.oBookmarks.getBookmarksFromFileId(fileId)
+    xbmc.log("bm: " + str(bm), xbmc.LOGERROR)
+    xbmc.log("len(bm): " + str(len(bm)), xbmc.LOGERROR)
+    if len(bm) == 0:
+    # read marks, and add
+      try:
+        f_marks = open(os.path.join(self.path, "marks"), "r")
+      except IOError:
+  # doesn't exist
+        xbmc.log("marks don't exist", xbmc.LOGINFO)
+      else:
+  # exists
+        xbmc.log("marks a: " + str(os.path.join(self.path, "marks")), xbmc.LOGERROR)        
+        marks_content = f_marks.readlines()
+        f_marks.close()
+        marks = []
+        xbmc.log("marks: " + str(os.path.join(self.path, "marks")), xbmc.LOGERROR)        
+        for marks_line in marks_content:
+          if marks_line[1] == ':':
+            m_time_sec = ((float(marks_line[0]) * 60) + float(marks_line[2:4]) ) * 60 + float(marks_line[5:10])
+            xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGERROR)
+            marks.append(m_time_sec)
+        self.oBookmarks.insertBookmarks(fileId, marks, totalTimeInSeconds)
+  
+  
