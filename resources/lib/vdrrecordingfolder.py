@@ -10,7 +10,7 @@ import xbmc
 from array import array
 import time
 import datetime
-from resources.lib.bookmarks import bookmarks
+from bookmarks import bookmarks
 import xbmcplugin
 
 
@@ -37,14 +37,8 @@ class VdrRecordingFolder:
 # Recording date / time
         rt = os.path.split(self.path)[1]
 #       xbmc.log("rectime_sort= " + rt, xbmc.LOGERROR)
-        if rt[18] == "-":
-          rec_seconds = int(rt[17])
-        else:
-          rec_seconds = int(rt[17:19])
-        if (rec_seconds < 0) or (rec_seconds > 59):
-          rec_seconds = 0
         self.RecordingTime = datetime.datetime(year = int(rt[0:4]), month = int(rt[5:7]),
-          day = int(rt[8:10]), hour = int(rt[11:13]), minute = int(rt[14:16]), second = rec_seconds)
+          day = int(rt[8:10]), hour = int(rt[11:13]), minute = int(rt[14:16]), second = 0)
 #         xbmc.log("rectime= " + str(self.RecordingTime), xbmc.LOGERROR)
         self.sortRecordingTimestamp = str(self.RecordingTime)
         infoFileName = os.path.join(self.path, "info")
@@ -235,29 +229,42 @@ class VdrRecordingFolder:
       if fileId == -1:      
         xbmc.log("Error, file Id still -1: " + str(url), xbmc.LOGERROR)   
         return
-    xbmc.log("marks, path: " + str(self.path), xbmc.LOGERROR)        
     bm = self.oBookmarks.getBookmarksFromFileId(fileId)
-    xbmc.log("bm: " + str(bm), xbmc.LOGERROR)
-    xbmc.log("len(bm): " + str(len(bm)), xbmc.LOGERROR)
+#   xbmc.log("bm: " + str(bm), xbmc.LOGERROR)
+#   xbmc.log("len(bm): " + str(len(bm)), xbmc.LOGERROR)
     if len(bm) == 0:
     # read marks, and add
       try:
         f_marks = open(os.path.join(self.path, "marks"), "r")
       except IOError:
   # doesn't exist
+        xbmc.log("marks, path: " + str(self.path), xbmc.LOGERROR)        
         xbmc.log("marks don't exist", xbmc.LOGINFO)
       else:
   # exists
-        xbmc.log("marks a: " + str(os.path.join(self.path, "marks")), xbmc.LOGERROR)        
         marks_content = f_marks.readlines()
         f_marks.close()
         marks = []
-        xbmc.log("marks: " + str(os.path.join(self.path, "marks")), xbmc.LOGERROR)        
+        xbmc.log("marks: " + str(os.path.join(self.path, "marks")), xbmc.LOGINFO)        
         for marks_line in marks_content:
           if marks_line[1] == ':':
             m_time_sec = ((float(marks_line[0]) * 60) + float(marks_line[2:4]) ) * 60 + float(marks_line[5:10])
-            xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGERROR)
+            xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGINFO)
             marks.append(m_time_sec)
         self.oBookmarks.insertBookmarks(fileId, marks, totalTimeInSeconds)
-  
-  
+
+  def addRecordingToLibrary(self, libraryPath):
+      if not os.path.exists(libraryPath):
+            os.makedirs(libraryPath)
+      sanTitle = self.title.strip().replace('(', '_').replace(')', '_')
+      strmFileName = os.path.join(libraryPath, sanTitle + ".strm")
+#     if os.path.isfile(strmFileName): return -1  # file exists
+      try:
+        f_strm = open(strmFileName, "w")
+      except IOError:
+# cannot open for write
+        xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
+        return -1
+      else:
+        f_strm.write(self.getStackUrl())
+        f_strm.close()
