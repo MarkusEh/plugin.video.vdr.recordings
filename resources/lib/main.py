@@ -4,21 +4,18 @@
 # Disable import error: E0401
 
 import os
-import urllib
 import urlparse
+import string
 import xbmcgui
 import xbmcplugin
 import xbmc
 import xbmcaddon
-import string
 import constants
 
 from vdrrecordingfolder import VdrRecordingFolder
 from bookmarks import bookmarks
+from kfolder import kFolder
 
-def get_immediate_subdirectories(a_dir):
-    return [name for name in os.listdir(a_dir)
-            if os.path.isdir(os.path.join(a_dir, name))]
     
 def GUIEditExportName(name):
     kb = xbmc.Keyboard('', name, True)
@@ -46,70 +43,18 @@ class main:
 
         xbmcplugin.setContent(self.addon_handle, 'movies')
 
-
-    def build_url(self, query):
-        return self.base_url + '?' + urllib.urlencode(query)
-
-    def addContextMenuCommand(self, commands, name, mode, url):
-        script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/contextMenu.py"
-        runner = "XBMC.RunScript(" + str(script)+ ", " + str(mode) + ", " + str(url) + ")"
-#       xbmc.log("runner=" + str(runner), xbmc.LOGERROR)
-        commands.append(( str(name), runner, ))
-
-
-#if mode[0] == 'folder':
     def modeFolder(self):
         currentFolder = self.args.get('currentFolder', [self.rootFolder])[0]
+        kf = kFolder(currentFolder)
+        kf.parseFolder(self.addon_handle, self.base_url, self.rootFolder)
 # Add special (search) folder
 #        url = self.build_url({'mode': 'search', 'currentFolder': currentFolder})
 #        li = xbmcgui.ListItem(" search", iconImage = 'DefaultFolder.png')
 #        xbmcplugin.addDirectoryItem(handle=self.addon_handle, url=url,
 #                                listitem=li, isFolder=True)
-        onlySameTitle = True
-        firstTitle = None
-        for fileN in os.listdir(currentFolder):
-          path = os.path.join(currentFolder, fileN)
-          if os.path.isdir(path):
-            subfolders = get_immediate_subdirectories(path)
-            if len(subfolders) == 1:
-              if os.path.splitext(subfolders[0])[1] == ".rec":
-                path = os.path.join(path, subfolders[0])
-            if os.path.splitext(path)[1] == ".rec":
-              vdrRecordingFolder = VdrRecordingFolder(path)
-              if firstTitle == None:
-                firstTitle = vdrRecordingFolder.title
-              else:
-                if vdrRecordingFolder.title != firstTitle:
-                  onlySameTitle = False
-              vdrRecordingFolder.addDirectoryItem(self.addon_handle)
-            else:
-              if len(subfolders) > 0:
-                onlySameTitle = False
-                url = self.build_url({'mode': 'folder', 'currentFolder': path})
-                name = fileN.replace('_', ' ')
-    
-                li = xbmcgui.ListItem(name, iconImage = 'DefaultFolder.png')
-# add context menu
-                commands = []
-                self.addContextMenuCommand(commands, "Set content: TV shows", constants.TV_SHOWS, path)
-                self.addContextMenuCommand(commands, "Set content: Music videos", constants.MUSIC_VIDEOS, path)
-                self.addContextMenuCommand(commands, "Set content: Movies", constants.MOVIES, path)
-                self.addContextMenuCommand(commands, "Add all recordings to Library", constants.ADDALLTOLIBRARY, self.rootFolder)
-                li.addContextMenuItems( commands )
-           
-                xbmcplugin.addDirectoryItem(handle=self.addon_handle, url=url,
-                                    listitem=li, isFolder=True)
-        if onlySameTitle:
-          xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
-        else:
-          xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
-    
-          xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
-    #     xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE)
-        xbmcplugin.endOfDirectory(self.addon_handle)
-# if mode[0] == 'search'
+
     def doSearch(self, searchString):
-        currentFolder = self.args.get('currentFolder', [self.rootFolder])[0]
+#        currentFolder = self.args.get('currentFolder', [self.rootFolder])[0]
 # Add special (search) folder
 #        url = self.build_url({'mode': 'search', 'currentFolder': currentFolder})
 #        li = xbmcgui.ListItem(" search", iconImage = 'DefaultFolder.png')

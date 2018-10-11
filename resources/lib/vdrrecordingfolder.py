@@ -12,6 +12,7 @@ import time
 import datetime
 from bookmarks import bookmarks
 import xbmcplugin
+import kfolder
 
 
 class VdrRecordingFolder:
@@ -125,6 +126,13 @@ class VdrRecordingFolder:
       if(streamInfoLine[0] != "video"):
         li.addStreamInfo(streamInfoLine[0], streamInfoLine[1])
 
+#    kf = kfolder.kFolder(self.path)
+#    img = kf.getStrmFileName()
+#    if img != None:
+#       thumb = xbmc.getCacheThumbName(img)
+#       xbmc.log("thumb= " + str(thumb), xbmc.LOGERROR)      
+#       li.setArt({ 'thumb': thumb, 'poster': thumb })
+
 #   li.addStreamInfo('video',
 #     { 'codec': 'mpeg-2', 'aspect': 1.78, 'width': 1280, 'height': 720,
 #          'duration': int(index_file_length / 200) })
@@ -205,10 +213,11 @@ class VdrRecordingFolder:
         f_resume.close()
         self.resume = int(resume_content[0])
     return
-  def addDirectoryItem(self, addon_handle):
+  def addDirectoryItem(self, addon_handle, commands = []):
     li = self.getListitem()
     url = self.getStackUrl()
     self.marksToBookmarks(url, self.duration)
+    li.addContextMenuItems( commands )    
     xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
                                 listitem=li, isFolder=False)
 
@@ -268,3 +277,6 @@ class VdrRecordingFolder:
       else:
         f_strm.write(self.getStackUrl())
         f_strm.close()
+        kf = kfolder.kFolder(self.path)
+        kf.SetStrmFileName(strmFileName)
+      
