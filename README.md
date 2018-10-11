@@ -9,6 +9,6 @@ Install the plugin from the downloaded zip file in KODI. Note: You have to allow
 
 Setup:
 
-Maintain the folder with the VDR recordings
+Maintain the folder with the VDR recordings in the plugin settings
 
 End user documantation: https://github.com/MarkusEh/plugin.video.vdr.recordings/wiki
