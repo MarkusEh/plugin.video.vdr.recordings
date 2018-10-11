@@ -20,9 +20,12 @@ xbmc.log("mode=" + str(mode), xbmc.LOGERROR)
 if mode == constants.ADDALLTOLIBRARY:
     rootFolder = sys.argv[2]
 #   xbmc.log("rootFolder=" + str(rootFolder), xbmc.LOGERROR)
-    shutil.rmtree(constants.LIBRARY_MOVIES)
-    shutil.rmtree(constants.LIBRARY_TV_SHOWS)
-    shutil.rmtree(constants.LIBRARY_MUSIC_VIDEOS)
+    try: shutil.rmtree(constants.LIBRARY_MOVIES)
+    except: pass
+    try: shutil.rmtree(constants.LIBRARY_TV_SHOWS)
+    except: pass
+    try: shutil.rmtree(constants.LIBRARY_MUSIC_VIDEOS)
+    except: pass
     os.makedirs(constants.LIBRARY_MOVIES)
     os.makedirs(constants.LIBRARY_TV_SHOWS)
     os.makedirs(constants.LIBRARY_MUSIC_VIDEOS)
