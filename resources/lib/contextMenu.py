@@ -15,7 +15,7 @@ import constants
 
 mode = sys.argv[1]
 
-xbmc.log("mode=" + str(mode), xbmc.LOGERROR)
+#xbmc.log("mode=" + str(mode), xbmc.LOGERROR)
 
 if mode == constants.ADDALLTOLIBRARY:
     rootFolder = sys.argv[2]

@@ -137,7 +137,7 @@ class kFolder:
                 se = 'S' + string.zfill(str(season),2) + 'E' + string.zfill(str(episode),2)
                 vdrRecordingFolder.title = vdrRecordingFolder.title.strip() + ' ' + se + '\n'
                 if addon_handle == -10:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, contentType)
                 else:
 # add context menu
                     commands = []
@@ -148,7 +148,7 @@ class kFolder:
         else:
             if addon_handle == -10:          
                 for vdrRecordingFolder in recordingsList:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, contentType)
             else:
               for vdrRecordingFolder in recordingsList:
                 commands = []
@@ -183,7 +183,10 @@ class kFolder:
             xbmcplugin.endOfDirectory(addon_handle)
 
   def getLibPath(self, contentType, baseFolderVDR):
-        relPath = self.path[len(baseFolderVDR):]        
+        relPath = self.path[len(baseFolderVDR)+1:]
+        if relPath != '':
+          while relPath[0] == '/' or relPath[0] == '\\':
+             relPath = relPath[1:]
         if contentType == constants.TV_SHOWS:
             libPath = os.path.join(constants.LIBRARY_TV_SHOWS, relPath)
         elif contentType == constants.MUSIC_VIDEOS:

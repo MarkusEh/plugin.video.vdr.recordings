@@ -40,6 +40,9 @@ class main:
             if not os.path.isdir(self.rootFolder):
                 xbmc.executebuiltin('Notification(Folder ' + self.rootFolder +
                ' does not exist.,Please select correct video folder in stettings., 50000)')
+            lastChar = self.rootFolder[-1] 
+            if lastChar == '/' or lastChar == '\\':
+               self.rootFolder = self.rootFolder[:-1]
 
         xbmcplugin.setContent(self.addon_handle, 'movies')
 

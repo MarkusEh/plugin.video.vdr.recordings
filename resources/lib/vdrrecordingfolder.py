@@ -5,6 +5,7 @@
 
 import os
 import string
+import re
 import xbmcgui
 import xbmc
 from array import array
@@ -13,6 +14,7 @@ import datetime
 from bookmarks import bookmarks
 import xbmcplugin
 import kfolder
+import constants
 
 
 class VdrRecordingFolder:
@@ -233,7 +235,7 @@ class VdrRecordingFolder:
       return
     if fileId == -1:
       self.oBookmarks.insertFile(url)
-      xbmc.log("file inserted: " + str(url), xbmc.LOGERROR)   
+#     xbmc.log("file inserted: " + str(url), xbmc.LOGERROR)   
       fileId = self.oBookmarks.getFileId(url)
       if fileId == -1:      
         xbmc.log("Error, file Id still -1: " + str(url), xbmc.LOGERROR)   
@@ -247,7 +249,7 @@ class VdrRecordingFolder:
         f_marks = open(os.path.join(self.path, "marks"), "r")
       except IOError:
   # doesn't exist
-        xbmc.log("marks, path: " + str(self.path), xbmc.LOGERROR)        
+        xbmc.log("marks, path: " + str(self.path), xbmc.LOGINFO)        
         xbmc.log("marks don't exist", xbmc.LOGINFO)
       else:
   # exists
@@ -262,11 +264,12 @@ class VdrRecordingFolder:
             marks.append(m_time_sec)
         self.oBookmarks.insertBookmarks(fileId, marks, totalTimeInSeconds)
 
-  def addRecordingToLibrary(self, libraryPath):
+  def addRecordingToLibrary(self, libraryPath, contentType):
       if not os.path.exists(libraryPath):
             os.makedirs(libraryPath)
-      sanTitle = self.title.strip().replace('(', '_').replace(')', '_')
+      sanTitle = re.sub(r'[/\\?%*:|"<>]', '_', self.title.strip())
       strmFileName = os.path.join(libraryPath, sanTitle + ".strm")
+      nfoFileName = os.path.join(libraryPath, sanTitle + ".nfo")
 #     if os.path.isfile(strmFileName): return -1  # file exists
       try:
         f_strm = open(strmFileName, "w")
@@ -277,6 +280,31 @@ class VdrRecordingFolder:
       else:
         f_strm.write(self.getStackUrl())
         f_strm.close()
-        kf = kfolder.kFolder(self.path)
-        kf.SetStrmFileName(strmFileName)
+#        kf = kfolder.kFolder(self.path)
+#        kf.SetStrmFileName(strmFileName)
       
+      try:
+        f_nfo = open(nfoFileName, "w")
+      except IOError:
+# cannot open for write
+        xbmc.log("Cannot open for write: " + str(nfoFileName), xbmc.LOGERROR)        
+        return
+      else:
+        if contentType == constants.TV_SHOWS:
+          ot = '<episodedetails>'
+          ct = '</episodedetails>'
+        elif contentType == constants.MUSIC_VIDEOS:
+          ot = '<musicvideo>'
+          ct = '</musicvideo>'
+        else:
+          ot = '<movie>'
+          ct = '</movie>'
+        f_nfo.write('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
+        f_nfo.write('<!-- created - by plugin.video.vdr.recordings -->')
+        f_nfo.write(ot)
+        f_nfo.write('<title>' + self.title.strip() + '</title>')
+        f_nfo.write('<outline>' + self.subtitle.strip() + '</outline>')
+        f_nfo.write('<plot>' + self.description.strip() + '</plot>')
+        f_nfo.write(ct)
+        f_nfo.close()
+
