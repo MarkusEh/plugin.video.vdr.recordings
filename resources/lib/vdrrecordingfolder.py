@@ -28,6 +28,7 @@ class VdrRecordingFolder:
     self.newResumeFormat = True
     self.initializeInfo()
     self.oBookmarks = bookmarks()
+    self.contentType = None
 
   def initializeInfo(self):
     if self.infoInitialized == False:
@@ -218,15 +219,13 @@ class VdrRecordingFolder:
   def addDirectoryItem(self, addon_handle, commands = []):
     li = self.getListitem()
     url = self.getStackUrl()
+#    if self.ts_f != [] and self.contentType != None:
+#        nfoFileName = os.path.splitext(self.ts_f[-1])[0] + '.nfo'
+#        self.writeNfoFile(nfoFileName)
     self.marksToBookmarks(url, self.duration)
     li.addContextMenuItems( commands )    
     xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
                                 listitem=li, isFolder=False)
-
-  def addDirectoryItem2(self):
-    li = self.getListitem()
-    url = self.getStackUrl()
-    self.marksToBookmarks(url, self.duration)
 
   def marksToBookmarks(self, url, totalTimeInSeconds):
     fileId = self.oBookmarks.getFileId(url)
@@ -267,9 +266,9 @@ class VdrRecordingFolder:
   def addRecordingToLibrary(self, libraryPath, contentType):
       if not os.path.exists(libraryPath):
             os.makedirs(libraryPath)
-      sanTitle = re.sub(r'[/\\?%*:|"<>]', '_', self.title.strip())
+      sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', self.title.strip())
       strmFileName = os.path.join(libraryPath, sanTitle + ".strm")
-      nfoFileName = os.path.join(libraryPath, sanTitle + ".nfo")
+#     nfoFileName = os.path.join(libraryPath, sanTitle + ".nfo")
 #     if os.path.isfile(strmFileName): return -1  # file exists
       try:
         f_strm = open(strmFileName, "w")
@@ -283,6 +282,8 @@ class VdrRecordingFolder:
 #        kf = kfolder.kFolder(self.path)
 #        kf.SetStrmFileName(strmFileName)
       
+
+  def writeNfoFile(self, nfoFileName):
       try:
         f_nfo = open(nfoFileName, "w")
       except IOError:
@@ -290,21 +291,20 @@ class VdrRecordingFolder:
         xbmc.log("Cannot open for write: " + str(nfoFileName), xbmc.LOGERROR)        
         return
       else:
-        if contentType == constants.TV_SHOWS:
-          ot = '<episodedetails>'
-          ct = '</episodedetails>'
-        elif contentType == constants.MUSIC_VIDEOS:
-          ot = '<musicvideo>'
-          ct = '</musicvideo>'
+        if self.contentType == constants.TV_SHOWS:
+          ot = '<episodedetails>\n'
+          ct = '</episodedetails>\n'
+        elif self.contentType == constants.MUSIC_VIDEOS:
+          ot = '<musicvideo>\n'
+          ct = '</musicvideo>\n'
         else:
-          ot = '<movie>'
-          ct = '</movie>'
-        f_nfo.write('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
-        f_nfo.write('<!-- created - by plugin.video.vdr.recordings -->')
+          ot = '<movie>\n'
+          ct = '</movie>\n'
+        f_nfo.write('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n')
+        f_nfo.write('<!-- created - by plugin.video.vdr.recordings -->\n')
         f_nfo.write(ot)
-        f_nfo.write('<title>' + self.title.strip() + '</title>')
-        f_nfo.write('<outline>' + self.subtitle.strip() + '</outline>')
-        f_nfo.write('<plot>' + self.description.strip() + '</plot>')
+        f_nfo.write('<title>' + self.title.strip() + '</title>\n')
+        f_nfo.write('<outline>' + self.subtitle.strip() + '</outline>\n')
+        f_nfo.write('<plot>' + self.description.strip() + '</plot>\n')
         f_nfo.write(ct)
         f_nfo.close()
-

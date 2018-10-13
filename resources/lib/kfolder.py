@@ -144,6 +144,7 @@ class kFolder:
                     addContextMenuCommand(commands, "Set season", constants.SEASON, vdrRecordingFolder.path, str(season))
                     addContextMenuCommand(commands, "Set episode", constants.EPISODE, vdrRecordingFolder.path, str(episode))
                     addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
+                    vdrRecordingFolder.contentType = contentType
                     vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
         else:
             if addon_handle == -10:          
@@ -153,6 +154,7 @@ class kFolder:
               for vdrRecordingFolder in recordingsList:
                 commands = []
                 addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
+                vdrRecordingFolder.contentType = contentType
                 vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
         
         if addon_handle == -10:         
