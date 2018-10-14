@@ -6,15 +6,22 @@
 import sys
 import os
 import shutil
+import urllib
 import xbmc
 import xbmcgui
 from kfolder import kFolder
 import constants
 
+def GUIEditExportName(name):
+    kb = xbmc.Keyboard('', name, False)
+    kb.doModal()
+    if kb.isConfirmed():
+      return kb.getText()
+    else:
+      return None
+
 #xbmc.log("contextMenu: sys.argv=" + str(sys.argv), xbmc.LOGERROR)
-
 mode = sys.argv[1]
-
 #xbmc.log("mode=" + str(mode), xbmc.LOGERROR)
 
 if mode == constants.ADDALLTOLIBRARY:
@@ -71,4 +78,18 @@ if mode == constants.DELETE:
     ps = os.path.splitext(recordingFolderPath)
     if ps[1] == ".rec":
         os.rename(recordingFolderPath, ps[0] + '.del')
-    xbmc.executebuiltin("Container.Refresh")        
+    xbmc.executebuiltin("Container.Refresh")       
+
+if mode == constants.SEARCH:
+    rootFolder = sys.argv[2]
+    base_url = sys.argv[3]
+    sString = GUIEditExportName("Enter search string")
+    if sString != None:
+       p_url = base_url + '?' + urllib.urlencode({'mode': 'search', 'searchString': sString})
+#     xbmc.log("p_url=" + str(p_url), xbmc.LOGERROR)
+       runner = "ActivateWindow(10025," + str(p_url) + ",return)"
+       xbmc.executebuiltin(runner)   
+ 
+    
+
+

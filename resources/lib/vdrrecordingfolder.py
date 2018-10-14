@@ -263,7 +263,7 @@ class VdrRecordingFolder:
             marks.append(m_time_sec)
         self.oBookmarks.insertBookmarks(fileId, marks, totalTimeInSeconds)
 
-  def addRecordingToLibrary(self, libraryPath, contentType):
+  def addRecordingToLibrary(self, libraryPath):
       if not os.path.exists(libraryPath):
             os.makedirs(libraryPath)
       sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', self.title.strip())

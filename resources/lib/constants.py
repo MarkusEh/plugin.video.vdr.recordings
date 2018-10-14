@@ -13,6 +13,7 @@ ADDALLTOLIBRARY ="AddAllToLibrary"
 SEASON = "Season"
 EPISODE = "Episode"
 DELETE = "Delete"
+SEARCH = "Search"
 
 LIBRARY_BASEPATH = xbmc.translatePath(
         "special://userdata/addon_data/plugin.video.vdr.recordings")

@@ -118,11 +118,13 @@ class kFolder:
         else:
             contentType = self.getContentType(constants.MOVIES)
 
-        libPath = self.getLibPath(contentType, rootFolder)
+# Recordings
         if contentType == constants.TV_SHOWS:
-            if onlySameTitle and firstTitle.strip() != os.path.split(self.path)[1].strip().replace('_', ' '):
-# Name of folder differs from name of recordings
-              libPath = os.path.join(libPath, firstTitle.strip()) 
+            if onlySameTitle:
+              TV_show_name = firstTitle.strip()
+            else:
+              TV_show_name = os.path.split(self.path)[1].strip()
+            libPath = os.path.join(constants.LIBRARY_TV_SHOWS, TV_show_name)                
             season = 1
             episode = 0
             for vdrRecordingFolder in sorted(recordingsList, key=lambda rec: rec.sortRecordingTimestamp):
@@ -137,7 +139,7 @@ class kFolder:
                 se = 'S' + string.zfill(str(season),2) + 'E' + string.zfill(str(episode),2)
                 vdrRecordingFolder.title = vdrRecordingFolder.title.strip() + ' ' + se + '\n'
                 if addon_handle == -10:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, contentType)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath)
                 else:
 # add context menu
                     commands = []
@@ -148,8 +150,9 @@ class kFolder:
                     vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
         else:
             if addon_handle == -10:          
+                libPath = self.getLibPath(contentType, rootFolder)
                 for vdrRecordingFolder in recordingsList:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, contentType)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath)
             else:
               for vdrRecordingFolder in recordingsList:
                 commands = []
@@ -157,6 +160,7 @@ class kFolder:
                 vdrRecordingFolder.contentType = contentType
                 vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
         
+# subfolders
         if addon_handle == -10:         
           for pathN in subfolderList:
             kFolder(pathN[0]).parseFolder(addon_handle, base_url, rootFolder)
@@ -171,10 +175,12 @@ class kFolder:
             addContextMenuCommand(commands, "Set content: Music videos", constants.MUSIC_VIDEOS, pathN[0])
             addContextMenuCommand(commands, "Set content: Movies", constants.MOVIES, pathN[0])
             addContextMenuCommand(commands, "Add all recordings to Library", constants.ADDALLTOLIBRARY, rootFolder)
+            addContextMenuCommand(commands, "Search", constants.SEARCH, rootFolder, base_url)
             li.addContextMenuItems( commands )
            
             xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
                                     listitem=li, isFolder=True)
+# finalize UI
         if addon_handle != -10: 
             if onlySameTitle:
               xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)

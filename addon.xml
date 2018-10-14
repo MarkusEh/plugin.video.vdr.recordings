@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="0.1.1" provider-name="Markus">
+<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="0.1.2" provider-name="Markus Ehrnsperger">
   <requires>
     <import addon="xbmc.python" version="2.25.0"/>
   </requires>
@@ -17,7 +17,13 @@
     <website>https://github.com/MarkusEh/plugin.video.vdr.recordings/wiki</website>
     <email></email>
     <source>https://github.com/MarkusEh/plugin.video.vdr.recordings</source>
-    <news></news>
+    <news>
+v0.1.2
+- TV shows: To aviod issue with KODI scrapper, TV shows are now flat (no subfolders).
+- Add search entry in context menu  
+v0.1.1  
+- Added support for KODI libraries
+    </news>
     <assets>
         <icon></icon>
         <fanart></fanart>

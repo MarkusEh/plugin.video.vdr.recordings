@@ -14,7 +14,7 @@ import constants
 
 from vdrrecordingfolder import VdrRecordingFolder
 from bookmarks import bookmarks
-from kfolder import kFolder
+import kfolder
 
     
 def GUIEditExportName(name):
@@ -48,7 +48,7 @@ class main:
 
     def modeFolder(self):
         currentFolder = self.args.get('currentFolder', [self.rootFolder])[0]
-        kf = kFolder(currentFolder)
+        kf = kfolder.kFolder(currentFolder)
         kf.parseFolder(self.addon_handle, self.base_url, self.rootFolder)
 # Add special (search) folder
 #        url = self.build_url({'mode': 'search', 'currentFolder': currentFolder})
@@ -65,20 +65,27 @@ class main:
 #                                listitem=li, isFolder=True)
         searchList = []
         for dirName, subdirList, fileList in os.walk(self.rootFolder, followlinks = True):
-            if os.path.splitext(dirName)[1] == ".rec":
-                vdrRecordingFolder = VdrRecordingFolder(dirName)
-                searchList.append([dirName, string.lower(vdrRecordingFolder.title)])
+            if dirName[-4:] == ".rec":
+                searchList.append(VdrRecordingFolder(dirName))
 
         searchStringL = string.lower(searchString)
-        for Recording in searchList:
-            if string.find(Recording[1], searchStringL) >= 0:
-                vdrRecordingFolder = VdrRecordingFolder(Recording[0])
-                vdrRecordingFolder.addDirectoryItem(self.addon_handle)                                
+        for vdrRecordingFolder in searchList:
+            if string.find(string.lower(vdrRecordingFolder.title), searchStringL) >= 0:
+                relRecordingPath = os.path.split(vdrRecordingFolder.path)[0][len(self.rootFolder)+1:].replace('_', ' ')
+                vdrRecordingFolder.description = relRecordingPath + '\n' + vdrRecordingFolder.description
+# add context menu
+                commands = []
+                kfolder.addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
+                vdrRecordingFolder.addDirectoryItem(self.addon_handle, commands)                                
         xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
         xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
         xbmcplugin.endOfDirectory(self.addon_handle)
 
     def modeSearch(self):
+        searchStringx = self.args.get('searchString', [''])[0]
+        self.doSearch(searchStringx)
+
+    def modeSearch2(self):
         searchStringx = GUIEditExportName("Enter search string")
         if (searchStringx == None):
             self.modeFolder()
