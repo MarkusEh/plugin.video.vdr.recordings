@@ -45,7 +45,7 @@ if mode == constants.TV_SHOWS:
 
 if mode == constants.MOVIES:
     recordingFolderPath = sys.argv[2]
-    xbmc.log("contextMenu, movies" + str(recordingFolderPath), xbmc.LOGERROR)    
+#   xbmc.log("contextMenu, movies" + str(recordingFolderPath), xbmc.LOGERROR)    
     k_Folder = kFolder(recordingFolderPath)    
     k_Folder.setContentType(constants.MOVIES)    
 
@@ -60,8 +60,9 @@ if mode == constants.EPISODE:
     k_Folder = kFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
     d = dialog.numeric(0, 'Enter episode number', str(k_Folder.getEpisode(episode)))
-    k_Folder.setEpisode(int(d))
-    xbmc.executebuiltin("Container.Refresh")
+    if d != '':
+        k_Folder.setEpisode(int(d))
+        xbmc.executebuiltin("Container.Refresh")
 
 if mode == constants.SEASON:
     recordingFolderPath = sys.argv[2]
@@ -69,8 +70,21 @@ if mode == constants.SEASON:
     k_Folder = kFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
     d = dialog.numeric(0, 'Enter season number', str(k_Folder.getSeason(season)))
-    k_Folder.setSeason(int(d))
-    xbmc.executebuiltin("Container.Refresh")
+    if d != '':
+        k_Folder.setSeason(int(d))
+        xbmc.executebuiltin("Container.Refresh")
+
+if mode == constants.YEAR:
+    recordingFolderPath = sys.argv[2]
+    year = sys.argv[3]
+    if int(year) <= 0:
+        year = ''
+    k_Folder = kFolder(recordingFolderPath)
+    dialog = xbmcgui.Dialog()
+    d = dialog.numeric(0, 'Enter year', year)
+    if d != '':
+        k_Folder.setYear(int(d))
+        xbmc.executebuiltin("Container.Refresh")
 
 
 if mode == constants.DELETE:
@@ -78,7 +92,7 @@ if mode == constants.DELETE:
     ps = os.path.splitext(recordingFolderPath)
     if ps[1] == ".rec":
         os.rename(recordingFolderPath, ps[0] + '.del')
-    xbmc.executebuiltin("Container.Refresh")       
+        xbmc.executebuiltin("Container.Refresh")       
 
 if mode == constants.SEARCH:
     rootFolder = sys.argv[2]

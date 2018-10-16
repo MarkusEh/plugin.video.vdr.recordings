@@ -16,6 +16,25 @@ import xbmcplugin
 import kfolder
 import constants
 
+def countDigits(dStr):
+  for i, c in enumerate(dStr):
+    if not c.isdigit():
+      return i
+  return len(dStr)
+
+def getYear(yStr):
+    i = 0
+    while i < (len(yStr)-3):
+        t = str(yStr[i])
+        if t.isdigit():
+            dcount = countDigits(yStr[i:])
+            if (dcount == 4) and (int(yStr[i:i+4]) > 1860) and (int(yStr[i:i+4]) < 2100):
+                return int(yStr[i:i+4])
+            else:
+                i += dcount
+        else:
+          i += 1
+    return -1
 
 class VdrRecordingFolder:
   """All about one Vdr Recording"""
@@ -308,3 +327,19 @@ class VdrRecordingFolder:
         f_nfo.write('<plot>' + self.description.strip() + '</plot>\n')
         f_nfo.write(ct)
         f_nfo.close()
+
+  def getYear(self):
+    year = kfolder.kFolder(self.path).getYear()
+    if year <= 0: 
+      year = getYear(self.subtitle[1:])
+    if year <= 0: 
+      yp = self.description.find("Jahr")
+      if yp >= 0:
+        year = getYear(self.description[yp+4:yp+15])
+    if year <= 0: 
+      yp = self.description.find("Year")
+      if yp >= 0:
+        year = getYear(self.description[yp+4:yp+15])
+    if year <= 0: 
+      year = getYear(self.description[1:])
+    return year

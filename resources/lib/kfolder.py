@@ -64,18 +64,27 @@ class kFolder:
     self.readKodiFile()
     return int(self.kodiLines.get('E', default))
 
-  def getSeason(self, default):
-    self.readKodiFile()
-    return int(self.kodiLines.get('S', default))
-
   def setEpisode(self, Episode):
     self.readKodiFile()
     self.kodiLines['E'] = str(Episode)
     self.writeKodiFile()
 
+  def getSeason(self, default):
+    self.readKodiFile()
+    return int(self.kodiLines.get('S', default))
+
   def setSeason(self, Season):
     self.readKodiFile()
     self.kodiLines['S'] = str(Season)
+    self.writeKodiFile()
+
+  def getYear(self):
+    self.readKodiFile()
+    return int(self.kodiLines.get('Y', -1))
+
+  def setYear(self, Year):
+    self.readKodiFile()
+    self.kodiLines['Y'] = str(Year)
     self.writeKodiFile()
 
   def SetStrmFileName(self, strmFileName):
@@ -148,7 +157,7 @@ class kFolder:
                     addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
                     vdrRecordingFolder.contentType = contentType
                     vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
-        else:
+        elif contentType == constants.MUSIC_VIDEOS:
             if addon_handle == -10:          
                 libPath = self.getLibPath(contentType, rootFolder)
                 for vdrRecordingFolder in recordingsList:
@@ -159,6 +168,21 @@ class kFolder:
                 addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
                 vdrRecordingFolder.contentType = contentType
                 vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
+        else:
+            libPath = self.getLibPath(contentType, rootFolder)          
+            for vdrRecordingFolder in recordingsList:
+                year = vdrRecordingFolder.getYear()
+                if year > 0:
+                   vdrRecordingFolder.title = vdrRecordingFolder.title.strip() + ' (' + str(year) + ')\n'
+                if addon_handle == -10:
+                    vdrRecordingFolder.addRecordingToLibrary(libPath)
+                else:
+                  commands = []
+                  addContextMenuCommand(commands, "Set year", constants.YEAR, vdrRecordingFolder.path, str(year))
+                  addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
+                  vdrRecordingFolder.contentType = contentType
+                  vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
+
         
 # subfolders
         if addon_handle == -10:         
@@ -207,9 +231,9 @@ class kFolder:
 def addContextMenuCommand(commands, name, mode, url, arg3 = ''):
         script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/contextMenu.py"
         if arg3 == '':
-          runner = "XBMC.RunScript(" + str(script)+ ", " + str(mode) + ", " + str(url) + ")"
+          runner = "XBMC.RunScript(" + str(script)+ ", " + str(mode) + ", \"" + str(url) + "\")"
         else:
-          runner = "XBMC.RunScript(" + str(script)+ ", " + str(mode) + ", " + str(url) + ", " + str(arg3) + ")"
+          runner = "XBMC.RunScript(" + str(script)+ ", " + str(mode) + ", \"" + str(url) + "\", \"" + str(arg3) + "\")"
 #       xbmc.log("runner=" + str(runner), xbmc.LOGERROR)
         commands.append(( str(name), runner, ))
 

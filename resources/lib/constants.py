@@ -12,6 +12,7 @@ MUSIC_VIDEOS = "Music_videos"
 ADDALLTOLIBRARY ="AddAllToLibrary"
 SEASON = "Season"
 EPISODE = "Episode"
+YEAR = "Year"
 DELETE = "Delete"
 SEARCH = "Search"
 
