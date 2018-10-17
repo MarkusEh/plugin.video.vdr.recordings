@@ -44,6 +44,8 @@ class VdrRecordingFolder:
     self.infoInitialized = False
     self.tsInitialized = False 
     self.resumeInitialized = False
+    self.marksInitialized = False
+    self.indexInitialized = False
     self.newResumeFormat = True
     self.initializeInfo()
     self.oBookmarks = bookmarks()
@@ -242,9 +244,97 @@ class VdrRecordingFolder:
 #        nfoFileName = os.path.splitext(self.ts_f[-1])[0] + '.nfo'
 #        self.writeNfoFile(nfoFileName)
     self.marksToBookmarks(url, self.duration)
+    self.updateComskip()
     li.addContextMenuItems( commands )    
     xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
                                 listitem=li, isFolder=False)
+
+  def getMarks(self):
+# read marks
+    if self.marksInitialized: return
+    self.marksInitialized = True
+    self.marks = []
+    try:
+        f_marks = open(os.path.join(self.path, "marks"), "r")
+    except IOError:
+# doesn't exist
+        xbmc.log("marks don't exist, path: " + str(self.path), xbmc.LOGINFO)        
+    else:
+# exists
+        marks_content = f_marks.readlines()
+        f_marks.close()
+#       xbmc.log("marks: " + str(os.path.join(self.path, "marks")), xbmc.LOGINFO)        
+        for marks_line in marks_content:
+          if marks_line[1] == ':':
+            m_time_sec = ((float(marks_line[0]) * 60) + float(marks_line[2:4]) ) * 60 + float(marks_line[5:10])
+#           xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGINFO)
+            self.marks.append(m_time_sec)
+
+  def sanitizeMarks(self):
+    self.marksS = []
+    self.getMarks()   
+    lastMarkComStart = 0
+    lastMarkMovieCont = -1
+    xbmc.log("sanitizeMarks, path: " + str(self.path), xbmc.LOGERROR)        
+
+    for mark in self.marks:
+      if mark < 5: continue
+      if lastMarkMovieCont == -1:
+        comLen = mark - lastMarkComStart
+        xbmc.log("sanitizeMarks, comLen: " + str(comLen), xbmc.LOGERROR)        
+        if comLen > 12*60:
+          if lastMarkComStart == 0:
+            lastMarkComStart = mark
+          else:
+            break   # commercials are shorter than 10 minutes
+        else:
+          self.marksS.append([lastMarkComStart, mark])
+          lastMarkMovieCont = mark
+      else:
+        movLen =  mark - lastMarkMovieCont
+        xbmc.log("sanitizeMarks, movLen: " + str(movLen), xbmc.LOGERROR)        
+        if movLen < 5*60: continue
+        lastMarkComStart = mark
+        lastMarkMovieCont = -1
+
+  def updateComskip(self):
+    self.sanitizeMarks()
+    if self.marksS == []: return
+#   for mark in self.marksS:      
+#       xbmc.log("updateComskip, mark: " + str(mark[0]) + " " + str(mark[1]), xbmc.LOGERROR)        
+
+    self.initializeIndex()
+    self.getTsFiles()
+
+    lengthOfPreviousFiles = 0
+    iIndex = 0
+    for ts_file in self.ts_f:
+
+      try:
+        f_com = open((os.path.splitext(ts_file)[0] + ".edl"), "w")
+      except IOError as e:
+        xbmc.log("Error creating commercials file" + str(e), xbmc.LOGERROR)
+      else:
+#       n_frames_in_file = int(self.duration * self.framerate)
+#       f_com.write("FILE PROCESSING COMPLETE " + str(n_frames_in_file) + " FRAMES AT " + str(self.framerate) + "\n")
+#       f_com.write("------------------------\n")
+
+        for mark in self.marksS:
+            mark0 = mark[0] - lengthOfPreviousFiles
+            mark1 = mark[1] - lengthOfPreviousFiles
+            if mark1 <= 0.1: continue
+            if mark0 < 0.1: mark0 = 0.1
+            f_com.write(str(mark0).ljust(7)
+               + "     "
+               + str(mark1).ljust(7) + "     3" 
+               + '\n')
+#            f_com.write(string.zfill(str(int(mark[0]* self.framerate)), 5)
+#               + "     "
+#               + string.zfill(str(int(mark[1]* self.framerate)), 5)
+#               + '\n')
+        f_com.close()
+      lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
+      iIndex = iIndex +1
 
   def marksToBookmarks(self, url, totalTimeInSeconds):
     fileId = self.oBookmarks.getFileId(url)
@@ -260,27 +350,10 @@ class VdrRecordingFolder:
         return
     bm = self.oBookmarks.getBookmarksFromFileId(fileId)
 #   xbmc.log("bm: " + str(bm), xbmc.LOGERROR)
-#   xbmc.log("len(bm): " + str(len(bm)), xbmc.LOGERROR)
     if len(bm) == 0:
-    # read marks, and add
-      try:
-        f_marks = open(os.path.join(self.path, "marks"), "r")
-      except IOError:
-  # doesn't exist
-        xbmc.log("marks, path: " + str(self.path), xbmc.LOGINFO)        
-        xbmc.log("marks don't exist", xbmc.LOGINFO)
-      else:
-  # exists
-        marks_content = f_marks.readlines()
-        f_marks.close()
-        marks = []
-        xbmc.log("marks: " + str(os.path.join(self.path, "marks")), xbmc.LOGINFO)        
-        for marks_line in marks_content:
-          if marks_line[1] == ':':
-            m_time_sec = ((float(marks_line[0]) * 60) + float(marks_line[2:4]) ) * 60 + float(marks_line[5:10])
-            xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGINFO)
-            marks.append(m_time_sec)
-        self.oBookmarks.insertBookmarks(fileId, marks, totalTimeInSeconds)
+# read marks, and add
+      self.getMarks()
+      self.oBookmarks.insertBookmarks(fileId, self.marks, totalTimeInSeconds)
 
   def addRecordingToLibrary(self, libraryPath):
       if not os.path.exists(libraryPath):
@@ -343,3 +416,59 @@ class VdrRecordingFolder:
     if year <= 0: 
       year = getYear(self.description[1:])
     return year
+
+  def initializeIndex(self):
+    if self.indexInitialized == False:
+      self.indexInitialized = True
+      newIndexFormat = True
+      indexFileName = os.path.join(self.path, "index")
+      if not os.path.isfile(indexFileName):
+        newIndexFormat = False
+        indexFileName = os.path.join(self.path, "index.vdr")
+      try:
+        f_index =  open(indexFileName, "rb")
+      except IOError:
+# doesn't exist
+        xbmc.log("Cannot open index file " + str(indexFileName), xbmc.LOGERROR)
+        pass
+      else:
+        if newIndexFormat:
+          index = array( 'H', f_index.read() )
+          numbersPerEntry = 4
+          offsetRight = 1
+        else:
+          index = array( 'B', f_index.read() )
+          numbersPerEntry = 8
+          offsetRight = 3
+        f_index.close
+        index_len = len(index)
+#       xbmc.log("index_len= " + str(index_len), xbmc.LOGERROR)
+        number_of_entries = index_len / numbersPerEntry
+        self.frameNumbers = number_of_entries
+        len_sec = number_of_entries / self.framerate
+        self.len_sec = len_sec
+        numberOfTsFiles = index[index_len - offsetRight]
+#       xbmc.log("numberOfTsFiles= " + str(numberOfTsFiles), xbmc.LOGERROR)
+# find length (sec) for each ts file
+        self.ts_l = []
+        for i in range(1, numberOfTsFiles):
+          limit_low = 1
+          limit_high = number_of_entries
+          testPos =  number_of_entries * i/ numberOfTsFiles
+          found = False
+          while found == False:
+            ts_file_at_test_pos = index[testPos * numbersPerEntry - offsetRight]
+            if ts_file_at_test_pos > i:
+              limit_high = testPos
+              testPos = limit_low + (testPos - limit_low) / 2
+            else:
+              ts_file_at_test_pos_p1 = index[(testPos + 1)* numbersPerEntry - offsetRight]
+              if ts_file_at_test_pos_p1 <= i:
+                limit_low = testPos
+                testPos = limit_high - (limit_high - testPos) / 2
+              else:
+                found = True
+                self.ts_l.append(testPos)
+
+        self.ts_l.append(number_of_entries)
+
