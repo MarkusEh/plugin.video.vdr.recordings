@@ -9,15 +9,17 @@ import os
 
 class bookmarks:
     def __init__(self):
-        dbFileMyVideos = xbmc.translatePath("special://database/MyVideos107.db")
-        if os.path.isfile(dbFileMyVideos):
-            self.dbKnown = True
+        self.dbKnown = False
+        dbFileMyVideos = xbmc.translatePath("special://database/MyVideos112.db")
+        if os.path.isfile(dbFileMyVideos): self.dbKnown = True
+        if self.dbKnown == False:
+            dbFileMyVideos = xbmc.translatePath("special://database/MyVideos107.db")
+            if os.path.isfile(dbFileMyVideos): self.dbKnown = True
+        if self.dbKnown == True:
         # Connect to database
             self.conn = sqlite3.connect(dbFileMyVideos)
             self.conn.text_factory = str
             self.cur = self.conn.cursor()
-        else:
-            self.dbKnown = False
 
     def getFileId(self, fileName):
         if self.dbKnown == False:

@@ -275,13 +275,13 @@ class VdrRecordingFolder:
     self.getMarks()   
     lastMarkComStart = 0
     lastMarkMovieCont = -1
-    xbmc.log("sanitizeMarks, path: " + str(self.path), xbmc.LOGERROR)        
+#   xbmc.log("sanitizeMarks, path: " + str(self.path), xbmc.LOGERROR)        
 
     for mark in self.marks:
       if mark < 5: continue
       if lastMarkMovieCont == -1:
         comLen = mark - lastMarkComStart
-        xbmc.log("sanitizeMarks, comLen: " + str(comLen), xbmc.LOGERROR)        
+#       xbmc.log("sanitizeMarks, comLen: " + str(comLen), xbmc.LOGERROR)        
         if comLen > 12*60:
           if lastMarkComStart == 0:
             lastMarkComStart = mark
@@ -292,12 +292,14 @@ class VdrRecordingFolder:
           lastMarkMovieCont = mark
       else:
         movLen =  mark - lastMarkMovieCont
-        xbmc.log("sanitizeMarks, movLen: " + str(movLen), xbmc.LOGERROR)        
+#       xbmc.log("sanitizeMarks, movLen: " + str(movLen), xbmc.LOGERROR)        
         if movLen < 5*60: continue
         lastMarkComStart = mark
         lastMarkMovieCont = -1
 
   def updateComskip(self):
+    if os.path.exists(os.path.join(self.path, "00001.edl") ): return
+    if os.path.exists(os.path.join(self.path, "001.edl") ): return
     self.sanitizeMarks()
     if self.marksS == []: return
 #   for mark in self.marksS:      
@@ -312,12 +314,14 @@ class VdrRecordingFolder:
 
       try:
         f_com = open((os.path.splitext(ts_file)[0] + ".edl"), "w")
+#       f_com_txt = open((os.path.splitext(ts_file)[0] + ".txt"), "w")
       except IOError as e:
         xbmc.log("Error creating commercials file" + str(e), xbmc.LOGERROR)
       else:
 #       n_frames_in_file = int(self.duration * self.framerate)
-#       f_com.write("FILE PROCESSING COMPLETE " + str(n_frames_in_file) + " FRAMES AT " + str(self.framerate) + "\n")
-#       f_com.write("------------------------\n")
+#       f_com_txt.write("FILE PROCESSING COMPLETE " + str(n_frames_in_file) + " FRAMES AT " + str(self.framerate) + "\n")
+#       f_com_txt.write("FILE PROCESSING COMPLETE\n")
+#       f_com_txt.write("------------------------\n")
 
         for mark in self.marksS:
             mark0 = mark[0] - lengthOfPreviousFiles
@@ -328,10 +332,10 @@ class VdrRecordingFolder:
                + "     "
                + str(mark1).ljust(7) + "     3" 
                + '\n')
-#            f_com.write(string.zfill(str(int(mark[0]* self.framerate)), 5)
-#               + "     "
-#               + string.zfill(str(int(mark[1]* self.framerate)), 5)
-#               + '\n')
+#           f_com_txt.write(string.zfill(str(int(mark0* self.framerate)), 5)
+#              + "   "
+#              + string.zfill(str(int(mark1* self.framerate)), 5)
+#              + '\n')
         f_com.close()
       lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
       iIndex = iIndex +1
