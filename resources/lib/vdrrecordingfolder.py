@@ -254,20 +254,23 @@ class VdrRecordingFolder:
     if self.marksInitialized: return
     self.marksInitialized = True
     self.marks = []
+    marksFile = os.path.join(self.path, "marks")
+    if not os.path.isfile(marksFile):
+      marksFile = os.path.join(self.path, "marks.vdr")
     try:
-        f_marks = open(os.path.join(self.path, "marks"), "r")
+        f_marks = open(marksFile, "r")
     except IOError:
 # doesn't exist
-        xbmc.log("marks don't exist, path: " + str(self.path), xbmc.LOGINFO)        
+      xbmc.log("marks don't exist, path: " + str(self.path), xbmc.LOGINFO)        
     else:
 # exists
         marks_content = f_marks.readlines()
         f_marks.close()
-#       xbmc.log("marks: " + str(os.path.join(self.path, "marks")), xbmc.LOGINFO)        
+#       xbmc.log("marks_content: " + str(marks_content), xbmc.LOGERROR)
         for marks_line in marks_content:
           if marks_line[1] == ':':
             m_time_sec = ((float(marks_line[0]) * 60) + float(marks_line[2:4]) ) * 60 + float(marks_line[5:10])
-#           xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGINFO)
+#           xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGERROR)
             self.marks.append(m_time_sec)
 
   def sanitizeMarks(self):
