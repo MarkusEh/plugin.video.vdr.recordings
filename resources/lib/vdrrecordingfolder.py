@@ -69,6 +69,8 @@ class VdrRecordingFolder:
         infoFileName = os.path.join(self.path, "info")
         if not os.path.isfile(infoFileName):
           infoFileName = os.path.join(self.path, "info.vdr")
+        if not os.path.isfile(infoFileName):
+          infoFileName = os.path.join(self.path, "info.txt")
         try:
           f_info = open(infoFileName, "r")
         except IOError:
@@ -86,7 +88,7 @@ class VdrRecordingFolder:
             if info_line[0] == 'D':
               self.description = info_line[2:]
             if info_line[0] == 'F':                 
-              self.framerate = int(info_line[2:])
+              self.framerate = float(info_line[2:])
             if info_line[0] == 'X':
               if info_line[2]  == '1':
                 self.streamInfo.append(['video', {'codec': 'MPEG-2', 'width': 720, 'height': 576  }])
@@ -285,7 +287,7 @@ class VdrRecordingFolder:
       if lastMarkMovieCont == -1:
         comLen = mark - lastMarkComStart
 #       xbmc.log("sanitizeMarks, comLen: " + str(comLen), xbmc.LOGERROR)        
-        if comLen > 12*60:
+        if comLen > 15*60:
           if lastMarkComStart == 0:
             lastMarkComStart = mark
           else:

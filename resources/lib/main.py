@@ -35,16 +35,16 @@ class main:
         self.addon_handle = int(self.argv[1])
         self.args = urlparse.parse_qs(self.argv[2][1:])
         self.mode = self.args.get('mode', ['folder'])[0]
+        addon = xbmcaddon.Addon('plugin.video.vdr.recordings')
+        self.rootFolder = addon.getSetting("rootFolder")
+        if not os.path.isdir(self.rootFolder):
+            xbmc.executebuiltin('Notification(Folder ' + self.rootFolder +
+           ' does not exist.,Please select correct video folder in stettings., 50000)')
+        lastChar = self.rootFolder[-1] 
+        if lastChar == '/' or lastChar == '\\':
+           self.rootFolder = self.rootFolder[:-1]
         if self.addon_handle > 0:
-            self.rootFolder = xbmcplugin.getSetting(self.addon_handle, "rootFolder")
-            if not os.path.isdir(self.rootFolder):
-                xbmc.executebuiltin('Notification(Folder ' + self.rootFolder +
-               ' does not exist.,Please select correct video folder in stettings., 50000)')
-            lastChar = self.rootFolder[-1] 
-            if lastChar == '/' or lastChar == '\\':
-               self.rootFolder = self.rootFolder[:-1]
-
-        xbmcplugin.setContent(self.addon_handle, 'movies')
+            xbmcplugin.setContent(self.addon_handle, 'movies')
 
     def modeFolder(self):
         currentFolder = self.args.get('currentFolder', [self.rootFolder])[0]
