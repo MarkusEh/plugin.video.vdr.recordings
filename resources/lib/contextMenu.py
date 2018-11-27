@@ -4,12 +4,15 @@
 # Disable import error: E0401
 
 import sys
+import subprocess
 import os
 import shutil
 import urllib
 import xbmc
+import xbmcaddon
 import xbmcgui
-from kfolder import kFolder
+import kfolder
+import vdrrecordingfolder
 import constants
 
 def GUIEditExportName(name):
@@ -19,6 +22,13 @@ def GUIEditExportName(name):
       return kb.getText()
     else:
       return None
+
+def getRootFolder():
+    rootFolder = xbmcaddon.Addon('plugin.video.vdr.recordings').getSetting("rootFolder")
+    lastChar = rootFolder[-1] 
+    if lastChar == '/' or lastChar == '\\':
+        rootFolder = rootFolder[:-1]
+    return rootFolder
 
 #xbmc.log("contextMenu: sys.argv=" + str(sys.argv), xbmc.LOGERROR)
 mode = sys.argv[1]
@@ -36,28 +46,28 @@ if mode == constants.ADDALLTOLIBRARY:
     os.makedirs(constants.LIBRARY_MOVIES)
     os.makedirs(constants.LIBRARY_TV_SHOWS)
     os.makedirs(constants.LIBRARY_MUSIC_VIDEOS)
-    kFolder(rootFolder).parseFolder(-10, '', rootFolder)
+    kfolder.kFolder(rootFolder).parseFolder(-10, '', rootFolder)
   
 if mode == constants.TV_SHOWS:
     recordingFolderPath = sys.argv[2]
-    k_Folder = kFolder(recordingFolderPath)    
+    k_Folder = kfolder.kFolder(recordingFolderPath)    
     k_Folder.setContentType(constants.TV_SHOWS)
 
 if mode == constants.MOVIES:
     recordingFolderPath = sys.argv[2]
 #   xbmc.log("contextMenu, movies" + str(recordingFolderPath), xbmc.LOGERROR)    
-    k_Folder = kFolder(recordingFolderPath)    
+    k_Folder = kfolder.kFolder(recordingFolderPath)    
     k_Folder.setContentType(constants.MOVIES)    
 
 if mode == constants.MUSIC_VIDEOS:
     recordingFolderPath = sys.argv[2]
-    k_Folder = kFolder(recordingFolderPath)    
+    k_Folder = kfolder.kFolder(recordingFolderPath)    
     k_Folder.setContentType(constants.MUSIC_VIDEOS)   
 
 if mode == constants.EPISODE:
     recordingFolderPath = sys.argv[2]
     episode = sys.argv[3]
-    k_Folder = kFolder(recordingFolderPath)
+    k_Folder = kfolder.kFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
     d = dialog.numeric(0, 'Enter episode number', str(k_Folder.getEpisode(episode)))
     if d != '':
@@ -67,7 +77,7 @@ if mode == constants.EPISODE:
 if mode == constants.SEASON:
     recordingFolderPath = sys.argv[2]
     season = sys.argv[3]
-    k_Folder = kFolder(recordingFolderPath)
+    k_Folder = kfolder.kFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
     d = dialog.numeric(0, 'Enter season number', str(k_Folder.getSeason(season)))
     if d != '':
@@ -79,7 +89,7 @@ if mode == constants.YEAR:
     year = sys.argv[3]
     if int(year) <= 0:
         year = ''
-    k_Folder = kFolder(recordingFolderPath)
+    k_Folder = kfolder.kFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
     d = dialog.numeric(0, 'Enter year', year)
     if d != '':
@@ -91,7 +101,36 @@ if mode == constants.DELETE:
     recordingFolderPath = sys.argv[2]
     ps = os.path.splitext(recordingFolderPath)
     if ps[1] == ".rec":
-        os.rename(recordingFolderPath, ps[0] + '.del')
+# Confirmation dialog
+        dialog = xbmcgui.Dialog()
+        rf = vdrrecordingfolder.VdrRecordingFolder(recordingFolderPath)
+        d = dialog.yesno('Delete recording?', 'Do you want to delete "'
+            + rf.title
+            + '"?')
+        if d == True:    
+            shutil.rmtree(recordingFolderPath, ignore_errors=True)
+#       os.rename(recordingFolderPath, ps[0] + '.del')
+        xbmc.executebuiltin("Container.Refresh")       
+
+if mode == constants.MOVE:
+    recordingFolderPath = sys.argv[2]
+    ps = os.path.splitext(recordingFolderPath)
+    if ps[1] == ".rec":
+        fp = os.path.split(recordingFolderPath)[0]
+    else:
+        fp = recordingFolderPath
+    (fd, fn) = os.path.split(fp)
+    k_Folder = kfolder.kFolder(fd)
+    dest = k_Folder.selectFolder(getRootFolder())
+    xbmc.log("constants.MOVE, dest = " + str(dest), xbmc.LOGERROR) 
+    if dest != None:
+        d1 = fp + ".move"
+        dfin = os.path.join(dest, fn)
+        shutil.move(fp, d1 )
+
+        script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/move.py"
+        xbmc.executebuiltin("XBMC.RunScript(" + xbmc.translatePath(script) + ", " + d1 + ", " + dest + ", " + dfin + ")")
+        xbmc.sleep(10) 
         xbmc.executebuiltin("Container.Refresh")       
 
 if mode == constants.SEARCH:

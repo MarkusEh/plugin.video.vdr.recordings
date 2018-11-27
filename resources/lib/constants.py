@@ -14,6 +14,8 @@ SEASON = "Season"
 EPISODE = "Episode"
 YEAR = "Year"
 DELETE = "Delete"
+RENAME = "Rename"
+MOVE = "Move"
 SEARCH = "Search"
 
 LIBRARY_BASEPATH = xbmc.translatePath(

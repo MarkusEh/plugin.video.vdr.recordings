@@ -8,6 +8,7 @@ import string
 import urllib
 import xbmc
 import xbmcplugin
+import xbmcaddon
 import xbmcgui
 import constants
 import vdrrecordingfolder
@@ -17,6 +18,7 @@ class kFolder:
   def __init__(self, folder):
     self.path = folder
     self.fileRead = False
+    self.rootFolder = None
 
   def readKodiFile(self):
     if self.fileRead == True:
@@ -96,6 +98,64 @@ class kFolder:
     self.readKodiFile()
     return self.kodiLines.get('F')
 
+  def getRootFolder(self):
+    if self.rootFolder == None:
+      addon = xbmcaddon.Addon('plugin.video.vdr.recordings')
+      self.rootFolder = addon.getSetting("rootFolder")
+      lastChar = self.rootFolder[-1] 
+      if lastChar == '/' or lastChar == '\\':
+        self.rootFolder = self.rootFolder[:-1]
+    return self.rootFolder
+
+  def selectFolder(self, rootFolder):
+    FOLDER_UP = ".."
+    THIS_FOLDER = "<select this folder>"
+    CREATE_FOLDER = "<create folder>"
+    DELETE_FOLDER = "<delete this folder>"
+    self.subFolders = []
+    self.subFolders.append(THIS_FOLDER)
+    if os.access(self.path, os.W_OK):
+      self.subFolders.append(CREATE_FOLDER)
+    if len(os.listdir(self.path)) == 0:
+      self.subFolders.append(DELETE_FOLDER)
+    if self.path != rootFolder:
+      self.subFolders.append(FOLDER_UP)
+    prefolders = len(self.subFolders)
+    self.parseFolder(-20, rootFolder, rootFolder)
+    dialog = xbmcgui.Dialog()
+    d = dialog.select(self.path, self.subFolders)
+    if d == None: return d
+    if d == -1: return None
+    if d >= prefolders:
+      return kFolder(os.path.join(self.path, self.subFolders[d])).selectFolder(rootFolder)
+    if self.subFolders[d] == FOLDER_UP:
+      return kFolder(os.path.split(self.path)[0]).selectFolder(rootFolder)
+    if self.subFolders[d] == THIS_FOLDER:
+      return self.path
+    if self.subFolders[d] == DELETE_FOLDER:
+      try:
+        os.rmdir(self.path)
+      except OSError:
+        xbmc.log("Error deleting directory " + str(self.path), xbmc.LOGERROR)            
+        return self.selectFolder(rootFolder)
+      return kFolder(os.path.split(self.path)[0]).selectFolder(rootFolder)
+
+    if self.subFolders[d] == CREATE_FOLDER:
+      d2 = dialog.input("Enter name of new folder")
+      if d2 == "": return self.selectFolder(rootFolder)
+      newpath = os.path.join(self.path, d2)
+      if not os.path.exists(newpath):
+        try:
+          os.makedirs(newpath)
+        except OSError:
+          xbmc.log("Error creating directory " + str(newpath), xbmc.LOGERROR)            
+          return self.selectFolder(rootFolder)
+      return kFolder(newpath).selectFolder(rootFolder)
+
+    xbmc.log("Error in selectFolder, d= " + str(d), xbmc.LOGERROR)            
+    return None
+
+
   def parseFolder(self, addon_handle, base_url, rootFolder):
         onlySameTitle = True
         firstTitle = None
@@ -104,6 +164,7 @@ class kFolder:
         for fileN in os.listdir(self.path):
           path = os.path.join(self.path, fileN)
           if os.path.isdir(path):
+            if os.path.splitext(path)[1] == ".move": continue
             subfolders = get_immediate_subdirectories(path)
             if len(subfolders) == 1:
               if os.path.splitext(subfolders[0])[1] == ".rec":
@@ -130,7 +191,7 @@ class kFolder:
 # Recordings
         if contentType == constants.TV_SHOWS:
             if onlySameTitle:
-              TV_show_name = firstTitle.strip()
+              TV_show_name = firstTitle
             else:
               TV_show_name = os.path.split(self.path)[1].strip()
             libPath = os.path.join(constants.LIBRARY_TV_SHOWS, TV_show_name)                
@@ -146,15 +207,16 @@ class kFolder:
                     season = season_n
                 episode = kf.getEpisode(episode)
                 se = 'S' + string.zfill(str(season),2) + 'E' + string.zfill(str(episode),2)
-                vdrRecordingFolder.title = vdrRecordingFolder.title.strip() + ' ' + se + '\n'
+                vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
                 if addon_handle == -10:
                     vdrRecordingFolder.addRecordingToLibrary(libPath)
-                else:
+                elif addon_handle >= 0:
 # add context menu
                     commands = []
                     addContextMenuCommand(commands, "Set season", constants.SEASON, vdrRecordingFolder.path, str(season))
                     addContextMenuCommand(commands, "Set episode", constants.EPISODE, vdrRecordingFolder.path, str(episode))
                     addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
+                    addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
                     vdrRecordingFolder.contentType = contentType
                     vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
         elif contentType == constants.MUSIC_VIDEOS:
@@ -162,10 +224,11 @@ class kFolder:
                 libPath = self.getLibPath(contentType, rootFolder)
                 for vdrRecordingFolder in recordingsList:
                     vdrRecordingFolder.addRecordingToLibrary(libPath)
-            else:
+            elif addon_handle >= 0:
               for vdrRecordingFolder in recordingsList:
                 commands = []
                 addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
+                addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
                 vdrRecordingFolder.contentType = contentType
                 vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
         else:
@@ -173,21 +236,27 @@ class kFolder:
             for vdrRecordingFolder in recordingsList:
                 year = vdrRecordingFolder.getYear()
                 if year > 0:
-                   vdrRecordingFolder.title = vdrRecordingFolder.title.strip() + ' (' + str(year) + ')\n'
+                   vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
                 if addon_handle == -10:
                     vdrRecordingFolder.addRecordingToLibrary(libPath)
-                else:
+                elif addon_handle >= 0:
                   commands = []
                   addContextMenuCommand(commands, "Set year", constants.YEAR, vdrRecordingFolder.path, str(year))
                   addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
+                  addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
                   vdrRecordingFolder.contentType = contentType
                   vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
 
         
 # subfolders
-        if addon_handle == -10:         
-          for pathN in subfolderList:
-            kFolder(pathN[0]).parseFolder(addon_handle, base_url, rootFolder)
+        if addon_handle < 0: 
+          if addon_handle == -20:
+            for pathN in subfolderList:
+                self.subFolders.append(pathN[0])
+#               xbmc.log("subFolders= " + str(subFolders), xbmc.LOGERROR)
+          else:   
+            for pathN in subfolderList:
+              kFolder(pathN[0]).parseFolder(addon_handle, base_url, rootFolder)
         else:
           for pathN in subfolderList:
             url = build_url(base_url, {'mode': 'folder', 'currentFolder': pathN[0]})
@@ -199,13 +268,14 @@ class kFolder:
             addContextMenuCommand(commands, "Set content: Music videos", constants.MUSIC_VIDEOS, pathN[0])
             addContextMenuCommand(commands, "Set content: Movies", constants.MOVIES, pathN[0])
             addContextMenuCommand(commands, "Add all recordings to Library", constants.ADDALLTOLIBRARY, rootFolder)
+            addContextMenuCommand(commands, "Move", constants.MOVE, pathN[0])
             addContextMenuCommand(commands, "Search", constants.SEARCH, rootFolder, base_url)
             li.addContextMenuItems( commands )
            
             xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
                                     listitem=li, isFolder=True)
 # finalize UI
-        if addon_handle != -10: 
+        if addon_handle >= 0: 
             if onlySameTitle:
               xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
             else:

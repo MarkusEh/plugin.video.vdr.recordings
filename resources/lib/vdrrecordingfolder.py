@@ -82,11 +82,11 @@ class VdrRecordingFolder:
           f_info.close()
           for info_line in info:
             if info_line[0] == 'T':
-              self.title = info_line[2:]
+              self.title = info_line[2:].strip()
             if info_line[0] == 'S':
-              self.subtitle = info_line[2:]
+              self.subtitle = info_line[2:].strip()
             if info_line[0] == 'D':
-              self.description = info_line[2:]
+              self.description = info_line[2:].strip()
             if info_line[0] == 'F':                 
               self.framerate = float(info_line[2:])
             if info_line[0] == 'X':
@@ -111,7 +111,7 @@ class VdrRecordingFolder:
                 self.streamInfo.append(['subtitle', {'language': info_line[7:10] }])
 
         if self.title == '':
-          self.title = os.path.split(os.path.split(self.path)[0])[1].replace('_', ' ')
+          self.title = os.path.split(os.path.split(self.path)[0])[1].replace('_', ' ').strip()
         if self.description == '':
           try:
             f_summary = open(os.path.join(self.path, "summary.vdr"), "r")
@@ -119,19 +119,19 @@ class VdrRecordingFolder:
 # doesn't exist
             pass
           else:
-            self.description = f_summary.read()
+            self.description = f_summary.read().strip()
             f_summary.close()
 # exists
 
   def getListitem(self):
     self.initializeInfo()
-    li = xbmcgui.ListItem(self.title + self.subtitle)
+    li = xbmcgui.ListItem(self.title)
     if self.getResume() > 20:
       playCount = 1
     else:
       playCount = 0 
     li.setInfo(type='video', infoLabels={'plot': self.sortRecordingTimestamp + '\n' + self.description,
-        'title':self.title + self.subtitle, 'sorttitle':self.sortRecordingTimestamp,
+        'title':self.title + '\n' + self.subtitle, 'sorttitle':self.sortRecordingTimestamp,
         'dateadded': self.sortRecordingTimestamp, 'playcount': playCount})
     li.setContentLookup(True)
     li.setProperty('IsPlayable', 'true')
@@ -367,7 +367,7 @@ class VdrRecordingFolder:
   def addRecordingToLibrary(self, libraryPath):
       if not os.path.exists(libraryPath):
             os.makedirs(libraryPath)
-      sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', self.title.strip())
+      sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', self.title)
       strmFileName = os.path.join(libraryPath, sanTitle + ".strm")
 #     nfoFileName = os.path.join(libraryPath, sanTitle + ".nfo")
 #     if os.path.isfile(strmFileName): return -1  # file exists
@@ -404,9 +404,9 @@ class VdrRecordingFolder:
         f_nfo.write('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n')
         f_nfo.write('<!-- created - by plugin.video.vdr.recordings -->\n')
         f_nfo.write(ot)
-        f_nfo.write('<title>' + self.title.strip() + '</title>\n')
-        f_nfo.write('<outline>' + self.subtitle.strip() + '</outline>\n')
-        f_nfo.write('<plot>' + self.description.strip() + '</plot>\n')
+        f_nfo.write('<title>' + self.title + '</title>\n')
+        f_nfo.write('<outline>' + self.subtitle + '</outline>\n')
+        f_nfo.write('<plot>' + self.description + '</plot>\n')
         f_nfo.write(ct)
         f_nfo.close()
 
