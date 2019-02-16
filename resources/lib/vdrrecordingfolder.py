@@ -135,19 +135,23 @@ class VdrRecordingFolder:
         'dateadded': self.sortRecordingTimestamp, 'playcount': playCount})
     li.setContentLookup(True)
     li.setProperty('IsPlayable', 'true')
+    indexFileName = os.path.join(self.path, "index")
+    if not os.path.isfile(indexFileName):
+      indexFileName = os.path.join(self.path, "index.vdr")
     try:
-      index_file_length = os.path.getsize(os.path.join(self.path, "index"))
-    except OSError:
-      index_file_length = os.path.getsize(os.path.join(self.path, "index.vdr"))
+      index_file_length = os.path.getsize(indexFileName)
+    except IOError:
+# doesn't exist
+      index_file_length = 0
     self.duration = int(index_file_length / 8 / self.framerate)
     numVidStreams = 0
     for streamInfoLine in self.streamInfo:
       if(streamInfoLine[0] == "video"):
         numVidStreams = numVidStreams  + 1
-        streamInfoLine[1]['duration'] = self.duration
+        if self.duration != 0: streamInfoLine[1]['duration'] = self.duration
         li.addStreamInfo(streamInfoLine[0], streamInfoLine[1])
     if numVidStreams == 0:
-      li.addStreamInfo('video', {'duration': self.duration})
+      if self.duration != 0: li.addStreamInfo('video', {'duration': self.duration})
     for streamInfoLine in self.streamInfo:
       if(streamInfoLine[0] != "video"):
         li.addStreamInfo(streamInfoLine[0], streamInfoLine[1])
@@ -245,7 +249,7 @@ class VdrRecordingFolder:
 #    if self.ts_f != [] and self.contentType != None:
 #        nfoFileName = os.path.splitext(self.ts_f[-1])[0] + '.nfo'
 #        self.writeNfoFile(nfoFileName)
-    self.marksToBookmarks(url, self.duration)
+    if self.duration != 0: self.marksToBookmarks(url, self.duration)
     self.updateComskip()
     li.addContextMenuItems( commands )    
     xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
