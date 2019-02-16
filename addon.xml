@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="0.2.3" provider-name="Markus Ehrnsperger">
+<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="0.2.4" provider-name="Markus Ehrnsperger">
   <requires>
     <import addon="xbmc.python" version="2.25.0"/>
   </requires>
@@ -18,6 +18,8 @@
     <email></email>
     <source>https://github.com/MarkusEh/plugin.video.vdr.recordings</source>
     <news>
+v0.2.4
+- ignore missing index files
 v0.2.3
 - change: Delete now permanently deletes a recording. There is a confirmation popup
 - new: Move of recordings
