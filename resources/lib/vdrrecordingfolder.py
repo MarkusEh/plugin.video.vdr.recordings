@@ -40,7 +40,8 @@ class VdrRecordingFolder:
   """All about one Vdr Recording"""
 
   def __init__(self, vdrRecordingFolder):
-    self.path = vdrRecordingFolder
+    self.path = xbmc.translatePath(vdrRecordingFolder)   #all special:// paths should be translated using xbmc.translatePath("special://foo/bar")
+                                                         #https://kodi.wiki/view/Add-on_rules
     self.infoInitialized = False
     self.tsInitialized = False 
     self.resumeInitialized = False
