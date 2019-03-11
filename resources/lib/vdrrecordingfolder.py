@@ -8,6 +8,7 @@ import string
 import re
 import xbmcgui
 import xbmc
+import xbmcvfs
 from array import array
 import time
 import datetime
@@ -28,7 +29,7 @@ def getYear(yStr):
         t = str(yStr[i])
         if t.isdigit():
             dcount = countDigits(yStr[i:])
-            if (dcount == 4) and (int(yStr[i:i+4]) > 1860) and (int(yStr[i:i+4]) < 2100):
+            if (dcount == 4) and (int(yStr[i:i+4]) > 1860) and (int(yStr[i:i+4]) < 2025):
                 return int(yStr[i:i+4])
             else:
                 i += dcount
@@ -67,20 +68,20 @@ class VdrRecordingFolder:
 #         xbmc.log("rectime= " + str(self.RecordingTime), xbmc.LOGERROR)
         self.sortRecordingTimestamp = str(self.RecordingTime)
         infoFileName = os.path.join(self.path, "info")
-        if not os.path.isfile(infoFileName):
+        if not xbmcvfs.exists(infoFileName):
           infoFileName = os.path.join(self.path, "info.vdr")
-        if not os.path.isfile(infoFileName):
+        if not xbmcvfs.exists(infoFileName):
           infoFileName = os.path.join(self.path, "info.txt")
         try:
-          f_info = open(infoFileName, "r")
+          f_info = xbmcvfs.File(infoFileName, "r")
         except IOError:
 # doesn't exist
           pass
         else:
 # exists
-          info = f_info.readlines()
+          info_str = f_info.read()
           f_info.close()
-          for info_line in info:
+          for info_line in info_str.splitlines():
             if info_line[0] == 'T':
               self.title = info_line[2:].strip()
             if info_line[0] == 'S':
@@ -114,7 +115,7 @@ class VdrRecordingFolder:
           self.title = os.path.split(os.path.split(self.path)[0])[1].replace('_', ' ').strip()
         if self.description == '':
           try:
-            f_summary = open(os.path.join(self.path, "summary.vdr"), "r")
+            f_summary = xbmcvfs.File(os.path.join(self.path, "summary.vdr"), "r")
           except IOError:
 # doesn't exist
             pass
@@ -136,10 +137,10 @@ class VdrRecordingFolder:
     li.setContentLookup(True)
     li.setProperty('IsPlayable', 'true')
     indexFileName = os.path.join(self.path, "index")
-    if not os.path.isfile(indexFileName):
+    if not xbmcvfs.exists(indexFileName):
       indexFileName = os.path.join(self.path, "index.vdr")
     try:
-      index_file_length = os.path.getsize(indexFileName)
+      index_file_length = xbmcvfs.Stat(indexFileName).st_size()
     except IOError:
 # doesn't exist
       index_file_length = 0
@@ -183,7 +184,8 @@ class VdrRecordingFolder:
     if self.tsInitialized == False:
       self.tsInitialized = True
       self.ts_f = []
-      for r_file in os.listdir(self.path):
+      dirs, files = xbmcvfs.listdir(self.path)
+      for r_file in files:
         ext = os.path.splitext(r_file)[1]
         if ext == ".ts":
           self.ts_f.append( os.path.join(self.path, r_file) )
@@ -217,21 +219,21 @@ class VdrRecordingFolder:
     self.newResumeFormat = True
     fileMode = "r"
     resumeFileName = os.path.join(self.path, "resume")
-    if not os.path.isfile(resumeFileName):
+    if not  xbmcvfs.exists(resumeFileName):
       self.newResumeFormat = False
       resumeFileName = os.path.join(self.path, "resume.vdr")
       fileMode = "rb"
     try:
-      f_resume = open(resumeFileName, fileMode)
+      f_resume = xbmcvfs.File(resumeFileName, fileMode)
     except IOError:
 # doesn't exist
       self.resume = 0
     else:
 # exists
       if self.newResumeFormat:
-        resume_content = f_resume.readlines()
+        resume_content = f_resume.read()
         f_resume.close()
-        for resume_line in resume_content:
+        for resume_line in resume_content.splitlines():
           if resume_line[0] == 'I':
             self.resume = int(resume_line[2:])
       else:
@@ -239,9 +241,10 @@ class VdrRecordingFolder:
         if resume_content.itemsize == 8:
           resume_content = array('I')
 #       xbmc.log("resume_content.itemsize= " + str(resume_content.itemsize), xbmc.LOGERROR)
-        resume_content.fromfile(f_resume, 1)
+#        resume_content.fromfile(f_resume, 1)
         f_resume.close()
-        self.resume = int(resume_content[0])
+#        self.resume = int(resume_content[0])
+        self.resume = 0
     return
   def addDirectoryItem(self, addon_handle, commands = []):
     li = self.getListitem()
@@ -261,19 +264,19 @@ class VdrRecordingFolder:
     self.marksInitialized = True
     self.marks = []
     marksFile = os.path.join(self.path, "marks")
-    if not os.path.isfile(marksFile):
+    if not xbmcvfs.exists(marksFile):
       marksFile = os.path.join(self.path, "marks.vdr")
     try:
-        f_marks = open(marksFile, "r")
+        f_marks = xbmcvfs.File(marksFile, "r")
     except IOError:
 # doesn't exist
       xbmc.log("marks don't exist, path: " + str(self.path), xbmc.LOGINFO)        
     else:
 # exists
-        marks_content = f_marks.readlines()
+        marks_content = f_marks.read()
         f_marks.close()
 #       xbmc.log("marks_content: " + str(marks_content), xbmc.LOGERROR)
-        for marks_line in marks_content:
+        for marks_line in marks_content.splitlines():
           if marks_line[1] == ':':
             m_time_sec = ((float(marks_line[0]) * 60) + float(marks_line[2:4]) ) * 60 + float(marks_line[5:10])
 #           xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGERROR)
@@ -307,8 +310,8 @@ class VdrRecordingFolder:
         lastMarkMovieCont = -1
 
   def updateComskip(self):
-    if os.path.exists(os.path.join(self.path, "00001.edl") ): return
-    if os.path.exists(os.path.join(self.path, "001.edl") ): return
+    if xbmcvfs.exists(os.path.join(self.path, "00001.edl") ): return
+    if xbmcvfs.exists(os.path.join(self.path, "001.edl") ): return
     self.sanitizeMarks()
     if self.marksS == []: return
 #   for mark in self.marksS:      
@@ -322,7 +325,7 @@ class VdrRecordingFolder:
     for ts_file in self.ts_f:
 
       try:
-        f_com = open((os.path.splitext(ts_file)[0] + ".edl"), "w")
+        f_com = xbmcvfs.File((os.path.splitext(ts_file)[0] + ".edl"), "w")
 #       f_com_txt = open((os.path.splitext(ts_file)[0] + ".txt"), "w")
       except IOError as e:
         xbmc.log("Error creating commercials file" + str(e), xbmc.LOGERROR)
@@ -369,14 +372,14 @@ class VdrRecordingFolder:
       self.oBookmarks.insertBookmarks(fileId, self.marks, totalTimeInSeconds)
 
   def addRecordingToLibrary(self, libraryPath):
-      if not os.path.exists(libraryPath):
-            os.makedirs(libraryPath)
+      if not xbmcvfs.exists(libraryPath):
+            xbmcvfs.mkdirs(libraryPath)
       sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', self.title)
       strmFileName = os.path.join(libraryPath, sanTitle + ".strm")
 #     nfoFileName = os.path.join(libraryPath, sanTitle + ".nfo")
 #     if os.path.isfile(strmFileName): return -1  # file exists
       try:
-        f_strm = open(strmFileName, "w")
+        f_strm = xbmcvfs.File(strmFileName, "w")
       except IOError:
 # cannot open for write
         xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
@@ -390,7 +393,7 @@ class VdrRecordingFolder:
 
   def writeNfoFile(self, nfoFileName):
       try:
-        f_nfo = open(nfoFileName, "w")
+        f_nfo = xbmcvfs.File(nfoFileName, "w")
       except IOError:
 # cannot open for write
         xbmc.log("Cannot open for write: " + str(nfoFileName), xbmc.LOGERROR)        
@@ -435,11 +438,11 @@ class VdrRecordingFolder:
       self.indexInitialized = True
       newIndexFormat = True
       indexFileName = os.path.join(self.path, "index")
-      if not os.path.isfile(indexFileName):
+      if not xbmcvfs.exist(indexFileName):
         newIndexFormat = False
         indexFileName = os.path.join(self.path, "index.vdr")
       try:
-        f_index =  open(indexFileName, "rb")
+        f_index =  xbmcvfs.File(indexFileName, "rb")
       except IOError:
 # doesn't exist
         xbmc.log("Cannot open index file " + str(indexFileName), xbmc.LOGERROR)

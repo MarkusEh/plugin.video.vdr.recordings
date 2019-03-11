@@ -9,6 +9,7 @@ import string
 import xbmcgui
 import xbmcplugin
 import xbmc
+import xbmcvfs
 import xbmcaddon
 import constants
 
@@ -37,7 +38,7 @@ class main:
         self.mode = self.args.get('mode', ['folder'])[0]
         addon = xbmcaddon.Addon('plugin.video.vdr.recordings')
         self.rootFolder = addon.getSetting("rootFolder")
-        if not os.path.isdir(self.rootFolder):
+        if not xbmcvfs.exists(self.rootFolder):
             xbmc.executebuiltin('Notification(Folder ' + self.rootFolder +
            ' does not exist.,Please select correct video folder in stettings., 50000)')
         lastChar = self.rootFolder[-1] 
@@ -56,6 +57,16 @@ class main:
 #        xbmcplugin.addDirectoryItem(handle=self.addon_handle, url=url,
 #                                listitem=li, isFolder=True)
 
+    def createSeachList(self, sPath, searchList):
+        dirs, files = xbmcvfs.listdir(sPath)
+        for dirName in dirs:
+            if dirName[-4:] == ".rec":
+#               xbmc.log("createSeachList, recDirName= " + dirName, xbmc.LOGERROR)
+                searchList.append(VdrRecordingFolder(os.path.join(sPath, dirName)))
+            else:
+                self.createSeachList(os.path.join(sPath, dirName), searchList)
+
+
     def doSearch(self, searchString):
 #        currentFolder = self.args.get('currentFolder', [self.rootFolder])[0]
 # Add special (search) folder
@@ -64,13 +75,11 @@ class main:
 #        xbmcplugin.addDirectoryItem(handle=self.addon_handle, url=url,
 #                                listitem=li, isFolder=True)
         searchList = []
-        for dirName, subdirList, fileList in os.walk(self.rootFolder, followlinks = True):
-            if dirName[-4:] == ".rec":
-                searchList.append(VdrRecordingFolder(dirName))
+        self.createSeachList(self.rootFolder, searchList)
 
-        searchStringL = string.lower(searchString)
+        searchStringL = searchString.lower()
         for vdrRecordingFolder in searchList:
-            if string.find(string.lower(vdrRecordingFolder.title), searchStringL) >= 0:
+            if vdrRecordingFolder.title.lower().find(searchStringL) >= 0:
                 relRecordingPath = os.path.split(vdrRecordingFolder.path)[0][len(self.rootFolder)+1:].replace('_', ' ')
                 vdrRecordingFolder.description = relRecordingPath + '\n' + vdrRecordingFolder.description
 # add context menu

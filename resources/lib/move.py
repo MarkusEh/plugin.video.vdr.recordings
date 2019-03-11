@@ -9,6 +9,7 @@ import shutil
 import threading
 import xbmc
 import xbmcgui
+import xbmcvfs
 
 src = sys.argv[1]
 dest = sys.argv[2]
@@ -17,17 +18,18 @@ pDialog = xbmcgui.DialogProgressBG()
 
 def GetFolderSize(path):
     TotalSize = 0.0
-    for item in os.walk(path):
-        for file in item[2]:
-            try:
-                TotalSize = TotalSize + os.path.getsize(os.path.join(item[0], file))
-            except:
-                print("error with file:  " + os.path.join(item[0], file))
+    dirs, files = xbmcvfs.listdir(path)
+    for dir in dirs:
+        TotalSize = TotalSize + GetFolderSize(os.path.join(path, dir))
+    
+    for file in files:
+        TotalSize = TotalSize + xbmcvfs.Stat(os.path.join(path, file)).st_size
     return TotalSize
 
+
 def move(t1, t2, tz, t3):
-  shutil.move(t1, t2)
-  shutil.move(tz, t3)
+  xbmcvfs.rename(t1, tz)
+  xbmcvfs.rename(tz, t3)
   xbmc.executebuiltin("Container.Refresh")   
 
 

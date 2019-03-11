@@ -10,6 +10,7 @@ import xbmc
 import xbmcplugin
 import xbmcaddon
 import xbmcgui
+import xbmcvfs
 import constants
 import vdrrecordingfolder
 
@@ -26,23 +27,28 @@ class kFolder:
     self.fileRead = True
     self.kodiLines = {}
     kodiFileName = os.path.join(self.path, "kodi")
-    if os.path.isfile(kodiFileName):
+    if xbmcvfs.exists(kodiFileName):
       try:
-        f_kodi = open(kodiFileName, "r")
-      except:
+#       f_kodi = open(kodiFileName, "r")
+        f_kodi = xbmcvfs.File(kodiFileName, "r")
+      except IOError:
+        xbmc.log("Cannot open for read: " + str(kodiFileName), xbmc.LOGERROR)
         pass
       else:
 # exists
-        kodi_content = f_kodi.readlines()
+        kodi_content = f_kodi.read()
         f_kodi.close()
-        for kodi_line in kodi_content:
-          self.kodiLines[kodi_line[0]] = kodi_line[2:].strip()
+        for kodi_line in kodi_content.splitlines():
+          try:
+            self.kodiLines[kodi_line[0]] = kodi_line[2:].strip()
+          except:
+            pass
  
   def writeKodiFile(self):
     kodiFileName = os.path.join(self.path, "kodi")
     try:
-        f_kodi = open(kodiFileName, "w")
-    except:
+        f_kodi = xbmcvfs.File(kodiFileName, "w")
+    except IOError:
 # cannot open for write
         xbmc.log("Cannot open for write: " + str(kodiFileName), xbmc.LOGERROR)        
         return -1
@@ -114,9 +120,10 @@ class kFolder:
     DELETE_FOLDER = "<delete this folder>"
     self.subFolders = []
     self.subFolders.append(THIS_FOLDER)
-    if os.access(self.path, os.W_OK):
-      self.subFolders.append(CREATE_FOLDER)
-    if len(os.listdir(self.path)) == 0:
+#   if os.access(self.path, os.W_OK):
+    self.subFolders.append(CREATE_FOLDER)
+    dirs, files = xbmcvfs.listdir(self.path)
+    if len(dirs) == 0 and len(files) == 0:
       self.subFolders.append(DELETE_FOLDER)
     if self.path != rootFolder:
       self.subFolders.append(FOLDER_UP)
@@ -134,8 +141,8 @@ class kFolder:
       return self.path
     if self.subFolders[d] == DELETE_FOLDER:
       try:
-        os.rmdir(self.path)
-      except OSError:
+        xbmcvfs.rmdir(self.path)
+      except:
         xbmc.log("Error deleting directory " + str(self.path), xbmc.LOGERROR)            
         return self.selectFolder(rootFolder)
       return kFolder(os.path.split(self.path)[0]).selectFolder(rootFolder)
@@ -144,10 +151,10 @@ class kFolder:
       d2 = dialog.input("Enter name of new folder")
       if d2 == "": return self.selectFolder(rootFolder)
       newpath = os.path.join(self.path, d2)
-      if not os.path.exists(newpath):
+      if not xbmcvfs.exists(newpath + "/"):
         try:
-          os.makedirs(newpath)
-        except OSError:
+          xbmcvfs.makedirs(newpath)
+        except:
           xbmc.log("Error creating directory " + str(newpath), xbmc.LOGERROR)            
           return self.selectFolder(rootFolder)
       return kFolder(newpath).selectFolder(rootFolder)
@@ -161,26 +168,27 @@ class kFolder:
         firstTitle = None
         recordingsList = []
         subfolderList = []
-        for fileN in os.listdir(self.path):
-          path = os.path.join(self.path, fileN)
-          if os.path.isdir(path):
-            if os.path.splitext(path)[1] == ".move": continue
-            subfolders = get_immediate_subdirectories(path)
-            if len(subfolders) == 1:
-              if os.path.splitext(subfolders[0])[1] == ".rec":
-                path = os.path.join(path, subfolders[0])
-            if os.path.splitext(path)[1] == ".rec":
-              vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(path)
-              if firstTitle == None:
-                firstTitle = vdrRecordingFolder.title
-              else:
-                if vdrRecordingFolder.title != firstTitle:
-                  onlySameTitle = False
-              recordingsList.append(vdrRecordingFolder)
+        dirs, files = xbmcvfs.listdir(self.path)
+        for dir in dirs:
+          if os.path.splitext(dir)[1] == ".move": continue
+          path = os.path.join(self.path, dir)
+          subfolders = get_immediate_subdirectories(path)
+          if len(subfolders) == 1:
+            if os.path.splitext(subfolders[0])[1] == ".rec":
+              path = os.path.join(path, subfolders[0])
+          if os.path.splitext(path)[1] == ".rec":
+            vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(path)
+            if firstTitle == None:
+              firstTitle = vdrRecordingFolder.title
             else:
+              if vdrRecordingFolder.title != firstTitle:
+                onlySameTitle = False
+            recordingsList.append(vdrRecordingFolder)
+          else:
               if len(subfolders) > 0:
 #               onlySameTitle = False
-                subfolderList.append([path, fileN])
+                subfolderList.append([path, dir])
+
         if onlySameTitle and len(recordingsList) > 1:
 #           xbmc.log("onlySameTitle: " + str(self.path), xbmc.LOGERROR)            
             contentType = self.getContentType(constants.TV_SHOWS)
@@ -308,8 +316,8 @@ def addContextMenuCommand(commands, name, mode, url, arg3 = ''):
         commands.append(( str(name), runner, ))
 
 def get_immediate_subdirectories(a_dir):
-    return [name for name in os.listdir(a_dir)
-            if os.path.isdir(os.path.join(a_dir, name))]
+    dirs, files = xbmcvfs.listdir(a_dir)
+    return dirs
 
 def build_url(base_url, query):
         return base_url + '?' + urllib.urlencode(query)

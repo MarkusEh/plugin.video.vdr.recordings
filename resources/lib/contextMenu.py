@@ -11,6 +11,7 @@ import urllib
 import xbmc
 import xbmcaddon
 import xbmcgui
+import xbmcvfs
 import kfolder
 import vdrrecordingfolder
 import constants
@@ -22,6 +23,18 @@ def GUIEditExportName(name):
       return kb.getText()
     else:
       return None
+
+def recursive_delete_dir(fullpath):
+    '''helper to recursively delete a directory'''
+    success = True
+    dirs, files = xbmcvfs.listdir(fullpath)
+    for file in files:
+        success = xbmcvfs.delete(os.path.join(fullpath, file))
+    for directory in dirs:
+        success = recursive_delete_dir(os.path.join(fullpath, directory))
+    success = xbmcvfs.rmdir(fullpath)
+    return success 
+
 
 def getRootFolder():
     rootFolder = xbmcaddon.Addon('plugin.video.vdr.recordings').getSetting("rootFolder")
@@ -37,15 +50,15 @@ mode = sys.argv[1]
 if mode == constants.ADDALLTOLIBRARY:
     rootFolder = sys.argv[2]
 #   xbmc.log("rootFolder=" + str(rootFolder), xbmc.LOGERROR)
-    try: shutil.rmtree(constants.LIBRARY_MOVIES)
+    try: recursive_delete_dir(constants.LIBRARY_MOVIES)
     except: pass
-    try: shutil.rmtree(constants.LIBRARY_TV_SHOWS)
+    try: recursive_delete_dir(constants.LIBRARY_TV_SHOWS)
     except: pass
-    try: shutil.rmtree(constants.LIBRARY_MUSIC_VIDEOS)
+    try: recursive_delete_dir(constants.LIBRARY_MUSIC_VIDEOS)
     except: pass
-    os.makedirs(constants.LIBRARY_MOVIES)
-    os.makedirs(constants.LIBRARY_TV_SHOWS)
-    os.makedirs(constants.LIBRARY_MUSIC_VIDEOS)
+    xbmcvfs.mkdirs(constants.LIBRARY_MOVIES)
+    xbmcvfs.mkdirs(constants.LIBRARY_TV_SHOWS)
+    xbmcvfs.mkdirs(constants.LIBRARY_MUSIC_VIDEOS)
     kfolder.kFolder(rootFolder).parseFolder(-10, '', rootFolder)
   
 if mode == constants.TV_SHOWS:
@@ -108,7 +121,7 @@ if mode == constants.DELETE:
             + rf.title
             + '"?')
         if d == True:    
-            shutil.rmtree(recordingFolderPath, ignore_errors=True)
+            recursive_delete_dir(recordingFolderPath)
 #       os.rename(recordingFolderPath, ps[0] + '.del')
         xbmc.executebuiltin("Container.Refresh")       
 
@@ -126,12 +139,15 @@ if mode == constants.MOVE:
     if dest != None:
         d1 = fp + ".move"
         dfin = os.path.join(dest, fn)
-        shutil.move(fp, d1 )
+        if xbmcvfs.rename(fp, d1) == False:
+            xbmc.log("constants.MOVE, fp = " + fp, xbmc.LOGERROR) 
+            xbmc.log("constants.MOVE, d1 = " + d1, xbmc.LOGERROR)
+        else:
 
-        script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/move.py"
-        xbmc.executebuiltin("XBMC.RunScript(" + xbmc.translatePath(script) + ", " + d1 + ", " + dest + ", " + dfin + ")")
-        xbmc.sleep(10) 
-        xbmc.executebuiltin("Container.Refresh")       
+            script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/move.py"
+            xbmc.executebuiltin("XBMC.RunScript(" + xbmc.translatePath(script) + ", " + d1 + ", " + dest + ", " + dfin + ")")
+            xbmc.sleep(10) 
+            xbmc.executebuiltin("Container.Refresh")       
 
 if mode == constants.SEARCH:
     rootFolder = sys.argv[2]

@@ -19,9 +19,9 @@ MOVE = "Move"
 SEARCH = "Search"
 
 LIBRARY_BASEPATH = xbmc.translatePath(
-        "special://userdata/addon_data/plugin.video.vdr.recordings")
-LIBRARY_MOVIES = os.path.join(LIBRARY_BASEPATH, "Movies")
-LIBRARY_TV_SHOWS = os.path.join(LIBRARY_BASEPATH, "TV shows")
-LIBRARY_MUSIC_VIDEOS = os.path.join(LIBRARY_BASEPATH, "Music videos")
+        "special://userdata/addon_data/plugin.video.vdr.recordings/")
+LIBRARY_MOVIES = os.path.join(LIBRARY_BASEPATH, "Movies/")
+LIBRARY_TV_SHOWS = os.path.join(LIBRARY_BASEPATH, "TV shows/")
+LIBRARY_MUSIC_VIDEOS = os.path.join(LIBRARY_BASEPATH, "Music videos/")
 
 
