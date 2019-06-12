@@ -19,7 +19,7 @@
     <source>https://github.com/MarkusEh/plugin.video.vdr.recordings</source>
     <news>
 v0.3.1
-- type fixed xbmcvfs.exist -> xbmcvfs.exists
+- typo in vdrrecordingfolder.py: fixed xbmcvfs.exist -> xbmcvfs.exists
 v0.3.0
 - support xbmcvfs
 v0.2.4
