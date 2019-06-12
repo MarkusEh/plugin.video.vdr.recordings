@@ -438,7 +438,7 @@ class VdrRecordingFolder:
       self.indexInitialized = True
       newIndexFormat = True
       indexFileName = os.path.join(self.path, "index")
-      if not xbmcvfs.exist(indexFileName):
+      if not xbmcvfs.exists(indexFileName):
         newIndexFormat = False
         indexFileName = os.path.join(self.path, "index.vdr")
       try:
