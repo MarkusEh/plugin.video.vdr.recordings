@@ -63,9 +63,14 @@ class VdrRecordingFolder:
 # Recording date / time
         rt = os.path.split(self.path)[1]
 #       xbmc.log("rectime_sort= " + rt, xbmc.LOGERROR)
-        self.RecordingTime = datetime.datetime(year = int(rt[0:4]), month = int(rt[5:7]),
-          day = int(rt[8:10]), hour = int(rt[11:13]), minute = int(rt[14:16]), second = 0)
-#         xbmc.log("rectime= " + str(self.RecordingTime), xbmc.LOGERROR)
+        try:
+          self.RecordingTime = datetime.datetime(year = int(rt[0:4]), month = int(rt[5:7]),
+            day = int(rt[8:10]), hour = int(rt[11:13]), minute = int(rt[14:16]), second = 0)
+#           xbmc.log("rectime= " + str(self.RecordingTime), xbmc.LOGERROR)
+        except:
+          xbmc.log("Error: Unknown format of rec folder name:" + rt, xbmc.LOGERROR)
+          self.RecordingTime = datetime.datetime(year = 1960, month = 1,
+            day = 1, hour = 0, minute = 0, second = 0)
         self.sortRecordingTimestamp = str(self.RecordingTime)
         infoFileName = os.path.join(self.path, "info")
         if not xbmcvfs.exists(infoFileName):
