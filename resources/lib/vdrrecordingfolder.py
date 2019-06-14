@@ -144,11 +144,11 @@ class VdrRecordingFolder:
     indexFileName = os.path.join(self.path, "index")
     if not xbmcvfs.exists(indexFileName):
       indexFileName = os.path.join(self.path, "index.vdr")
-    try:
-      index_file_length = xbmcvfs.Stat(indexFileName).st_size()
-    except IOError:
+    if not xbmcvfs.exists(indexFileName):
 # doesn't exist
       index_file_length = 0
+    else:
+      index_file_length = xbmcvfs.Stat(indexFileName).st_size()
     self.duration = int(index_file_length / 8 / self.framerate)
     numVidStreams = 0
     for streamInfoLine in self.streamInfo:
@@ -323,6 +323,7 @@ class VdrRecordingFolder:
 #       xbmc.log("updateComskip, mark: " + str(mark[0]) + " " + str(mark[1]), xbmc.LOGERROR)        
 
     self.initializeIndex()
+    if self.ts_l == []: return
     self.getTsFiles()
 
     lengthOfPreviousFiles = 0
@@ -446,12 +447,16 @@ class VdrRecordingFolder:
       if not xbmcvfs.exists(indexFileName):
         newIndexFormat = False
         indexFileName = os.path.join(self.path, "index.vdr")
+      if not xbmcvfs.exists(indexFileName):
+        xbmc.log("Cannot open index file " + str(indexFileName), xbmc.LOGERROR)
+        self.ts_l = []
+        return
       try:
         f_index =  xbmcvfs.File(indexFileName, "rb")
-      except IOError:
+      except:
 # doesn't exist
         xbmc.log("Cannot open index file " + str(indexFileName), xbmc.LOGERROR)
-        pass
+        self.ts_l = []
       else:
         if newIndexFormat:
           index = array( 'H', f_index.read() )
