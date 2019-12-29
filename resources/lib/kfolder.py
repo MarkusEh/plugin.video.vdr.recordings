@@ -134,7 +134,7 @@ class kFolder:
     if d == None: return d
     if d == -1: return None
     if d >= prefolders:
-      return kFolder(os.path.join(self.path, self.subFolders[d])).selectFolder(rootFolder)
+      return kFolder(self.subFolders[d]).selectFolder(rootFolder)
     if self.subFolders[d] == FOLDER_UP:
       return kFolder(os.path.split(self.path)[0]).selectFolder(rootFolder)
     if self.subFolders[d] == THIS_FOLDER:

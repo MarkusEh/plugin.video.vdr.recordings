@@ -23,7 +23,7 @@ def GetFolderSize(path):
         TotalSize = TotalSize + GetFolderSize(os.path.join(path, dir))
     
     for file in files:
-        TotalSize = TotalSize + xbmcvfs.Stat(os.path.join(path, file)).st_size
+        TotalSize = TotalSize + xbmcvfs.Stat(os.path.join(path, file)).st_size()
     return TotalSize
 
 
