@@ -17,6 +17,7 @@ DELETE = "Delete"
 RENAME = "Rename"
 MOVE = "Move"
 SEARCH = "Search"
+REFRESH = "Refresh"
 
 LIBRARY_BASEPATH = xbmc.translatePath(
         "special://userdata/addon_data/plugin.video.vdr.recordings/")

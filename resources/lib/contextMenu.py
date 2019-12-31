@@ -159,6 +159,6 @@ if mode == constants.SEARCH:
        runner = "ActivateWindow(10025," + str(p_url) + ",return)"
        xbmc.executebuiltin(runner)   
  
-    
-
+if mode == constants.REFRESH:
+    xbmc.executebuiltin("Container.Refresh")  
 

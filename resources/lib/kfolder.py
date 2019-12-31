@@ -225,6 +225,7 @@ class kFolder:
                     addContextMenuCommand(commands, "Set episode", constants.EPISODE, vdrRecordingFolder.path, str(episode))
                     addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
                     addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
+                    addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
                     vdrRecordingFolder.contentType = contentType
                     vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
         elif contentType == constants.MUSIC_VIDEOS:
@@ -252,6 +253,7 @@ class kFolder:
                   addContextMenuCommand(commands, "Set year", constants.YEAR, vdrRecordingFolder.path, str(year))
                   addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
                   addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
+                  addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
                   vdrRecordingFolder.contentType = contentType
                   vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
 
@@ -278,6 +280,7 @@ class kFolder:
             addContextMenuCommand(commands, "Add all recordings to Library", constants.ADDALLTOLIBRARY, rootFolder)
             addContextMenuCommand(commands, "Move", constants.MOVE, pathN[0])
             addContextMenuCommand(commands, "Search", constants.SEARCH, rootFolder, base_url)
+            addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
             li.addContextMenuItems( commands )
            
             xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
