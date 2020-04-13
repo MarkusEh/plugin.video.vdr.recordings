@@ -168,26 +168,25 @@ class kFolder:
         firstTitle = None
         recordingsList = []
         subfolderList = []
-        dirs, files = xbmcvfs.listdir(self.path)
-        for dir in dirs:
-          if os.path.splitext(dir)[1] == ".move": continue
-          path = os.path.join(self.path, dir)
-          subfolders = get_immediate_subdirectories(path)
-          if len(subfolders) == 1:
-            if os.path.splitext(subfolders[0])[1] == ".rec":
-              path = os.path.join(path, subfolders[0])
-          if os.path.splitext(path)[1] == ".rec":
-            vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(path)
-            if firstTitle == None:
-              firstTitle = vdrRecordingFolder.title
+        rec_names, files = xbmcvfs.listdir(self.path)
+        for rec_name in rec_names:
+          if os.path.splitext(rec_name)[1] == ".move": continue
+          path = os.path.join(self.path, rec_name)
+          rec_timestamps, files = xbmcvfs.listdir(path)
+          subfolder = False
+          for rec_timestamp in rec_timestamps:
+            if os.path.splitext(rec_timestamp)[1] != ".rec":
+              subfolder = True
             else:
-              if vdrRecordingFolder.title != firstTitle:
-                onlySameTitle = False
-            recordingsList.append(vdrRecordingFolder)
-          else:
-              if len(subfolders) > 0:
-#               onlySameTitle = False
-                subfolderList.append([path, dir])
+              vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(os.path.join(path,rec_timestamp))
+              if firstTitle == None:
+                firstTitle = vdrRecordingFolder.title
+              else:
+                if vdrRecordingFolder.title != firstTitle:
+                  onlySameTitle = False
+              recordingsList.append(vdrRecordingFolder)
+          if subfolder:
+             subfolderList.append([path, rec_name])
 
         if onlySameTitle and len(recordingsList) > 1:
 #           xbmc.log("onlySameTitle: " + str(self.path), xbmc.LOGERROR)            
