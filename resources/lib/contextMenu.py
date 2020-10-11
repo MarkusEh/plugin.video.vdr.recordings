@@ -145,7 +145,7 @@ if mode == constants.MOVE:
         else:
 
             script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/move.py"
-            xbmc.executebuiltin("XBMC.RunScript(" + xbmc.translatePath(script) + ", \"" + d1 + "\", \"" + dest + "\", \"" + dfin + "\")")
+            xbmc.executebuiltin("XBMC.RunScript(" + xbmcvfs.translatePath(script) + ", \"" + d1 + "\", \"" + dest + "\", \"" + dfin + "\")")
             xbmc.sleep(10) 
             xbmc.executebuiltin("Container.Refresh")       
 

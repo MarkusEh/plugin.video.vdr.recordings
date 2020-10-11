@@ -317,6 +317,7 @@ class VdrRecordingFolder:
   def updateComskip(self):
     if xbmcvfs.exists(os.path.join(self.path, "00001.edl") ): return
     if xbmcvfs.exists(os.path.join(self.path, "001.edl") ): return
+#   xbmc.log("Start creating commercials file" + self.path, xbmc.LOGERROR)
     self.sanitizeMarks()
     if self.marksS == []: return
 #   for mark in self.marksS:      
@@ -458,18 +459,19 @@ class VdrRecordingFolder:
         xbmc.log("Cannot open index file " + str(indexFileName), xbmc.LOGERROR)
         self.ts_l = []
       else:
-        if newIndexFormat:
-          index = array( 'H', f_index.read() )
-          numbersPerEntry = 4
-          offsetRight = 1
-        else:
-          index = array( 'B', f_index.read() )
-          numbersPerEntry = 8
-          offsetRight = 3
+        index_len = f_index.size()
+#       xbmc.log("index file size= " + str(index_len), xbmc.LOGERROR)
+        index = array( 'B', f_index.readBytes() )
         f_index.close
-        index_len = len(index)
+        numbersPerEntry = 8
+        if newIndexFormat:
+          offsetRight = 2
+        else:
+          offsetRight = 3
+#       index_len = len(index)
 #       xbmc.log("index_len= " + str(index_len), xbmc.LOGERROR)
         number_of_entries = index_len / numbersPerEntry
+#       xbmc.log("number_of_entries= " + str(number_of_entries), xbmc.LOGERROR)
         self.frameNumbers = number_of_entries
         len_sec = number_of_entries / self.framerate
         self.len_sec = len_sec
@@ -480,18 +482,22 @@ class VdrRecordingFolder:
         for i in range(1, numberOfTsFiles):
           limit_low = 1
           limit_high = number_of_entries
-          testPos =  number_of_entries * i/ numberOfTsFiles
+          testPos =  int(number_of_entries * i/ numberOfTsFiles)
           found = False
           while found == False:
+#           xbmc.log("testPos= " + str(testPos), xbmc.LOGERROR)
+#           xbmc.log("numbersPerEntry= " + str(numbersPerEntry), xbmc.LOGERROR)
+#           xbmc.log("offsetRight= " + str(offsetRight), xbmc.LOGERROR)
+            
             ts_file_at_test_pos = index[testPos * numbersPerEntry - offsetRight]
             if ts_file_at_test_pos > i:
               limit_high = testPos
-              testPos = limit_low + (testPos - limit_low) / 2
+              testPos = int(limit_low + (testPos - limit_low) / 2)
             else:
               ts_file_at_test_pos_p1 = index[(testPos + 1)* numbersPerEntry - offsetRight]
               if ts_file_at_test_pos_p1 <= i:
                 limit_low = testPos
-                testPos = limit_high - (limit_high - testPos) / 2
+                testPos = int(limit_high - (limit_high - testPos) / 2)
               else:
                 found = True
                 self.ts_l.append(testPos)

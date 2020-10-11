@@ -270,7 +270,8 @@ class kFolder:
           for pathN in subfolderList:
             url = build_url(base_url, {'mode': 'folder', 'currentFolder': pathN[0]})
             name = pathN[1].replace('_', ' ')
-            li = xbmcgui.ListItem(name, iconImage = 'DefaultFolder.png')
+            li = xbmcgui.ListItem(name)
+            li.setArt({ 'icon' : 'DefaultFolder.png' })
 # add context menu
             commands = []
             addContextMenuCommand(commands, "Set content: TV shows", constants.TV_SHOWS, pathN[0])
@@ -322,4 +323,4 @@ def get_immediate_subdirectories(a_dir):
     return dirs
 
 def build_url(base_url, query):
-        return base_url + '?' + urllib.urlencode(query)
+        return base_url + '?' + urllib.parse.urlencode(query)

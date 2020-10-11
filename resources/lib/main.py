@@ -4,8 +4,7 @@
 # Disable import error: E0401
 
 import os
-import urlparse
-import string
+from urllib import parse
 import xbmcgui
 import xbmcplugin
 import xbmc
@@ -34,7 +33,7 @@ class main:
         self.argv = argv
         self.base_url = self.argv[0]
         self.addon_handle = int(self.argv[1])
-        self.args = urlparse.parse_qs(self.argv[2][1:])
+        self.args = parse.parse_qs(self.argv[2][1:])
         self.mode = self.args.get('mode', ['folder'])[0]
         addon = xbmcaddon.Addon('plugin.video.vdr.recordings')
         self.rootFolder = addon.getSetting("rootFolder")

@@ -11,10 +11,10 @@ import xbmcvfs
 class bookmarks:
     def __init__(self):
         self.dbKnown = False
-        dbFileMyVideos = xbmc.translatePath("special://database/MyVideos112.db")
+        dbFileMyVideos = xbmcvfs.translatePath("special://database/MyVideos112.db")
         if xbmcvfs.exists(dbFileMyVideos): self.dbKnown = True
         if self.dbKnown == False:
-            dbFileMyVideos = xbmc.translatePath("special://database/MyVideos107.db")
+            dbFileMyVideos = xbmcvfs.translatePath("special://database/MyVideos107.db")
             if xbmcvfs.exists(dbFileMyVideos): self.dbKnown = True
         if self.dbKnown == True:
         # Connect to database

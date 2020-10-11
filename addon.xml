@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="0.3.6" provider-name="Markus Ehrnsperger">
+<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="0.4.0" provider-name="Markus Ehrnsperger">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
   </requires>
@@ -18,6 +18,8 @@
     <email></email>
     <source>https://github.com/MarkusEh/plugin.video.vdr.recordings</source>
     <news>
+v0.4.0
+- Support KODI 19, and stop support of KODI 18
 v0.3.6
 - Recordings are now listed in the same hierarchy as VDR
 v0.3.5

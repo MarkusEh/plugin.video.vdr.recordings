@@ -4,7 +4,7 @@
 # Disable import error: E0401
 
 import os
-import xbmc
+import xbmcvfs
 
 MOVIES = "Movies"
 TV_SHOWS = "TV_shows"
@@ -19,7 +19,7 @@ MOVE = "Move"
 SEARCH = "Search"
 REFRESH = "Refresh"
 
-LIBRARY_BASEPATH = xbmc.translatePath(
+LIBRARY_BASEPATH = xbmcvfs.translatePath(
         "special://userdata/addon_data/plugin.video.vdr.recordings/")
 LIBRARY_MOVIES = os.path.join(LIBRARY_BASEPATH, "Movies/")
 LIBRARY_TV_SHOWS = os.path.join(LIBRARY_BASEPATH, "TV shows/")
