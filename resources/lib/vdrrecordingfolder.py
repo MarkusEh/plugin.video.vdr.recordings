@@ -204,6 +204,7 @@ class VdrRecordingFolder:
     self.getTsFiles()
 #   url = "stack://file:/" + url1 + " , file:/" + url2
     isFirst = True
+    url = ""
     for r_file in self.ts_f:
       if isFirst:
         url = "stack://" + r_file
