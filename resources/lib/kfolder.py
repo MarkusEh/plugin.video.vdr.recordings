@@ -312,9 +312,9 @@ class kFolder:
 def addContextMenuCommand(commands, name, mode, url, arg3 = ''):
         script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/contextMenu.py"
         if arg3 == '':
-          runner = "XBMC.RunScript(" + str(script)+ ", " + str(mode) + ", \"" + str(url) + "\")"
+          runner = "RunScript(" + str(script)+ ", " + str(mode) + ", \"" + str(url) + "\")"
         else:
-          runner = "XBMC.RunScript(" + str(script)+ ", " + str(mode) + ", \"" + str(url) + "\", \"" + str(arg3) + "\")"
+          runner = "RunScript(" + str(script)+ ", " + str(mode) + ", \"" + str(url) + "\", \"" + str(arg3) + "\")"
 #       xbmc.log("runner=" + str(runner), xbmc.LOGERROR)
         commands.append(( str(name), runner, ))
 
