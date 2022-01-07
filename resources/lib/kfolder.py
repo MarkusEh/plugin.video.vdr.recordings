@@ -213,7 +213,8 @@ class kFolder:
                     episode = 1
                     season = season_n
                 episode = kf.getEpisode(episode)
-                se = 'S' + string.zfill(str(season),2) + 'E' + string.zfill(str(episode),2)
+
+                se = 'S' + str(season).zfill(2) + 'E' + str(episode).zfill(2)
                 vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
                 if addon_handle == -10:
                     vdrRecordingFolder.addRecordingToLibrary(libPath)

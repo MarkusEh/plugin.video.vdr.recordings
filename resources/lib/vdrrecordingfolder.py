@@ -78,14 +78,19 @@ class VdrRecordingFolder:
         if not xbmcvfs.exists(infoFileName):
           infoFileName = os.path.join(self.path, "info.txt")
         try:
-          f_info = xbmcvfs.File(infoFileName, "r")
+          f_info = xbmcvfs.File(infoFileName, "rb")
         except IOError:
 # doesn't exist
           pass
         else:
 # exists
-          info_str = f_info.read()
+          try:
+            info_str = f_info.read()
+          except:
+            xbmc.log("non-utf8 characters in file " + infoFileName, xbmc.LOGERROR)
+            info_str = ""
           f_info.close()
+
           for info_line in info_str.splitlines():
             if info_line[0] == 'T':
               self.title = info_line[2:].strip()
@@ -120,12 +125,16 @@ class VdrRecordingFolder:
           self.title = os.path.split(os.path.split(self.path)[0])[1].replace('_', ' ').strip()
         if self.description == '':
           try:
-            f_summary = xbmcvfs.File(os.path.join(self.path, "summary.vdr"), "r")
+            f_summary = xbmcvfs.File(os.path.join(self.path, "summary.vdr"), "rb")
           except IOError:
 # doesn't exist
             pass
           else:
-            self.description = f_summary.read().strip()
+# file exists            
+            try:
+              self.description = f_summary.read().strip()
+            except:
+              xbmc.log("non-utf8 characters in file " + os.path.join(self.path, "summary.vdr"), xbmc.LOGERROR)
             f_summary.close()
 # exists
 
@@ -161,6 +170,18 @@ class VdrRecordingFolder:
     for streamInfoLine in self.streamInfo:
       if(streamInfoLine[0] != "video"):
         li.addStreamInfo(streamInfoLine[0], streamInfoLine[1])
+
+
+    dict_art = {}
+    poster_path = os.path.join(self.path, "poster.jpg")
+    if xbmcvfs.exists(poster_path):
+      dict_art['poster'] = poster_path
+    fanart_path = os.path.join(self.path, "fanart.jpg")
+    if xbmcvfs.exists(fanart_path):
+      dict_art['fanart'] = fanart_path
+
+    li.setArt(dict_art)
+#   li.setArt({ 'poster': poster_path, 'fanart': fanart_path})
 
 #    kf = kfolder.kFolder(self.path)
 #    img = kf.getStrmFileName()
@@ -279,7 +300,11 @@ class VdrRecordingFolder:
       xbmc.log("marks don't exist, path: " + str(self.path), xbmc.LOGINFO)        
     else:
 # exists
-        marks_content = f_marks.read()
+        try:
+          marks_content = f_marks.read()
+        except:
+          xbmc.log("non-utf8 characters in file " + marksFile, xbmc.LOGERROR)
+          marks_content = ""
         f_marks.close()
 #       xbmc.log("marks_content: " + str(marks_content), xbmc.LOGERROR)
         for marks_line in marks_content.splitlines():
