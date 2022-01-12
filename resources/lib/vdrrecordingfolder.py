@@ -176,6 +176,7 @@ class VdrRecordingFolder:
     poster_path = os.path.join(self.path, "poster.jpg")
     if xbmcvfs.exists(poster_path):
       dict_art['poster'] = poster_path
+      dict_art['thumb'] = poster_path
     fanart_path = os.path.join(self.path, "fanart.jpg")
     if xbmcvfs.exists(fanart_path):
       dict_art['fanart'] = fanart_path
