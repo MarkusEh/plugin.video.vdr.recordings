@@ -19,7 +19,36 @@ class kFolder:
   def __init__(self, folder):
     self.path = folder
     self.fileRead = False
+    self.scraperFileRead = False
     self.rootFolder = None
+
+  def readScrapperFiles(self):
+    self.readKodiFile()
+    self.readTvscrapperFile()
+
+  def readTvscrapperFile(self):
+    if self.scraperFileRead == True: return
+    self.scraperFileRead = True
+    self.tvscrapperData = {}
+    j_filename = os.path.join(self.path, "tvscrapper.json")
+    if not xbmcvfs.exists(j_filename): return
+    with xbmcvfs.File(j_filename, "r") as j_file:
+      try:
+        j_string = j_file.read()
+      except:
+        xbmc.log("non-utf8 characters in file " + j_filename, xbmc.LOGERROR)
+        return
+      try:
+        data = json.loads(j_string)
+      except:
+        xbmc.log("ERROR parsing json file " + j_filename, xbmc.LOGERROR)
+        return
+      keys0 = list(data.keys() )
+      source = ''
+      if 'thetvdb' in keys0: source = 'thetvdb'
+      if 'themoviedb' in keys0: source = 'themoviedb'
+      if source == '' : return
+      self.tvscrapperData = data[source]
 
   def readKodiFile(self):
     if self.fileRead == True:
@@ -29,14 +58,18 @@ class kFolder:
     kodiFileName = os.path.join(self.path, "kodi")
     if xbmcvfs.exists(kodiFileName):
       try:
-#       f_kodi = open(kodiFileName, "r")
-        f_kodi = xbmcvfs.File(kodiFileName, "r")
+        f_kodi = xbmcvfs.File(kodiFileName, "rb")
       except IOError:
         xbmc.log("Cannot open for read: " + str(kodiFileName), xbmc.LOGERROR)
         pass
       else:
 # exists
-        kodi_content = f_kodi.read()
+        try:
+          kodi_content = f_kodi.read()
+        except:
+          xbmc.log("non-utf8 characters in file " + kodiFileName, xbmc.LOGERROR)
+          kodi_content = ""
+
         f_kodi.close()
         for kodi_line in kodi_content.splitlines():
           try:
@@ -59,9 +92,14 @@ class kFolder:
         f_kodi.close()
   
   def getContentType(self, default = constants.MOVIES):
-# default, if we can't figure out anything else
-    self.readKodiFile()
-    return self.kodiLines.get('C', default)
+    self.readScrapperFiles()
+    r = self.kodiLines.get('C')
+    if r != None: return r
+    r = self.tvscrapperData.get('type')
+    if r == 'movie': return constants.MOVIES
+    if r == 'tv show': return constants.TV_SHOWS
+
+    return default
 
   def setContentType(self, contentType):
     self.readKodiFile()
@@ -69,8 +107,12 @@ class kFolder:
     self.writeKodiFile()
 
   def getEpisode(self, default):
-    self.readKodiFile()
-    return int(self.kodiLines.get('E', default))
+    self.readScrapperFiles()
+    r = self.kodiLines.get('E')
+    if r != None: return int(r)
+    r = self.tvscrapperData.get('episode_number')
+    if r == None: return default
+    return r
 
   def setEpisode(self, Episode):
     self.readKodiFile()
@@ -78,8 +120,12 @@ class kFolder:
     self.writeKodiFile()
 
   def getSeason(self, default):
-    self.readKodiFile()
-    return int(self.kodiLines.get('S', default))
+    self.readScrapperFiles()
+    r = self.kodiLines.get('S')
+    if r != None: return int(r)
+    r = self.tvscrapperData.get('season_number')
+    if r == None: return default
+    return r
 
   def setSeason(self, Season):
     self.readKodiFile()
@@ -87,8 +133,15 @@ class kFolder:
     self.writeKodiFile()
 
   def getYear(self):
-    self.readKodiFile()
-    return int(self.kodiLines.get('Y', -1))
+    self.readScrapperFiles()
+    r = self.kodiLines.get('Y')
+    if r != None:
+      if not r.isdigit(): xbmc.log("kfolder, file kodi, year not integer, year = " + str(r) + " path " + self.path, xbmc.LOGERROR)
+    if r != None: return int(r)
+    r = self.tvscrapperData.get('year')
+    if r == None: return -1
+    if type(r) != int: xbmc.log("kfolder, year not integer, year = " + str(r) + " path " + self.path, xbmc.LOGERROR)
+    return r
 
   def setYear(self, Year):
     self.readKodiFile()
@@ -217,6 +270,7 @@ class kFolder:
                 se = 'S' + str(season).zfill(2) + 'E' + str(episode).zfill(2)
                 vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
                 if addon_handle == -10:
+                    vdrRecordingFolder.updateComskip()
                     vdrRecordingFolder.addRecordingToLibrary(libPath)
                 elif addon_handle >= 0:
 # add context menu
@@ -247,6 +301,7 @@ class kFolder:
                 if year > 0:
                    vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
                 if addon_handle == -10:
+                    vdrRecordingFolder.updateComskip()                 
                     vdrRecordingFolder.addRecordingToLibrary(libPath)
                 elif addon_handle >= 0:
                   commands = []

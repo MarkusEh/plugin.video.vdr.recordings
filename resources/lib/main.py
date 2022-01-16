@@ -13,7 +13,6 @@ import xbmcaddon
 import constants
 
 from vdrrecordingfolder import VdrRecordingFolder
-from bookmarks import bookmarks
 import kfolder
 
     

@@ -12,7 +12,6 @@ import xbmcvfs
 from array import array
 import time
 import datetime
-from bookmarks import bookmarks
 import xbmcplugin
 import kfolder
 import constants
@@ -49,7 +48,6 @@ class VdrRecordingFolder:
     self.indexInitialized = False
     self.newResumeFormat = True
     self.initializeInfo()
-    self.oBookmarks = bookmarks()
     self.contentType = None
 
   def initializeInfo(self):
@@ -279,7 +277,6 @@ class VdrRecordingFolder:
 #    if self.ts_f != [] and self.contentType != None:
 #        nfoFileName = os.path.splitext(self.ts_f[-1])[0] + '.nfo'
 #        self.writeNfoFile(nfoFileName)
-    if self.duration != 0: self.marksToBookmarks(url, self.duration)
     self.updateComskip()
     li.addContextMenuItems( commands )    
     xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
@@ -353,6 +350,11 @@ class VdrRecordingFolder:
     if self.ts_l == []: return
     self.getTsFiles()
 
+    if len(self.ts_f) != len(self.ts_l):
+      xbmc.log("ERROR updateComskip, len(self.ts_f) = " + str(len(self.ts_f)) + " len(self.ts_l) " + str(len(self.ts_l)) + " path = " + self.path, xbmc.LOGERROR)
+      return
+
+
     lengthOfPreviousFiles = 0
     iIndex = 0
     for ts_file in self.ts_f:
@@ -384,25 +386,6 @@ class VdrRecordingFolder:
         f_com.close()
       lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
       iIndex = iIndex +1
-
-  def marksToBookmarks(self, url, totalTimeInSeconds):
-    fileId = self.oBookmarks.getFileId(url)
-    if fileId == -2:
-# database format not supported      
-      return
-    if fileId == -1:
-      self.oBookmarks.insertFile(url)
-#     xbmc.log("file inserted: " + str(url), xbmc.LOGERROR)   
-      fileId = self.oBookmarks.getFileId(url)
-      if fileId == -1:      
-        xbmc.log("Error, file Id still -1: " + str(url), xbmc.LOGERROR)   
-        return
-    bm = self.oBookmarks.getBookmarksFromFileId(fileId)
-#   xbmc.log("bm: " + str(bm), xbmc.LOGERROR)
-    if len(bm) == 0:
-# read marks, and add
-      self.getMarks()
-      self.oBookmarks.insertBookmarks(fileId, self.marks, totalTimeInSeconds)
 
   def addRecordingToLibrary(self, libraryPath):
       if not xbmcvfs.exists(libraryPath):
