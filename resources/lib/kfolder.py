@@ -6,6 +6,7 @@
 import os
 import string
 import urllib
+import json
 import xbmc
 import xbmcplugin
 import xbmcaddon
@@ -47,7 +48,9 @@ class kFolder:
       source = ''
       if 'thetvdb' in keys0: source = 'thetvdb'
       if 'themoviedb' in keys0: source = 'themoviedb'
-      if source == '' : return
+      if source == '' :
+        xbmc.log("ERROR readTvscrapperFile, source == '', file = " + j_filename, xbmc.LOGERROR)
+        return
       self.tvscrapperData = data[source]
 
   def readKodiFile(self):
