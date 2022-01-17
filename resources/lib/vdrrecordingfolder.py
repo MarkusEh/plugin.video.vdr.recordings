@@ -388,10 +388,9 @@ class VdrRecordingFolder:
       lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
       iIndex = iIndex +1
 
-  def addRecordingToLibrary(self, libraryPath):
-      if not xbmcvfs.exists(libraryPath):
-            xbmcvfs.mkdirs(libraryPath)
-      sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', self.title)
+  def addRecordingToLibrary(self, libraryPath, filename):
+      if not xbmcvfs.exists(libraryPath): xbmcvfs.mkdirs(libraryPath)
+      sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', filename)
       strmFileName = os.path.join(libraryPath, sanTitle + ".strm")
 #     nfoFileName = os.path.join(libraryPath, sanTitle + ".nfo")
 #     if os.path.isfile(strmFileName): return -1  # file exists

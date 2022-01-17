@@ -143,6 +143,12 @@ class kFolder:
     if type(r) != int: xbmc.log("kfolder, year not integer, year = " + str(r) + " path " + self.path, xbmc.LOGERROR)
     return r
 
+  def getName(self, default):
+    self.readScrapperFiles()
+    r = self.tvscrapperData.get('name')
+    if r == None: return default
+    return r
+
   def setYear(self, Year):
     self.readKodiFile()
     self.kodiLines['Y'] = str(Year)
@@ -271,7 +277,7 @@ class kFolder:
                 vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
                 if addon_handle == -10:
                     vdrRecordingFolder.updateComskip()
-                    vdrRecordingFolder.addRecordingToLibrary(libPath)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.subtitle+ ' ' + se)
                 elif addon_handle >= 0:
 # add context menu
                     commands = []
@@ -286,7 +292,7 @@ class kFolder:
             if addon_handle == -10:          
                 libPath = self.getLibPath(contentType, rootFolder)
                 for vdrRecordingFolder in recordingsList:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title)
             elif addon_handle >= 0:
               for vdrRecordingFolder in recordingsList:
                 commands = []
@@ -297,13 +303,18 @@ class kFolder:
         else:
             libPath = self.getLibPath(contentType, rootFolder)          
             for vdrRecordingFolder in recordingsList:
-                year = vdrRecordingFolder.getYear()
-                if year > 0:
-                   vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
+                kf = kFolder(vdrRecordingFolder.path)
+                year = kf.getYear()
+                if year <= 0: year = vdrRecordingFolder.getYear()
                 if addon_handle == -10:
-                    vdrRecordingFolder.updateComskip()                 
-                    vdrRecordingFolder.addRecordingToLibrary(libPath)
+                    vdrRecordingFolder.updateComskip()
+                    filename =  kf.getName(vdrRecordingFolder.title)
+                    if year > 0:
+                       filename = filename + ' (' + str(year) + ')'
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title)
                 elif addon_handle >= 0:
+                  if year > 0:
+                     vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
                   commands = []
                   addContextMenuCommand(commands, "Set year", constants.YEAR, vdrRecordingFolder.path, str(year))
                   addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
@@ -343,12 +354,11 @@ class kFolder:
                                     listitem=li, isFolder=True)
 # finalize UI
         if addon_handle >= 0: 
-            if onlySameTitle:
-              xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
-            else:
-              xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
-        
-              xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
+#           if onlySameTitle:
+#             xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
+#           else:
+            xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
+            xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
             xbmcplugin.endOfDirectory(addon_handle)
 
   def getLibPath(self, contentType, baseFolderVDR):
