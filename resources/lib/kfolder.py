@@ -250,10 +250,10 @@ class kFolder:
           if subfolder:
              subfolderList.append([path, rec_name])
 
+        totalItems = len(recordingsList) + len(subfolderList)
         if onlySameTitle and len(recordingsList) > 1:
 #           xbmc.log("onlySameTitle: " + str(self.path), xbmc.LOGERROR)            
             contentType = self.getContentType(constants.TV_SHOWS)
-#           xbmc.log("contentType: " + str(contentType), xbmc.LOGERROR)            
         else:
             contentType = self.getContentType(constants.MOVIES)
 
@@ -289,8 +289,7 @@ class kFolder:
                     addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
                     addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
                     addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
-                    vdrRecordingFolder.contentType = contentType
-                    vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
+                    vdrRecordingFolder.addDirectoryItem(addon_handle, commands, totalItems)
         elif contentType == constants.MUSIC_VIDEOS:
             if addon_handle == -10:          
                 libPath = self.getLibPath(contentType, rootFolder)
@@ -301,8 +300,7 @@ class kFolder:
                 commands = []
                 addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
                 addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
-                vdrRecordingFolder.contentType = contentType
-                vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
+                vdrRecordingFolder.addDirectoryItem(addon_handle, commands, totalItems)
         else:
             libPath = self.getLibPath(contentType, rootFolder)          
             for vdrRecordingFolder in recordingsList:
@@ -314,7 +312,7 @@ class kFolder:
                     filename =  kf.getName(vdrRecordingFolder.title)
                     if year > 0:
                        filename = filename + ' (' + str(year) + ')'
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename)
                 elif addon_handle >= 0:
                   if year > 0:
                      vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
@@ -323,8 +321,7 @@ class kFolder:
                   addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
                   addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
                   addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
-                  vdrRecordingFolder.contentType = contentType
-                  vdrRecordingFolder.addDirectoryItem(addon_handle, commands)
+                  vdrRecordingFolder.addDirectoryItem(addon_handle, commands, totalItems)
 
         
 # subfolders
@@ -354,12 +351,9 @@ class kFolder:
             li.addContextMenuItems( commands )
            
             xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
-                                    listitem=li, isFolder=True)
+                                    listitem=li, isFolder=True, totalItems = totalItems)
 # finalize UI
         if addon_handle >= 0: 
-#           if onlySameTitle:
-#             xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
-#           else:
             xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
             xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
             xbmcplugin.endOfDirectory(addon_handle)
@@ -386,10 +380,6 @@ def addContextMenuCommand(commands, name, mode, url, arg3 = ''):
           runner = "RunScript(" + str(script)+ ", " + str(mode) + ", \"" + str(url) + "\", \"" + str(arg3) + "\")"
 #       xbmc.log("runner=" + str(runner), xbmc.LOGERROR)
         commands.append(( str(name), runner, ))
-
-def get_immediate_subdirectories(a_dir):
-    dirs, files = xbmcvfs.listdir(a_dir)
-    return dirs
 
 def build_url(base_url, query):
         return base_url + '?' + urllib.parse.urlencode(query)
