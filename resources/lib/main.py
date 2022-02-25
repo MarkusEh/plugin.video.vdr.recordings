@@ -48,7 +48,7 @@ class main:
     def modeFolder(self):
         currentFolder = self.args.get('currentFolder', [self.rootFolder])[0]
         kf = kfolder.kFolder(currentFolder)
-        kf.parseFolder(self.addon_handle, self.base_url, self.rootFolder)
+        kf.parseFolder(self.addon_handle, self.base_url, self.rootFolder, {})
 # Add special (search) folder
 #        url = self.build_url({'mode': 'search', 'currentFolder': currentFolder})
 #        li = xbmcgui.ListItem(" search", iconImage = 'DefaultFolder.png')

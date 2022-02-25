@@ -4,6 +4,7 @@
 # Disable import error: E0401
 
 import os
+import sys
 import string
 import re
 import xbmcgui
@@ -13,6 +14,7 @@ from array import array
 import time
 import datetime
 import xbmcplugin
+import json
 import kfolder
 import constants
 
@@ -244,16 +246,33 @@ class VdrRecordingFolder:
       lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
       iIndex = iIndex +1
 
-  def addRecordingToLibrary(self, libraryPath, filename):
+  def addRecordingToLibrary(self, libraryPath, filename, old_files):
       if not xbmcvfs.exists(libraryPath): xbmcvfs.mkdirs(libraryPath)
       sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', filename)
-      strmFileName = os.path.join(libraryPath, sanTitle + ".strm")
-      with xbmcvfs.File(strmFileName, "w") as f_strm:
-        try:
-          f_strm.write(self.getStackUrl())
-        except:
-          xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
-          return -1
+      if sys.platform.startswith('linux') and len(self.getTsFiles() ) == 1:
+        ext = os.path.splitext(self.getTsFiles()[0])[1]
+        i = 1
+        strmFileName = os.path.join(libraryPath, sanTitle + ext)
+        edlFileName = os.path.join(libraryPath, sanTitle + ".edl")
+        while xbmcvfs.exists(strmFileName):
+          i = i + 1
+          strmFileName = os.path.join(libraryPath, sanTitle + str(i) + ext)
+          edlFileName = os.path.join(libraryPath, sanTitle + str(i) + ".edl")
+        os.symlink(self.getTsFiles()[0], strmFileName)
+        os.symlink(os.path.splitext(self.getTsFiles()[0])[0] + ".edl", edlFileName)
+      else:
+        strmFileName = os.path.join(libraryPath, sanTitle + ".strm")
+        with xbmcvfs.File(strmFileName, "w") as f_strm:
+          try:
+            f_strm.write(self.getStackUrl())
+          except:
+            xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
+            return -1
+      if strmFileName not in old_files:
+        jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.scan', 'params': {'directory': strmFileName}, 'id': 45}
+        xbmc.executeJSONRPC(json.dumps(jsonCommand))
+
+
 
   def getYear(self):
     year = kfolder.kFolder(self.path).getYear()

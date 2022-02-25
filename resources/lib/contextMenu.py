@@ -12,6 +12,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcvfs
+import json
 import kfolder
 import vdrrecordingfolder
 import constants
@@ -35,6 +36,15 @@ def recursive_delete_dir(fullpath):
     success = xbmcvfs.rmdir(fullpath)
     return success 
 
+def recursive_add_files(fullpath, files_dict):
+    '''helper to recursively add all files in directory'''
+    dirs, files = xbmcvfs.listdir(fullpath)
+    for file in files:
+        files_dict[os.path.join(fullpath, file)] = True
+    for directory in dirs:
+        recursive_add_files(os.path.join(fullpath, directory), files_dict)
+    return
+
 
 def getRootFolder():
     rootFolder = xbmcaddon.Addon('plugin.video.vdr.recordings').getSetting("rootFolder")
@@ -50,6 +60,10 @@ mode = sys.argv[1]
 if mode == constants.ADDALLTOLIBRARY:
     rootFolder = sys.argv[2]
 #   xbmc.log("rootFolder=" + str(rootFolder), xbmc.LOGERROR)
+    old_files = {}
+    recursive_add_files(constants.LIBRARY_MOVIES, old_files)
+    recursive_add_files(constants.LIBRARY_TV_SHOWS, old_files)
+    recursive_add_files(constants.LIBRARY_MUSIC_VIDEOS, old_files)
     try: recursive_delete_dir(constants.LIBRARY_MOVIES)
     except: pass
     try: recursive_delete_dir(constants.LIBRARY_TV_SHOWS)
@@ -59,7 +73,16 @@ if mode == constants.ADDALLTOLIBRARY:
     xbmcvfs.mkdirs(constants.LIBRARY_MOVIES)
     xbmcvfs.mkdirs(constants.LIBRARY_TV_SHOWS)
     xbmcvfs.mkdirs(constants.LIBRARY_MUSIC_VIDEOS)
-    kfolder.kFolder(rootFolder).parseFolder(-10, '', rootFolder)
+    kfolder.kFolder(rootFolder).parseFolder(-10, '', rootFolder, old_files)
+    jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'id': 44}
+    xbmc.executeJSONRPC(json.dumps(jsonCommand))
+#    jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Scan', 'id': 44}
+#    xbmc.executeJSONRPC(json.dumps(jsonCommand))
+# curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"JSONRPC.Introspect"}' > ~/doc.json
+# curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.scan","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
+
+
+
   
 if mode == constants.TV_SHOWS:
     recordingFolderPath = sys.argv[2]
