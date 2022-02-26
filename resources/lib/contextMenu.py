@@ -60,10 +60,12 @@ mode = sys.argv[1]
 if mode == constants.ADDALLTOLIBRARY:
     rootFolder = sys.argv[2]
 #   xbmc.log("rootFolder=" + str(rootFolder), xbmc.LOGERROR)
+# create list of old files
     old_files = {}
     recursive_add_files(constants.LIBRARY_MOVIES, old_files)
     recursive_add_files(constants.LIBRARY_TV_SHOWS, old_files)
     recursive_add_files(constants.LIBRARY_MUSIC_VIDEOS, old_files)
+# delete old files
     try: recursive_delete_dir(constants.LIBRARY_MOVIES)
     except: pass
     try: recursive_delete_dir(constants.LIBRARY_TV_SHOWS)
@@ -73,13 +75,23 @@ if mode == constants.ADDALLTOLIBRARY:
     xbmcvfs.mkdirs(constants.LIBRARY_MOVIES)
     xbmcvfs.mkdirs(constants.LIBRARY_TV_SHOWS)
     xbmcvfs.mkdirs(constants.LIBRARY_MUSIC_VIDEOS)
+# add current (new) files
     kfolder.kFolder(rootFolder).parseFolder(-10, '', rootFolder, old_files)
-    jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'id': 44}
-    xbmc.executeJSONRPC(json.dumps(jsonCommand))
-#    jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Scan', 'id': 44}
+# create list of new files
+    new_files = {}
+    recursive_add_files(constants.LIBRARY_MOVIES, new_files)
+    recursive_add_files(constants.LIBRARY_TV_SHOWS, new_files)
+    recursive_add_files(constants.LIBRARY_MUSIC_VIDEOS, new_files)
+# compare list of old files with lest of new filse, clean up library for files which do no longer exist
+    for file in old_files.keys() - new_files.keys():
+# files do no longer exist -> lean up library
+      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'params':{'directory':file, 'showdialogs':False}, 'id': 44}
+      xbmc.executeJSONRPC(json.dumps(jsonCommand))
+#    jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'id': 44}
 #    xbmc.executeJSONRPC(json.dumps(jsonCommand))
 # curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"JSONRPC.Introspect"}' > ~/doc.json
-# curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.scan","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
+# curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.Scan","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
+# curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.Clean","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
 
 
 

@@ -247,6 +247,7 @@ class VdrRecordingFolder:
       iIndex = iIndex +1
 
   def addRecordingToLibrary(self, libraryPath, filename, old_files):
+      self.updateComskip()
       if not xbmcvfs.exists(libraryPath): xbmcvfs.mkdirs(libraryPath)
       sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', filename)
       if sys.platform.startswith('linux') and len(self.getTsFiles() ) == 1:
@@ -269,7 +270,7 @@ class VdrRecordingFolder:
             xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
             return -1
       if strmFileName not in old_files:
-        jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.scan', 'params': {'directory': strmFileName}, 'id': 45}
+        jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Scan', 'params': {'directory': strmFileName, 'showdialogs':False}, 'id': 45}
         xbmc.executeJSONRPC(json.dumps(jsonCommand))
 
 
