@@ -246,33 +246,38 @@ class VdrRecordingFolder:
       lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
       iIndex = iIndex +1
 
-  def addRecordingToLibrary(self, libraryPath, filename, old_files):
+  def addRecordingToLibrary(self, libraryPath, filename, current_files):
+      if len(self.getTsFiles() ) == 0: return
       self.updateComskip()
       if not xbmcvfs.exists(libraryPath): xbmcvfs.mkdirs(libraryPath)
       sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', filename)
-      if sys.platform.startswith('linux') and len(self.getTsFiles() ) == 1:
-        ext = os.path.splitext(self.getTsFiles()[0])[1]
-        i = 1
-        strmFileName = os.path.join(libraryPath, sanTitle + ext)
-        edlFileName = os.path.join(libraryPath, sanTitle + ".edl")
-        while xbmcvfs.exists(strmFileName):
+      base_name = os.path.join(libraryPath, sanTitle)
+      i = 1
+      if sys.platform.startswith('linux') and len(self.getTsFiles() ) == 1 and self.getTsFiles()[0].startswith('/'):
+        basename, ext = os.path.splitext(self.getTsFiles()[0])
+        strmFileName = base_name + ext
+        edlFileName  = base_name + ".edl"
+        while strmFileName in current_files:
           i = i + 1
-          strmFileName = os.path.join(libraryPath, sanTitle + str(i) + ext)
-          edlFileName = os.path.join(libraryPath, sanTitle + str(i) + ".edl")
+          strmFileName = base_name + str(i) + ext
+          edlFileName  = base_name + str(i) + ".edl"
+        xbmcvfs.delete(strmFileName)
+        xbmcvfs.delete( edlFileName)
         os.symlink(self.getTsFiles()[0], strmFileName)
-        os.symlink(os.path.splitext(self.getTsFiles()[0])[0] + ".edl", edlFileName)
+        os.symlink(basename + ".edl", edlFileName)
       else:
-        strmFileName = os.path.join(libraryPath, sanTitle + ".strm")
+        strmFileName = base_name + ".strm"
+        while strmFileName in current_files:
+          i = i + 1
+          strmFileName = base_name + str(i) + ".strm"
+        xbmcvfs.delete(strmFileName)
         with xbmcvfs.File(strmFileName, "w") as f_strm:
           try:
             f_strm.write(self.getStackUrl())
           except:
             xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
             return -1
-      if strmFileName not in old_files:
-        jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Scan', 'params': {'directory': strmFileName, 'showdialogs':False}, 'id': 45}
-        xbmc.executeJSONRPC(json.dumps(jsonCommand))
-
+      current_files[strmFileName] = True
 
 
   def getYear(self):

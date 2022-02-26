@@ -225,7 +225,7 @@ class kFolder:
     return None
 
 
-  def parseFolder(self, addon_handle, base_url, rootFolder, old_files):
+  def parseFolder(self, addon_handle, base_url, rootFolder, current_files):
         onlySameTitle = True
         firstTitle = None
         recordingsList = []
@@ -279,8 +279,7 @@ class kFolder:
                 se = 'S' + str(season).zfill(2) + 'E' + str(episode).zfill(2)
                 vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
                 if addon_handle == -10:
-                    vdrRecordingFolder.updateComskip()
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.subtitle+ ' ' + se, old_files)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.subtitle+ ' ' + se, current_files)
                 elif addon_handle >= 0:
 # add context menu
                     commands = []
@@ -294,7 +293,7 @@ class kFolder:
             if addon_handle == -10:          
                 libPath = self.getLibPath(contentType, rootFolder)
                 for vdrRecordingFolder in recordingsList:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title, old_files)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title, current_files)
             elif addon_handle >= 0:
               for vdrRecordingFolder in recordingsList:
                 commands = []
@@ -308,11 +307,12 @@ class kFolder:
                 year = kf.getYear()
                 if year <= 0: year = vdrRecordingFolder.getYear()
                 if addon_handle == -10:
-                    vdrRecordingFolder.updateComskip()
-                    filename =  kf.getName(vdrRecordingFolder.title)
+#                   filename =  kf.getName(vdrRecordingFolder.title)
+#                   filename =  os.path.split(os.path.split(vdrRecordingFolder.path)[0])[1].replace('_', ' ').strip()
+                    filename =  vdrRecordingFolder.title
                     if year > 0:
                        filename = filename + ' (' + str(year) + ')'
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, old_files)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files)
                 elif addon_handle >= 0:
                   if year > 0:
                      vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
@@ -332,7 +332,7 @@ class kFolder:
 #               xbmc.log("subFolders= " + str(subFolders), xbmc.LOGERROR)
           else:   
             for pathN in subfolderList:
-              kFolder(pathN[0]).parseFolder(addon_handle, base_url, rootFolder, old_files)
+              kFolder(pathN[0]).parseFolder(addon_handle, base_url, rootFolder, current_files)
         else:
           for pathN in subfolderList:
             url = build_url(base_url, {'mode': 'folder', 'currentFolder': pathN[0]})

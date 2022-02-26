@@ -8,6 +8,7 @@ import subprocess
 import os
 import shutil
 import urllib
+import time
 import xbmc
 import xbmcaddon
 import xbmcgui
@@ -39,12 +40,24 @@ def recursive_delete_dir(fullpath):
 def recursive_add_files(fullpath, files_dict):
     '''helper to recursively add all files in directory'''
     dirs, files = xbmcvfs.listdir(fullpath)
+#   if len(dirs) == 0 and len(files) > 0: files_dict[fullpath] = True
     for file in files:
         files_dict[os.path.join(fullpath, file)] = True
     for directory in dirs:
         recursive_add_files(os.path.join(fullpath, directory), files_dict)
     return
 
+def waitForScan():
+  jsonCommand = {'jsonrpc': '2.0', 'method': 'XBMC.GetInfoBooleans', 'params': {"booleans":["Library.IsScanningVideo"]}, 'id': 33}
+  while True:
+    result = xbmc.executeJSONRPC(json.dumps(jsonCommand))
+    jresult = json.loads(result)
+    if "error" in jresult or "result" not in jresult:
+       xbmc.log("Error waiting for scan, error = " + str(result), xbmc.LOGERROR)
+       return
+    bresult = jresult["result"]["Library.IsScanningVideo"]
+    if not bresult: return
+    time.sleep (1)
 
 def getRootFolder():
     rootFolder = xbmcaddon.Addon('plugin.video.vdr.recordings').getSetting("rootFolder")
@@ -65,30 +78,38 @@ if mode == constants.ADDALLTOLIBRARY:
     recursive_add_files(constants.LIBRARY_MOVIES, old_files)
     recursive_add_files(constants.LIBRARY_TV_SHOWS, old_files)
     recursive_add_files(constants.LIBRARY_MUSIC_VIDEOS, old_files)
-# delete old files
-    try: recursive_delete_dir(constants.LIBRARY_MOVIES)
-    except: pass
-    try: recursive_delete_dir(constants.LIBRARY_TV_SHOWS)
-    except: pass
-    try: recursive_delete_dir(constants.LIBRARY_MUSIC_VIDEOS)
-    except: pass
+# make directories (if required)
     xbmcvfs.mkdirs(constants.LIBRARY_MOVIES)
     xbmcvfs.mkdirs(constants.LIBRARY_TV_SHOWS)
     xbmcvfs.mkdirs(constants.LIBRARY_MUSIC_VIDEOS)
 # add current (new) files
-    kfolder.kFolder(rootFolder).parseFolder(-10, '', rootFolder, old_files)
-# create list of new files
     new_files = {}
-    recursive_add_files(constants.LIBRARY_MOVIES, new_files)
-    recursive_add_files(constants.LIBRARY_TV_SHOWS, new_files)
-    recursive_add_files(constants.LIBRARY_MUSIC_VIDEOS, new_files)
-# compare list of old files with lest of new filse, clean up library for files which do no longer exist
+    kfolder.kFolder(rootFolder).parseFolder(-10, '', rootFolder, new_files)
+# compare list of old files with lest of new files, clean up library for files which do no longer exist
+    i = 1
     for file in old_files.keys() - new_files.keys():
-# files do no longer exist -> lean up library
-      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'params':{'directory':file, 'showdialogs':False}, 'id': 44}
+# files do no longer exist -> delete and clean up library
+      xbmcvfs.delete(file)
+      file_base, ext = os.path.splitext(file)
+      if ext != ".strm": xbmcvfs.delete(file_base + ".edl")
+      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'params':{'directory':file, 'showdialogs':False}, 'id': i}
+      i = i + 1
       xbmc.executeJSONRPC(json.dumps(jsonCommand))
-#    jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'id': 44}
-#    xbmc.executeJSONRPC(json.dumps(jsonCommand))
+      waitForScan()
+# we cannot scrap / scan files. Create a list of dirs (don't scan the same dir 2 times ...)
+    dirs = {}
+    for file in new_files.keys() - old_files.keys():
+      dirs[os.path.dirname(file)] = True
+    i = 1
+    for dir in dirs.keys():
+# new files -> update library
+      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Scan', 'params': {'directory': dir, 'showdialogs':False}, 'id': i}
+      result = xbmc.executeJSONRPC(json.dumps(jsonCommand))
+      xbmc.log("VideoLibrary.Scan, dir = " + str(dir) + " i = " + str(i) + " result = " + str(result), xbmc.LOGERROR)
+      waitForScan()
+      i = i + 1
+
+# {"jsonrpc": "2.0", "method": "JSONRPC.SetConfiguration", "params": {"Configuration.Notifications": { "PVR": true, "Player": true }}, "id": 1}
 # curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"JSONRPC.Introspect"}' > ~/doc.json
 # curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.Scan","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
 # curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.Clean","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
