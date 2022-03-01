@@ -73,6 +73,7 @@ mode = sys.argv[1]
 
 if mode == constants.ADDALLTOLIBRARY:
     rootFolder = sys.argv[2]
+    base_url   = sys.argv[3]
 #   xbmc.log("rootFolder=" + str(rootFolder), xbmc.LOGERROR)
 # create list of old files
     old_files = {}
@@ -85,7 +86,7 @@ if mode == constants.ADDALLTOLIBRARY:
     xbmcvfs.mkdirs(constants.LIBRARY_MUSIC_VIDEOS)
 # add current (new) files
     new_files = {}
-    kfolder.kFolder(rootFolder).parseFolder(-10, '', rootFolder, new_files)
+    kfolder.kFolder(rootFolder).parseFolder(-10, base_url, rootFolder, new_files)
 # compare list of old files with list of new files, clean up library for files which do no longer exist
     dirs_with_deleted_items = {}
     for file in old_files.keys() - new_files.keys():

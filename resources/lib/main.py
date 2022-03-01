@@ -100,3 +100,7 @@ class main:
 #           xbmc.log("searchString " + str(searchStringx), xbmc.LOGERROR)
             self.doSearch(searchStringx)
 
+    def modePlay(self):
+        recordingFolder = self.args.get('recordingFolder', [self.rootFolder])[0]
+        rf = VdrRecordingFolder(recordingFolder)
+        rf.play()

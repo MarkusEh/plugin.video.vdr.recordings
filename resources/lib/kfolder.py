@@ -266,7 +266,7 @@ class kFolder:
             if addon_handle == -10:          
                 libPath = self.getLibPath(contentType, rootFolder)
                 for vdrRecordingFolder in recordingsList:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title, current_files)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title, current_files, base_url)
             elif addon_handle >= 0:
               for vdrRecordingFolder in recordingsList:
                 commands = []
@@ -303,7 +303,7 @@ class kFolder:
                 if addon_handle == -10:
                     filename = vdrRecordingFolder.subtitle 
                     if filename == "": filename =  os.path.split(os.path.split(vdrRecordingFolder.path)[0])[1].replace('_', ' ').strip()
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename + ' ' + se, current_files)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename + ' ' + se, current_files, base_url)
                 elif addon_handle >= 0:
 # add context menu
                     commands = []
@@ -322,7 +322,7 @@ class kFolder:
 #                   filename =  vdrRecordingFolder.title
                     if year > 0:
                        filename = filename + ' (' + str(year) + ')'
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files, base_url)
                 elif addon_handle >= 0:
                   if year > 0:
                      vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
@@ -354,7 +354,7 @@ class kFolder:
             addContextMenuCommand(commands, "Set content: TV shows", constants.TV_SHOWS, pathN[0])
             addContextMenuCommand(commands, "Set content: Music videos", constants.MUSIC_VIDEOS, pathN[0])
             addContextMenuCommand(commands, "Set content: Movies", constants.MOVIES, pathN[0])
-            addContextMenuCommand(commands, "Add all recordings to Library", constants.ADDALLTOLIBRARY, rootFolder)
+            addContextMenuCommand(commands, "Add all recordings to Library", constants.ADDALLTOLIBRARY, rootFolder, base_url)
             addContextMenuCommand(commands, "Move", constants.MOVE, pathN[0])
             addContextMenuCommand(commands, "Search", constants.SEARCH, rootFolder, base_url)
             addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)

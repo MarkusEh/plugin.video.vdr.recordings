@@ -5,6 +5,8 @@
 
 import os
 import sys
+import urllib
+import urllib.parse
 import string
 import re
 import xbmcgui
@@ -159,6 +161,10 @@ class VdrRecordingFolder:
     li.addContextMenuItems( commands )
     xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
                                 listitem=li, isFolder=False, totalItems = totalItems)
+  def play(self):
+    li = self.getListitem()
+    url = self.getStackUrl()
+    xbmc.Player().play(url, li)
 
   def getMarks(self):
 # read marks
@@ -246,7 +252,7 @@ class VdrRecordingFolder:
         lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
         iIndex = iIndex +1
 
-  def addRecordingToLibrary(self, libraryPath, filename, current_files):
+  def addRecordingToLibrary(self, libraryPath, filename, current_files, base_url):
       if len(self.getTsFiles() ) == 0: return
       self.updateComskip()
       if not xbmcvfs.exists(libraryPath): xbmcvfs.mkdirs(libraryPath)
@@ -270,10 +276,12 @@ class VdrRecordingFolder:
         while strmFileName in current_files:
           i = i + 1
           strmFileName = base_name + str(i) + ".strm"
+        plu = base_url + '?' + urllib.parse.urlencode({'mode': 'play', 'recordingFolder': self.path})
         xbmcvfs.delete(strmFileName)
         with xbmcvfs.File(strmFileName, "w") as f_strm:
           try:
-            f_strm.write(self.getStackUrl())
+            f_strm.write(plu)
+#           f_strm.write(self.getStackUrl())
           except:
             xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
             return -1

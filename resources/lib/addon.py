@@ -10,3 +10,6 @@ if oMain.mode == 'folder':
 
 if oMain.mode == 'search':
   oMain.modeSearch()
+
+if oMain.mode == 'play':
+  oMain.modePlay()
