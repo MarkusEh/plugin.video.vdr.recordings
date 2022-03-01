@@ -218,14 +218,13 @@ class VdrRecordingFolder:
 #   for mark in self.marksS:      
 #       xbmc.log("updateComskip, mark: " + str(mark[0]) + " " + str(mark[1]), xbmc.LOGERROR)        
 
-    self.initializeIndex()
-    if self.ts_l == []: return
     self.getTsFiles()
-
-    if len(self.ts_f) != len(self.ts_l):
-      xbmc.log("ERROR updateComskip, len(self.ts_f) = " + str(len(self.ts_f)) + " len(self.ts_l) " + str(len(self.ts_l)) + " path = " + self.path, xbmc.LOGERROR)
-      return
-
+    if len(self.ts_f) == 0: return
+    if len(self.ts_f) >  1:
+      self.initializeIndex()
+      if len(self.ts_f) != len(self.ts_l):
+        xbmc.log("ERROR updateComskip, len(self.ts_f) = " + str(len(self.ts_f)) + " len(self.ts_l) " + str(len(self.ts_l)) + " path = " + self.path, xbmc.LOGERROR)
+        return
 
     lengthOfPreviousFiles = 0
     iIndex = 0
@@ -243,8 +242,9 @@ class VdrRecordingFolder:
                  + '\n')
             except:
               xbmc.log("Error creating commercials file " + os.path.splitext(ts_file)[0] + ".edl", xbmc.LOGERROR)
-      lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
-      iIndex = iIndex +1
+      if len(self.ts_f) >  1:
+        lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
+        iIndex = iIndex +1
 
   def addRecordingToLibrary(self, libraryPath, filename, current_files):
       if len(self.getTsFiles() ) == 0: return
@@ -277,6 +277,7 @@ class VdrRecordingFolder:
           except:
             xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
             return -1
+        os.utime(strmFileName, times=(datetime.datetime.now().timestamp(), self.RecordingTime.timestamp() ))
       current_files[strmFileName] = True
 
 

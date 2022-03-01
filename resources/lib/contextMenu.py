@@ -39,10 +39,11 @@ def recursive_delete_dir(fullpath):
 
 def recursive_add_files(fullpath, files_dict):
     '''helper to recursively add all files in directory'''
+# note: ignore .edl files
     dirs, files = xbmcvfs.listdir(fullpath)
-#   if len(dirs) == 0 and len(files) > 0: files_dict[fullpath] = True
     for file in files:
-        files_dict[os.path.join(fullpath, file)] = True
+        if os.path.splitext(file)[1] != '.edl':
+          files_dict[os.path.join(fullpath, file)] = True
     for directory in dirs:
         recursive_add_files(os.path.join(fullpath, directory), files_dict)
     return
@@ -85,14 +86,17 @@ if mode == constants.ADDALLTOLIBRARY:
 # add current (new) files
     new_files = {}
     kfolder.kFolder(rootFolder).parseFolder(-10, '', rootFolder, new_files)
-# compare list of old files with lest of new files, clean up library for files which do no longer exist
-    i = 1
+# compare list of old files with list of new files, clean up library for files which do no longer exist
+    dirs_with_deleted_items = {}
     for file in old_files.keys() - new_files.keys():
 # files do no longer exist -> delete and clean up library
       xbmcvfs.delete(file)
       file_base, ext = os.path.splitext(file)
       if ext != ".strm": xbmcvfs.delete(file_base + ".edl")
-      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'params':{'directory':file, 'showdialogs':False}, 'id': i}
+      dirs_with_deleted_items[os.path.dirname(file)] = True
+    i = 1
+    for dir in dirs_with_deleted_items.keys():
+      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'params':{'directory':dir, 'showdialogs':False}, 'id': i}
       i = i + 1
       xbmc.executeJSONRPC(json.dumps(jsonCommand))
       waitForScan()

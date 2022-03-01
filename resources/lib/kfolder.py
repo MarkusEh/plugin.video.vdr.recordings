@@ -51,6 +51,10 @@ class kFolder:
       if source == '' :
         xbmc.log("ERROR readTvscrapperFile, source == '', file = " + j_filename, xbmc.LOGERROR)
         return
+# ignore tvscraper data if there is no name
+      r = data[source].get('name')
+      if r == None: return
+      if r == "": return
       self.tvscrapperData = data[source]
 
   def readKodiFile(self):
@@ -258,38 +262,7 @@ class kFolder:
             contentType = self.getContentType(constants.MOVIES)
 
 # Recordings
-        if contentType == constants.TV_SHOWS:
-            if onlySameTitle:
-              TV_show_name = firstTitle
-            else:
-              TV_show_name = os.path.split(self.path)[1].strip()
-            libPath = os.path.join(constants.LIBRARY_TV_SHOWS, TV_show_name)                
-            season = 1
-            episode = 0
-            for vdrRecordingFolder in sorted(recordingsList, key=lambda rec: rec.sortRecordingTimestamp):
-                kf = kFolder(vdrRecordingFolder.path)
-                season_n = kf.getSeason(season)
-                if season_n == season:
-                    episode = episode + 1
-                else:
-                    episode = 1
-                    season = season_n
-                episode = kf.getEpisode(episode)
-
-                se = 'S' + str(season).zfill(2) + 'E' + str(episode).zfill(2)
-                vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
-                if addon_handle == -10:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.subtitle+ ' ' + se, current_files)
-                elif addon_handle >= 0:
-# add context menu
-                    commands = []
-                    addContextMenuCommand(commands, "Set season", constants.SEASON, vdrRecordingFolder.path, str(season))
-                    addContextMenuCommand(commands, "Set episode", constants.EPISODE, vdrRecordingFolder.path, str(episode))
-                    addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
-                    addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
-                    addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
-                    vdrRecordingFolder.addDirectoryItem(addon_handle, commands, totalItems)
-        elif contentType == constants.MUSIC_VIDEOS:
+        if contentType == constants.MUSIC_VIDEOS:
             if addon_handle == -10:          
                 libPath = self.getLibPath(contentType, rootFolder)
                 for vdrRecordingFolder in recordingsList:
@@ -301,15 +274,52 @@ class kFolder:
                 addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
                 vdrRecordingFolder.addDirectoryItem(addon_handle, commands, totalItems)
         else:
-            libPath = self.getLibPath(contentType, rootFolder)          
-            for vdrRecordingFolder in recordingsList:
-                kf = kFolder(vdrRecordingFolder.path)
-                year = kf.getYear()
-                if year <= 0: year = vdrRecordingFolder.getYear()
+            if onlySameTitle:
+              TV_show_name = firstTitle
+            else:
+              TV_show_name = os.path.split(self.path)[1].strip()
+            season = 1
+            episode = 0
+            for vdrRecordingFolder in sorted(recordingsList, key=lambda rec: rec.sortRecordingTimestamp):
+              kf = kFolder(vdrRecordingFolder.path)
+              year = kf.getYear()
+              if year <= 0: year = vdrRecordingFolder.getYear()
+              finalContentType = kf.getContentType(contentType)
+              if finalContentType == constants.TV_SHOWS:
+# TV shows
+                final_TV_show_name = kf.getName(TV_show_name)
+                if year > 0: final_TV_show_name = final_TV_show_name + ' (' + str(year) + ')'
+                libPath = os.path.join(constants.LIBRARY_TV_SHOWS, final_TV_show_name)
+                season_n = kf.getSeason(season)
+                if season_n == season:
+                    episode = episode + 1
+                else:
+                    episode = 1
+                    season = season_n
+                episode = kf.getEpisode(episode)
+
+                se = 'S' + str(season).zfill(2) + 'E' + str(episode).zfill(2)
+                vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
                 if addon_handle == -10:
-#                   filename =  kf.getName(vdrRecordingFolder.title)
+                    filename = vdrRecordingFolder.subtitle 
+                    if filename == "": filename =  os.path.split(os.path.split(vdrRecordingFolder.path)[0])[1].replace('_', ' ').strip()
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename + ' ' + se, current_files)
+                elif addon_handle >= 0:
+# add context menu
+                    commands = []
+                    addContextMenuCommand(commands, "Set season", constants.SEASON, vdrRecordingFolder.path, str(season))
+                    addContextMenuCommand(commands, "Set episode", constants.EPISODE, vdrRecordingFolder.path, str(episode))
+                    addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
+                    addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
+                    addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
+                    vdrRecordingFolder.addDirectoryItem(addon_handle, commands, totalItems)
+              else:
+# Movies
+                libPath = self.getLibPath(finalContentType, rootFolder)          
+                if addon_handle == -10:
+                    filename =  kf.getName(vdrRecordingFolder.title)
 #                   filename =  os.path.split(os.path.split(vdrRecordingFolder.path)[0])[1].replace('_', ' ').strip()
-                    filename =  vdrRecordingFolder.title
+#                   filename =  vdrRecordingFolder.title
                     if year > 0:
                        filename = filename + ' (' + str(year) + ')'
                     vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files)
