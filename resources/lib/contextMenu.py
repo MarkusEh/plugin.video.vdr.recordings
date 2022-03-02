@@ -28,14 +28,22 @@ def GUIEditExportName(name):
 
 def recursive_delete_dir(fullpath):
     '''helper to recursively delete a directory'''
-    success = True
     dirs, files = xbmcvfs.listdir(fullpath)
     for file in files:
-        success = xbmcvfs.delete(os.path.join(fullpath, file))
+        xbmcvfs.delete(os.path.join(fullpath, file))
     for directory in dirs:
-        success = recursive_delete_dir(os.path.join(fullpath, directory))
-    success = xbmcvfs.rmdir(fullpath)
-    return success 
+        recursive_delete_dir(os.path.join(fullpath, directory))
+    xbmcvfs.rmdir(fullpath)
+
+def recursive_delete_empty_dirs(fullpath):
+    '''helper to recursively delete all empty directories'''
+    empty = True
+    dirs, files = xbmcvfs.listdir(fullpath)
+    for directory in dirs:
+        empty = empty and recursive_delete_empty_dirs(os.path.join(fullpath, directory))
+    if not empty or len(files) > 0: return False
+    xbmcvfs.rmdir(fullpath)
+    return True 
 
 def recursive_add_files(fullpath, files_dict):
     '''helper to recursively add all files in directory'''
@@ -87,20 +95,25 @@ if mode == constants.ADDALLTOLIBRARY:
 # add current (new) files
     new_files = {}
     kfolder.kFolder(rootFolder).parseFolder(-10, base_url, rootFolder, new_files)
-# compare list of old files with list of new files, clean up library for files which do no longer exist
+## compare list of old files with list of new files, clean up library for files which do no longer exist
     dirs_with_deleted_items = {}
     for file in old_files.keys() - new_files.keys():
-# files do no longer exist -> delete and clean up library
+# files do no longer exist -> delete
       xbmcvfs.delete(file)
       file_base, ext = os.path.splitext(file)
       if ext != ".strm": xbmcvfs.delete(file_base + ".edl")
       dirs_with_deleted_items[os.path.dirname(file)] = True
+# clean up library
     i = 1
     for dir in dirs_with_deleted_items.keys():
-      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'params':{'directory':dir, 'showdialogs':False}, 'id': i}
-      i = i + 1
-      xbmc.executeJSONRPC(json.dumps(jsonCommand))
       waitForScan()
+      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'params':{'directory':dir, 'showdialogs':False}, 'id': i}
+      xbmc.executeJSONRPC(json.dumps(jsonCommand))
+      i = i + 1
+# delete all empty directries
+    recursive_delete_empty_dirs(constants.LIBRARY_MOVIES)
+    recursive_delete_empty_dirs(constants.LIBRARY_TV_SHOWS)
+    recursive_delete_empty_dirs(constants.LIBRARY_MUSIC_VIDEOS)
 # we cannot scrap / scan files. Create a list of dirs (don't scan the same dir 2 times ...)
     dirs = {}
     for file in new_files.keys() - old_files.keys():
@@ -108,10 +121,10 @@ if mode == constants.ADDALLTOLIBRARY:
     i = 1
     for dir in dirs.keys():
 # new files -> update library
+      waitForScan()
       jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Scan', 'params': {'directory': dir, 'showdialogs':False}, 'id': i}
       result = xbmc.executeJSONRPC(json.dumps(jsonCommand))
       xbmc.log("VideoLibrary.Scan, dir = " + str(dir) + " i = " + str(i) + " result = " + str(result), xbmc.LOGERROR)
-      waitForScan()
       i = i + 1
 
 # {"jsonrpc": "2.0", "method": "JSONRPC.SetConfiguration", "params": {"Configuration.Notifications": { "PVR": true, "Player": true }}, "id": 1}
