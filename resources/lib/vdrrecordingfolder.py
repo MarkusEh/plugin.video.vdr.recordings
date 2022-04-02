@@ -162,9 +162,21 @@ class VdrRecordingFolder:
     xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
                                 listitem=li, isFolder=False, totalItems = totalItems)
   def play(self):
-    li = self.getListitem()
     url = self.getStackUrl()
-    xbmc.Player().play(url, li)
+    li = xbmcgui.ListItem()
+    li.setProperty('IsPlayable', 'true')
+    li.setPath(url)
+    xbmcplugin.setResolvedUrl(int(sys.argv[ 1 ]),True,li)
+#    rt = li.getProperty('ResumeTime')
+#    xbmc.log("play, resume position " + str(rt) + " url " + str(url), xbmc.LOGERROR)
+# note: resume position is alway 0.0000
+# see https://forum.kodi.tv/showthread.php?tid=358049
+# if resume:
+#    item.setProperty('totaltime', '1')
+#else:
+#    item.setProperty('StartPercent', '0')
+#
+#    xbmc.Player().play(url, li) : only works if there is no resume position
 
   def getMarks(self):
 # read marks
@@ -235,58 +247,87 @@ class VdrRecordingFolder:
     lengthOfPreviousFiles = 0
     iIndex = 0
     for ts_file in self.ts_f:
-      with xbmcvfs.File((os.path.splitext(ts_file)[0] + ".edl"), "w") as f_com:
-        for mark in self.marksS:
-            mark0 = mark[0] - lengthOfPreviousFiles
-            mark1 = mark[1] - lengthOfPreviousFiles
-            if mark1 <= 0.1: continue
-            if mark0 < 0.1: mark0 = 0.1
-            try:
-              f_com.write(str(mark0).ljust(7)
-                 + "     "
-                 + str(mark1).ljust(7) + "     3" 
-                 + '\n')
-            except:
-              xbmc.log("Error creating commercials file " + os.path.splitext(ts_file)[0] + ".edl", xbmc.LOGERROR)
+      if len(self.ts_f) >  1: length = self.ts_l[iIndex] / self.framerate - lengthOfPreviousFiles
+      else:                   length = 10*60
+      if length > 2*60:
+        with xbmcvfs.File((os.path.splitext(ts_file)[0] + ".edl"), "w") as f_com:
+          for mark in self.marksS:
+              mark0 = mark[0] - lengthOfPreviousFiles
+              mark1 = mark[1] - lengthOfPreviousFiles
+              if mark1 <= 0.1: continue
+              if mark0 < 0.1: mark0 = 0.1
+              try:
+                f_com.write(str(mark0).ljust(7)
+                   + "     "
+                   + str(mark1).ljust(7) + "     3" 
+                   + '\n')
+              except:
+                xbmc.log("Error creating commercials file " + os.path.splitext(ts_file)[0] + ".edl", xbmc.LOGERROR)
       if len(self.ts_f) >  1:
         lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
         iIndex = iIndex +1
 
-  def addRecordingToLibrary(self, libraryPath, filename, current_files, base_url):
+  def addRecordingToLibrary(self, libraryPath, filename, current_files, base_url, isMovie = False):
       if len(self.getTsFiles() ) == 0: return
       self.updateComskip()
       if not xbmcvfs.exists(libraryPath): xbmcvfs.mkdirs(libraryPath)
+# can we use symlinks? (Otherwisae, edl / comskip does not work)
+      use_symlinks = sys.platform.startswith('linux') and self.getTsFiles()[0].startswith('/')
+      use_symlinks = use_symlinks and (isMovie or len(self.getTsFiles() ) == 1)
+# extension of the new file / new symbolic link (.ts or .vdr or .strm)
+      ext = os.path.splitext(self.getTsFiles()[0])[1]
+      if not use_symlinks: ext = ".strm"
+# basename of the new file / new symbolic link
       sanTitle = re.sub(r'[/\\?%*:|"<>]', '-', filename)
       base_name = os.path.join(libraryPath, sanTitle)
+# create a unique basename, in case of duplicates
       i = 1
-      if sys.platform.startswith('linux') and len(self.getTsFiles() ) == 1 and self.getTsFiles()[0].startswith('/'):
-        basename, ext = os.path.splitext(self.getTsFiles()[0])
-        strmFileName = base_name + ext
-        edlFileName  = base_name + ".edl"
-        while strmFileName in current_files:
+      strmFileName  = base_name + ext
+      strmFileNameA = base_name + " part1" + ext
+      while strmFileName in current_files or strmFileNameA in current_files:
+        i = i + 1
+        strmFileName  = base_name + str(i) + ext
+        strmFileNameA = base_name + str(i) + " part1" + ext
+      if i > 1: base_name = base_name + str(i)
+      if use_symlinks:
+# create the symlinks
+        stack_number = ""
+        i = 1
+        for tsFile in self.getTsFiles():
+          if len(self.getTsFiles() ) > 1: stack_number = " part" + str(i)
           i = i + 1
-          strmFileName = base_name + str(i) + ext
-          edlFileName  = base_name + str(i) + ".edl"
-        xbmcvfs.delete(strmFileName)
-        xbmcvfs.delete( edlFileName)
-        os.symlink(self.getTsFiles()[0], strmFileName)
-        os.symlink(basename + ".edl", edlFileName)
+          strmFileName = base_name + stack_number + ext
+          edlFileName  = base_name + stack_number + ".edl"
+          xbmcvfs.delete(strmFileName)
+          xbmcvfs.delete( edlFileName)
+          try:
+            os.symlink(tsFile, strmFileName)
+            os.symlink(os.path.splitext(tsFile)[0] + ".edl", edlFileName)
+          except:
+            xbmc.log("Cannot create symlink: " + str(strmFileName), xbmc.LOGERROR)        
+            return -1
+          try:
+            os.utime(strmFileName, times=(datetime.datetime.now().timestamp(), self.RecordingTime.timestamp() ))
+          except:
+            xbmc.log("Cannot update time of symlink: " + str(strmFileName), xbmc.LOGERROR)        
+          current_files[strmFileName] = True
       else:
+# symlinks are not supported, use strm file
         strmFileName = base_name + ".strm"
-        while strmFileName in current_files:
-          i = i + 1
-          strmFileName = base_name + str(i) + ".strm"
-        plu = base_url + '?' + urllib.parse.urlencode({'mode': 'play', 'recordingFolder': self.path})
         xbmcvfs.delete(strmFileName)
         with xbmcvfs.File(strmFileName, "w") as f_strm:
           try:
-            f_strm.write(plu)
-#           f_strm.write(self.getStackUrl())
+#           plu = base_url + '?' + urllib.parse.urlencode({'mode': 'play', 'recordingFolder': self.path})
+#           f_strm.write(plu)
+            f_strm.write(self.getStackUrl())
           except:
             xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
             return -1
-        os.utime(strmFileName, times=(datetime.datetime.now().timestamp(), self.RecordingTime.timestamp() ))
-      current_files[strmFileName] = True
+        try:
+          os.utime(strmFileName, times=(datetime.datetime.now().timestamp(), self.RecordingTime.timestamp() ))
+        except:
+          xbmc.log("Cannot update time of strm file: " + str(strmFileName), xbmc.LOGERROR)        
+        current_files[strmFileName] = True
 
 
   def getYear(self):

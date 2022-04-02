@@ -121,6 +121,12 @@ class kFolder:
     if r == None: return default
     return r
 
+  def getEpisodeName(self, default = ""):
+    self.readScrapperFiles()
+    r = self.tvscrapperData.get('episode_name')
+    if r == None: return default
+    return r
+
   def setEpisode(self, Episode):
     self.readKodiFile()
     self.kodiLines['E'] = str(Episode)
@@ -266,7 +272,7 @@ class kFolder:
             if addon_handle == -10:          
                 libPath = self.getLibPath(contentType, rootFolder)
                 for vdrRecordingFolder in recordingsList:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title, current_files, base_url)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title, current_files, base_url, False)
             elif addon_handle >= 0:
               for vdrRecordingFolder in recordingsList:
                 commands = []
@@ -301,9 +307,9 @@ class kFolder:
                 se = 'S' + str(season).zfill(2) + 'E' + str(episode).zfill(2)
                 vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
                 if addon_handle == -10:
-                    filename = vdrRecordingFolder.subtitle 
+                    filename = kf.getEpisodeName(vdrRecordingFolder.subtitle)
                     if filename == "": filename =  os.path.split(os.path.split(vdrRecordingFolder.path)[0])[1].replace('_', ' ').strip()
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename + ' ' + se, current_files, base_url)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename + ' ' + se, current_files, base_url, False)
                 elif addon_handle >= 0:
 # add context menu
                     commands = []
@@ -322,7 +328,7 @@ class kFolder:
 #                   filename =  vdrRecordingFolder.title
                     if year > 0:
                        filename = filename + ' (' + str(year) + ')'
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files, base_url)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files, base_url, True)
                 elif addon_handle >= 0:
                   if year > 0:
                      vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'

@@ -57,8 +57,9 @@ def recursive_add_files(fullpath, files_dict):
     return
 
 def waitForScan():
-  jsonCommand = {'jsonrpc': '2.0', 'method': 'XBMC.GetInfoBooleans', 'params': {"booleans":["Library.IsScanningVideo"]}, 'id': 33}
+  jsonCommand = {'jsonrpc': '2.0', 'method': 'XBMC.GetInfoBooleans', 'params': {"booleans":["Library.IsScanningVideo"]}, 'id': "waitForScan"}
   while True:
+    time.sleep (1)
     result = xbmc.executeJSONRPC(json.dumps(jsonCommand))
     jresult = json.loads(result)
     if "error" in jresult or "result" not in jresult:
@@ -66,7 +67,6 @@ def waitForScan():
        return
     bresult = jresult["result"]["Library.IsScanningVideo"]
     if not bresult: return
-    time.sleep (1)
 
 def getRootFolder():
     rootFolder = xbmcaddon.Addon('plugin.video.vdr.recordings').getSetting("rootFolder")
@@ -131,7 +131,7 @@ if mode == constants.ADDALLTOLIBRARY:
 # curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"JSONRPC.Introspect"}' > ~/doc.json
 # curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.Scan","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
 # curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.Clean","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
-
+#curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","method":"XBMC.GetInfoBooleans", "params": {"booleans":["Library.IsScanningVideo"]},"id":"waitForScan"}'
 
 
   
