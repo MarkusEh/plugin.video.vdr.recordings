@@ -13,4 +13,4 @@ Maintain the folder with the VDR recordings in the plugin settings
 
 End user documantation: https://github.com/MarkusEh/plugin.video.vdr.recordings/wiki
 
-Note: If you still have Kodi 18 or older Kodi versions: Download the plugin.video.vdr.recordings_0.3.6.zip file from an older version of his git, like v0.4.1.
+Note: If you still have Kodi 18 or older Kodi versions: Download the plugin.video.vdr.recordings_0.3.6.zip file from an older version of this git, like v0.4.1.
