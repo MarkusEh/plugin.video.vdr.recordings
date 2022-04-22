@@ -22,6 +22,7 @@ class kFolder:
     self.fileRead = False
     self.scraperFileRead = False
     self.rootFolder = None
+    self.source = ""
 
   def readScrapperFiles(self):
     self.readKodiFile()
@@ -45,17 +46,17 @@ class kFolder:
         xbmc.log("ERROR parsing json file " + j_filename, xbmc.LOGERROR)
         return
       keys0 = list(data.keys() )
-      source = ''
-      if 'thetvdb' in keys0: source = 'thetvdb'
-      if 'themoviedb' in keys0: source = 'themoviedb'
-      if source == '' :
+      self.source = ''
+      if 'thetvdb' in keys0: self.source = 'thetvdb'
+      if 'themoviedb' in keys0: self.source = 'themoviedb'
+      if self.source == '' :
         xbmc.log("ERROR readTvscrapperFile, source == '', file = " + j_filename, xbmc.LOGERROR)
         return
 # ignore tvscraper data if there is no name
-      r = data[source].get('name')
+      r = data[self.source].get('name')
       if r == None: return
       if r == "": return
-      self.tvscrapperData = data[source]
+      self.tvscrapperData = data[self.source]
 
   def readKodiFile(self):
     if self.fileRead == True:
@@ -162,6 +163,15 @@ class kFolder:
     if r == None: return default
     return r
 
+  def getDbUrl(self):
+    self.readScrapperFiles()
+    r = self.tvscrapperData.get('movie_tv_id')
+    if r == None: return ""
+    if self.source == 'themoviedb': return "https://www.themoviedb.org/movie/" + str(r)
+    if self.source == 'thetvdb': return "https://www.thetvdb.com/index.php?tab=series&id=" + str(r)
+    return ""
+
+
   def setYear(self, Year):
     self.readKodiFile()
     self.kodiLines['Y'] = str(Year)
@@ -236,6 +246,7 @@ class kFolder:
 
 
   def parseFolder(self, addon_handle, base_url, rootFolder, current_files):
+        if addon_handle >= 0: xbmc.log("parseFolder: Start, path: " + str(self.path), xbmc.LOGERROR)
         onlySameTitle = True
         firstTitle = None
         recordingsList = []
@@ -261,6 +272,9 @@ class kFolder:
              subfolderList.append([path, rec_name])
 
         totalItems = len(recordingsList) + len(subfolderList)
+        if addon_handle >= 0:
+          xbmc.log("parseFolder: finished analysing VDR structure, number of recordings: " + str(len(recordingsList)) + " number of folders: " + str(len(subfolderList)), xbmc.LOGERROR)
+          xbmc.log("parseFolder: Start add recordings", xbmc.LOGERROR)
         if onlySameTitle and len(recordingsList) > 1:
 #           xbmc.log("onlySameTitle: " + str(self.path), xbmc.LOGERROR)            
             contentType = self.getContentType(constants.TV_SHOWS)
@@ -272,7 +286,7 @@ class kFolder:
             if addon_handle == -10:          
                 libPath = self.getLibPath(contentType, rootFolder)
                 for vdrRecordingFolder in recordingsList:
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title, current_files, base_url, False)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, vdrRecordingFolder.title, current_files, base_url, False, "")
             elif addon_handle >= 0:
               for vdrRecordingFolder in recordingsList:
                 commands = []
@@ -296,20 +310,28 @@ class kFolder:
                 final_TV_show_name = kf.getName(TV_show_name)
                 if year > 0: final_TV_show_name = final_TV_show_name + ' (' + str(year) + ')'
                 libPath = os.path.join(constants.LIBRARY_TV_SHOWS, final_TV_show_name)
-                season_n = kf.getSeason(season)
-                if season_n == season:
+                if contentType == constants.TV_SHOWS:
+# automatically count episodes, but only if folder is explicitly marked as TV Shows or all recurdings have the same name
+                  season_n = kf.getSeason(season)
+                  if season_n == season:
                     episode = episode + 1
-                else:
+                  else:
                     episode = 1
                     season = season_n
+                else:
+# don't automatically count episodes, use season = 1 and episode = 1 if on other information is available
+                  season = kf.getSeason(1)
+                  episode = 1
                 episode = kf.getEpisode(episode)
 
                 se = 'S' + str(season).zfill(2) + 'E' + str(episode).zfill(2)
                 vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
                 if addon_handle == -10:
                     filename = kf.getEpisodeName(vdrRecordingFolder.subtitle)
-                    if filename == "": filename =  os.path.split(os.path.split(vdrRecordingFolder.path)[0])[1].replace('_', ' ').strip()
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename + ' ' + se, current_files, base_url, False)
+                    if filename == "":
+                      filename =  os.path.split(os.path.split(vdrRecordingFolder.path)[0])[1].replace('_', ' ').strip()
+                      if filename[:1] == "%": filename = filename[1:]
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename + ' ' + se, current_files, base_url, False, kf.getDbUrl() )
                 elif addon_handle >= 0:
 # add context menu
                     commands = []
@@ -324,11 +346,9 @@ class kFolder:
                 libPath = self.getLibPath(finalContentType, rootFolder)          
                 if addon_handle == -10:
                     filename =  kf.getName(vdrRecordingFolder.title)
-#                   filename =  os.path.split(os.path.split(vdrRecordingFolder.path)[0])[1].replace('_', ' ').strip()
-#                   filename =  vdrRecordingFolder.title
                     if year > 0:
                        filename = filename + ' (' + str(year) + ')'
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files, base_url, True)
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files, base_url, True, kf.getDbUrl() )
                 elif addon_handle >= 0:
                   if year > 0:
                      vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
@@ -350,6 +370,7 @@ class kFolder:
             for pathN in subfolderList:
               kFolder(pathN[0]).parseFolder(addon_handle, base_url, rootFolder, current_files)
         else:
+          xbmc.log("parseFolder: Start add folders", xbmc.LOGERROR)
           for pathN in subfolderList:
             url = build_url(base_url, {'mode': 'folder', 'currentFolder': pathN[0]})
             name = pathN[1].replace('_', ' ')
@@ -373,6 +394,7 @@ class kFolder:
             xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
             xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
             xbmcplugin.endOfDirectory(addon_handle)
+            xbmc.log("parseFolder: End", xbmc.LOGERROR)
 
   def getLibPath(self, contentType, baseFolderVDR):
         relPath = self.path[len(baseFolderVDR)+1:]

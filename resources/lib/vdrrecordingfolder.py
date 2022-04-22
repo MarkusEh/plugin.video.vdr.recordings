@@ -94,6 +94,7 @@ class VdrRecordingFolder:
 
         if self.title == '':
           self.title = os.path.split(os.path.split(self.path)[0])[1].replace('_', ' ').strip()
+          if self.title[:1] == "%": self.title = self.title[1:]
         if self.description == '':
           with xbmcvfs.File(os.path.join(self.path, "summary.vdr"), "r") as f_summary:
             try:
@@ -267,7 +268,7 @@ class VdrRecordingFolder:
         lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
         iIndex = iIndex +1
 
-  def addRecordingToLibrary(self, libraryPath, filename, current_files, base_url, isMovie = False):
+  def addRecordingToLibrary(self, libraryPath, filename, current_files, base_url, isMovie, nfoUrl):
       if len(self.getTsFiles() ) == 0: return
       self.updateComskip()
       if not xbmcvfs.exists(libraryPath): xbmcvfs.mkdirs(libraryPath)
@@ -289,6 +290,17 @@ class VdrRecordingFolder:
         strmFileName  = base_name + str(i) + ext
         strmFileNameA = base_name + str(i) + " part1" + ext
       if i > 1: base_name = base_name + str(i)
+# create nfo file
+      if nfoUrl != "":
+        if isMovie: nfoFileName = base_name + ".nfo"
+        else: nfoFileName = os.path.join(libraryPath, "tvshow.nfo")
+        xbmcvfs.delete(nfoFileName)
+        current_files[nfoFileName] = True
+        with xbmcvfs.File(nfoFileName, "w") as f_nfo:
+          try:
+            f_nfo.write(nfoUrl)
+          except:
+            xbmc.log("Cannot open for write: " + str(nfoFileName), xbmc.LOGERROR)        
       if use_symlinks:
 # create the symlinks
         stack_number = ""
@@ -317,9 +329,10 @@ class VdrRecordingFolder:
         xbmcvfs.delete(strmFileName)
         with xbmcvfs.File(strmFileName, "w") as f_strm:
           try:
-#           plu = base_url + '?' + urllib.parse.urlencode({'mode': 'play', 'recordingFolder': self.path})
-#           f_strm.write(plu)
-            f_strm.write(self.getStackUrl())
+            plu = base_url + '?' + urllib.parse.urlencode({'mode': 'play', 'recordingFolder': self.path})
+            f_strm.write(plu)
+## use the plugin to play files with multiple *.ts files. Putting all these ts files in an strm file is broken for too many ts files
+#           f_strm.write(self.getStackUrl())
           except:
             xbmc.log("Cannot open for write: " + str(strmFileName), xbmc.LOGERROR)        
             return -1

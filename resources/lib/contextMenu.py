@@ -27,7 +27,7 @@ def GUIEditExportName(name):
       return None
 
 def recursive_delete_dir(fullpath):
-    '''helper to recursively delete a directory'''
+    '''helper to recursively delete a directory, including all files'''
     dirs, files = xbmcvfs.listdir(fullpath)
     for file in files:
         xbmcvfs.delete(os.path.join(fullpath, file))
@@ -40,7 +40,8 @@ def recursive_delete_empty_dirs(fullpath):
     empty = True
     dirs, files = xbmcvfs.listdir(fullpath)
     for directory in dirs:
-        empty = empty and recursive_delete_empty_dirs(os.path.join(fullpath, directory))
+        empty_this = recursive_delete_empty_dirs(os.path.join(fullpath, directory))
+        empty = empty and empty_this
     if not empty or len(files) > 0: return False
     xbmcvfs.rmdir(fullpath)
     return True 
@@ -75,14 +76,47 @@ def getRootFolder():
         rootFolder = rootFolder[:-1]
     return rootFolder
 
+def scanIfRequired(rootFolder, changedDirs, text):
+    for dir in changedDirs.keys():
+      if dir.find(rootFolder) >= 0:
+        waitForScan()
+        xbmc.log("ADDALLTOLIBRARY, VideoLibrary.Scan, " + text + " dir = " + str(rootFolder), xbmc.LOGERROR)
+        xbmc.executebuiltin('Notification(VDR Recordings, update ' + str(os.path.basename(rootFolder)) + ' in video library)', False)
+        xbmc.executebuiltin('UpdateLibrary(video,'+ str(rootFolder) + ')', True)
+        waitForScan()
+        return
+
+def scan(rootFolder, dirs, text, forceCompleteScan):
+    numChangedFolders = len(dirs.keys() )
+    if numChangedFolders == 0: return
+    if numChangedFolders > 4 or forceCompleteScan:
+# update compleate library
+      xbmc.log("ADDALLTOLIBRARY, before scanning all " + text + " folders, number of paths = " + str(numChangedFolders), xbmc.LOGERROR)
+      scanIfRequired(rootFolder, dirs, text)
+    else:
+      xbmc.log("ADDALLTOLIBRARY, before scanning changed " + text + " folders, number of paths = " + str(numChangedFolders), xbmc.LOGERROR)
+      xbmc.executebuiltin('Notification(VDR Recordings, update ' + str(numChangedFolders) + ' changed ' + text + ' folders in video library)', False)
+      for dir in dirs.keys():
+# new files -> update library
+        waitForScan()
+        xbmc.log("ADDALLTOLIBRARY, VideoLibrary.Scan, dir = " + str(dir), xbmc.LOGERROR)
+        xbmc.executebuiltin('UpdateLibrary(video,'+ str(dir) + ')', True)
+        waitForScan()
+    xbmc.log("ADDALLTOLIBRARY, after scanning changed " + text + " folders", xbmc.LOGERROR)
+    xbmc.executebuiltin('Notification(VDR Recordings, Update " + text + " Library finished)', False)
+
 #xbmc.log("contextMenu: sys.argv=" + str(sys.argv), xbmc.LOGERROR)
 mode = sys.argv[1]
 #xbmc.log("mode=" + str(mode), xbmc.LOGERROR)
 
+if mode == 1243409579357905:
+    dir = "/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/TV shows/MacGyver (1985)"
+    xbmc.executebuiltin('UpdateLibrary(video,'+ str(dir) + ')', True)
 if mode == constants.ADDALLTOLIBRARY:
     rootFolder = sys.argv[2]
     base_url   = sys.argv[3]
-#   xbmc.log("rootFolder=" + str(rootFolder), xbmc.LOGERROR)
+    xbmc.log("Start of ADDALLTOLIBRARY, rootFolder=" + str(rootFolder), xbmc.LOGERROR)
+    xbmc.executebuiltin('Notification(VDR Recordings, Update Library files)', False)
 # create list of old files
     old_files = {}
     recursive_add_files(constants.LIBRARY_MOVIES, old_files)
@@ -94,47 +128,62 @@ if mode == constants.ADDALLTOLIBRARY:
     xbmcvfs.mkdirs(constants.LIBRARY_MUSIC_VIDEOS)
 # add current (new) files
     new_files = {}
+    xbmc.log("ADDALLTOLIBRARY, before adding all files", xbmc.LOGERROR)
     kfolder.kFolder(rootFolder).parseFolder(-10, base_url, rootFolder, new_files)
+    xbmc.log("ADDALLTOLIBRARY, after adding all files", xbmc.LOGERROR)
 ## compare list of old files with list of new files, clean up library for files which do no longer exist
-    dirs_with_deleted_items = {}
     for file in old_files.keys() - new_files.keys():
 # files do no longer exist -> delete
       xbmcvfs.delete(file)
       file_base, ext = os.path.splitext(file)
-      if ext != ".strm": xbmcvfs.delete(file_base + ".edl")
-      dirs_with_deleted_items[os.path.dirname(file)] = True
-# clean up library
-    i = 1
-    for dir in dirs_with_deleted_items.keys():
-      waitForScan()
-      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Clean', 'params':{'directory':dir, 'showdialogs':False}, 'id': i}
-      xbmc.executeJSONRPC(json.dumps(jsonCommand))
-      i = i + 1
+      if ext != ".strm" and ext != ".nfo": xbmcvfs.delete(file_base + ".edl")
 # delete all empty directries
     recursive_delete_empty_dirs(constants.LIBRARY_MOVIES)
     recursive_delete_empty_dirs(constants.LIBRARY_TV_SHOWS)
     recursive_delete_empty_dirs(constants.LIBRARY_MUSIC_VIDEOS)
+# clean up library
+    xbmc.log("ADDALLTOLIBRARY, before clean up library", xbmc.LOGERROR)
+    xbmc.executebuiltin('Notification(VDR Recordings, clean up video library)', False)
+    xbmc.executebuiltin('CleanLibrary(video,false)', True)
 # we cannot scrap / scan files. Create a list of dirs (don't scan the same dir 2 times ...)
     dirs = {}
     for file in new_files.keys() - old_files.keys():
+      xbmc.log("ADDALLTOLIBRARY, new file: " + str(file), xbmc.LOGERROR)
       dirs[os.path.dirname(file)] = True
-    i = 1
+    dirs_movies = {}
+    dirs_tv_shows = {}
+    dirs_music_videos = {}
+# create list of dirs belonging to each of LIBRARY_MOVIES, LIBRARY_TV_SHOWS, LIBRARY_MUSIC_VIDEOS
     for dir in dirs.keys():
-# new files -> update library
-      waitForScan()
-      jsonCommand = {'jsonrpc': '2.0', 'method': 'VideoLibrary.Scan', 'params': {'directory': dir, 'showdialogs':False}, 'id': i}
-      result = xbmc.executeJSONRPC(json.dumps(jsonCommand))
-      xbmc.log("VideoLibrary.Scan, dir = " + str(dir) + " i = " + str(i) + " result = " + str(result), xbmc.LOGERROR)
-      i = i + 1
+      xbmc.log("ADDALLTOLIBRARY, new folder: " + str(dir), xbmc.LOGERROR)
+      if dir.find(constants.LIBRARY_MOVIES) >= 0: dirs_movies[dir] = True
+      if dir.find(constants.LIBRARY_TV_SHOWS) >= 0: dirs_tv_shows[dir] = True
+      if dir.find(constants.LIBRARY_MUSIC_VIDEOS) >= 0: dirs_music_videos[dir] = True
+# special check for tv shows: if there is a new tv show (not a new episode), a complete scan is required (KODI bug)
+    scanCompleteTvShows = False
+    numChangedFolders = len(dirs_tv_shows.keys() )
+    if numChangedFolders > 4:
+      scanCompleteTvShows = True
+    else:
+      for dir in dirs_tv_shows.keys():
+        existed = False
+        for file in old_files.keys():
+          if file.find(dir) >= 0:
+            existed = True
+            break
+        if not existed:
+          scanCompleteTvShows = True
+          break
+      if scanCompleteTvShows:
+        xbmc.log("ADDALLTOLIBRARY, completely new tv show " + str(dir), xbmc.LOGERROR)
+      else:
+        xbmc.log("ADDALLTOLIBRARY, no completely new tv show", xbmc.LOGERROR)
+              
+# update LIBRARY
+    scan(constants.LIBRARY_MOVIES, dirs_movies, "movies", False)
+    scan(constants.LIBRARY_TV_SHOWS, dirs_tv_shows, "tv shows", scanCompleteTvShows)
+    scan(constants.LIBRARY_MUSIC_VIDEOS, dirs_music_videos, "music videos", False)
 
-# {"jsonrpc": "2.0", "method": "JSONRPC.SetConfiguration", "params": {"Configuration.Notifications": { "PVR": true, "Player": true }}, "id": 1}
-# curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"JSONRPC.Introspect"}' > ~/doc.json
-# curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.Scan","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
-# curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","id":1,"method":"VideoLibrary.Clean","params":{"directory":"/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/Movies/video/Winnetou/Winnetou (2016).strm"}}'
-#curl -X POST -H "content-type:application/json" http://rpi3:8080/jsonrpc -d '{"jsonrpc":"2.0","method":"XBMC.GetInfoBooleans", "params": {"booleans":["Library.IsScanningVideo"]},"id":"waitForScan"}'
-
-
-  
 if mode == constants.TV_SHOWS:
     recordingFolderPath = sys.argv[2]
     k_Folder = kfolder.kFolder(recordingFolderPath)    
