@@ -208,7 +208,7 @@ class VdrRecordingFolder:
 #   xbmc.log("sanitizeMarks, path: " + str(self.path), xbmc.LOGERROR)        
 
     for mark in self.marks:
-      if mark < 5: continue
+#     if mark < 5: continue
       if lastMarkMovieCont == -1:
         comLen = mark - lastMarkComStart
 #       xbmc.log("sanitizeMarks, comLen: " + str(comLen), xbmc.LOGERROR)        
@@ -216,7 +216,7 @@ class VdrRecordingFolder:
           if lastMarkComStart == 0:
             lastMarkComStart = mark
           else:
-            break   # commercials are shorter than 10 minutes
+            break   # commercials are shorter than 15 minutes
         else:
           self.marksS.append([lastMarkComStart, mark])
           lastMarkMovieCont = mark
