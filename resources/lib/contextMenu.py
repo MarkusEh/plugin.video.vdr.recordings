@@ -7,6 +7,7 @@ import sys
 import subprocess
 import os
 import shutil
+import threading
 import urllib
 import time
 import xbmc
@@ -104,6 +105,40 @@ def scan(rootFolder, dirs, text, forceCompleteScan):
         waitForScan()
     xbmc.log("ADDALLTOLIBRARY, after scanning changed " + text + " folders", xbmc.LOGERROR)
     xbmc.executebuiltin('Notification(VDR Recordings, Update " + text + " Library finished)', False)
+
+def move_dir(source, destination):
+  xbmc.log("contextMenu move_dir, source = " + source + " destination = " + destination, xbmc.LOGERROR)
+  if not xbmcvfs.exists(source + "/"):
+    xbmc.log("ERROR: contextMenu move_dir, source = " + source + " does not exist!", xbmc.LOGERROR)
+    return False
+  if xbmcvfs.exists(destination + "/"):
+    xbmc.log("ERROR: contextMenu move_dir, destination = " + destination + " already exists!", xbmc.LOGERROR)
+    return False
+  if xbmcvfs.rename(source, destination) == True:
+    return True
+  if source.startswith('/') and destination.startswith('/'):
+    try:
+      shutil.move(source, destination)
+      return True
+    except Error as err:
+      xbmc.log("ERROR contextMenu move_dir, shutil.move, source = " + source + " destination = " + destination, xbmc.LOGERROR)
+      return False
+  return False
+
+def move(t1, t2, tz, t3):
+  if move_dir(t1, tz) == True:
+    if move_dir (tz, t3) == False:
+      move_dir(tz, t1)
+
+def GetFolderSize(path):
+    TotalSize = 0.0
+    dirs, files = xbmcvfs.listdir(path)
+    for dir in dirs:
+      TotalSize = TotalSize + GetFolderSize(os.path.join(path, dir))
+
+    for file in files:
+      TotalSize = TotalSize + xbmcvfs.Stat(os.path.join(path, file)).st_size()
+    return TotalSize
 
 #xbmc.log("contextMenu: sys.argv=" + str(sys.argv), xbmc.LOGERROR)
 mode = sys.argv[1]
@@ -245,7 +280,6 @@ if mode == constants.DELETE:
             + '"?')
         if d == True:    
             recursive_delete_dir(recordingFolderPath)
-#       os.rename(recordingFolderPath, ps[0] + '.del')
         xbmc.executebuiltin("Container.Refresh")       
 
 if mode == constants.MOVE:
@@ -266,18 +300,39 @@ if mode == constants.MOVE:
             xbmc.log("constants.MOVE, fp = " + fp, xbmc.LOGERROR) 
             xbmc.log("constants.MOVE, d1 = " + d1, xbmc.LOGERROR)
         else:
-
-            script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/move.py"
-            xbmc.executebuiltin("XBMC.RunScript(" + xbmcvfs.translatePath(script) + ", \"" + d1 + "\", \"" + dest + "\", \"" + dfin + "\")")
+            xbmc.executebuiltin("RunScript(plugin.video.vdr.recordings, " + str(constants.MOVE_INTERNAL) + ", \"" + d1 + "\", \"" + dest + "\", \"" + dfin + "\")")
             xbmc.sleep(10) 
             xbmc.executebuiltin("Container.Refresh")       
+
+
+if mode == constants.MOVE_INTERNAL:
+  src = sys.argv[2]
+  dest = sys.argv[3]
+  final = sys.argv[4]
+  pDialog = xbmcgui.DialogProgressBG()
+
+  tz = os.path.join(dest, os.path.split(src)[1])
+  t = threading.Thread(target=move, args=(src, dest, tz, final))
+  t.start()
+  pDialog.create('Move recording', src)
+
+  while t.is_alive() and not xbmc.Monitor().abortRequested():
+      xbmc.sleep(2000)
+      s = GetFolderSize(src)
+      d = GetFolderSize(tz)
+      if d == 0:
+        d = GetFolderSize(final)
+      if s + d != 0:
+        pDialog.update(int(d * 100 / (s+d)))
+
+  pDialog.close()
 
 if mode == constants.SEARCH:
     rootFolder = sys.argv[2]
     base_url = sys.argv[3]
     sString = GUIEditExportName("Enter search string")
     if sString != None:
-       p_url = base_url + '?' + urllib.urlencode({'mode': 'search', 'searchString': sString})
+       p_url = base_url + '?' + urllib.parse.urlencode({'mode': 'search', 'searchString': sString})
 #     xbmc.log("p_url=" + str(p_url), xbmc.LOGERROR)
        runner = "ActivateWindow(10025," + str(p_url) + ",return)"
        xbmc.executebuiltin(runner)   

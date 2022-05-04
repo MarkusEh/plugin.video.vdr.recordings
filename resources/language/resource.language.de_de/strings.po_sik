@@ -19,23 +19,23 @@ msgstr ""
 
 msgctxt "Addon Summary"
 msgid "VDR Recordings"
-msgstr ""
+msgstr "VDR Aufzeichnungen"
 
 msgctxt "Addon Description"
-msgid "\nPlay VDR recordings. First test version\n"
-msgstr ""
+msgid "\nPlay VDR recordings.\n"
+msgstr "\nAbspielen von VDR Aufzeichnungen.\n"
 
 #All {0} and {1} must remain in string but can change position
 
 msgctxt "#32000"
 msgid "General"
-msgstr ""
+msgstr "Allgemeine Einstellungen"
 
 msgctxt "#32001"
 msgid "Root folder with VDR recordings"
-msgstr ""
+msgstr "Verzeichnis mit VDR Aufzeichnungen"
 
 msgctxt "#32013"
 msgid "Debug output"
-msgstr ""
+msgstr "Debug Meldungen ausgeben"
 

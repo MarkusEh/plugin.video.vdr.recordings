@@ -23,6 +23,7 @@ class kFolder:
     self.scraperFileRead = False
     self.rootFolder = None
     self.source = ""
+    self.addon = xbmcaddon.Addon('plugin.video.vdr.recordings')
 
   def readScrapperFiles(self):
     self.readKodiFile()
@@ -188,8 +189,7 @@ class kFolder:
 
   def getRootFolder(self):
     if self.rootFolder == None:
-      addon = xbmcaddon.Addon('plugin.video.vdr.recordings')
-      self.rootFolder = addon.getSetting("rootFolder")
+      self.rootFolder = self.addon.getSetting("rootFolder")
       lastChar = self.rootFolder[-1] 
       if lastChar == '/' or lastChar == '\\':
         self.rootFolder = self.rootFolder[:-1]
@@ -290,8 +290,8 @@ class kFolder:
             elif addon_handle >= 0:
               for vdrRecordingFolder in recordingsList:
                 commands = []
-                addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
-                addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
+                self.addContextMenuCommand(commands, 30100, constants.DELETE, vdrRecordingFolder.path)
+                self.addContextMenuCommand(commands, 30101, constants.MOVE, vdrRecordingFolder.path)
                 vdrRecordingFolder.addDirectoryItem(addon_handle, commands, totalItems)
         else:
             if onlySameTitle:
@@ -335,11 +335,11 @@ class kFolder:
                 elif addon_handle >= 0:
 # add context menu
                     commands = []
-                    addContextMenuCommand(commands, "Set season", constants.SEASON, vdrRecordingFolder.path, str(season))
-                    addContextMenuCommand(commands, "Set episode", constants.EPISODE, vdrRecordingFolder.path, str(episode))
-                    addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
-                    addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
-                    addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
+                    self.addContextMenuCommand(commands, 30103, constants.SEASON, vdrRecordingFolder.path, str(season))
+                    self.addContextMenuCommand(commands, 30104, constants.EPISODE, vdrRecordingFolder.path, str(episode))
+                    self.addContextMenuCommand(commands, 30100, constants.DELETE, vdrRecordingFolder.path)
+                    self.addContextMenuCommand(commands, 30101, constants.MOVE, vdrRecordingFolder.path)
+                    self.addContextMenuCommand(commands, 30102, constants.REFRESH, rootFolder, base_url)
                     vdrRecordingFolder.addDirectoryItem(addon_handle, commands, totalItems)
               else:
 # Movies
@@ -353,10 +353,10 @@ class kFolder:
                   if year > 0:
                      vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
                   commands = []
-                  addContextMenuCommand(commands, "Set year", constants.YEAR, vdrRecordingFolder.path, str(year))
-                  addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
-                  addContextMenuCommand(commands, "Move", constants.MOVE, vdrRecordingFolder.path)
-                  addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
+                  self.addContextMenuCommand(commands, 30105, constants.YEAR, vdrRecordingFolder.path, str(year))
+                  self.addContextMenuCommand(commands, 30100, constants.DELETE, vdrRecordingFolder.path)
+                  self.addContextMenuCommand(commands, 30101, constants.MOVE, vdrRecordingFolder.path)
+                  self.addContextMenuCommand(commands, 30102, constants.REFRESH, rootFolder, base_url)
                   vdrRecordingFolder.addDirectoryItem(addon_handle, commands, totalItems)
 
         
@@ -378,13 +378,13 @@ class kFolder:
             li.setArt({ 'icon' : 'DefaultFolder.png' })
 # add context menu
             commands = []
-            addContextMenuCommand(commands, "Set content: TV shows", constants.TV_SHOWS, pathN[0])
-            addContextMenuCommand(commands, "Set content: Music videos", constants.MUSIC_VIDEOS, pathN[0])
-            addContextMenuCommand(commands, "Set content: Movies", constants.MOVIES, pathN[0])
-            addContextMenuCommand(commands, "Add all recordings to Library", constants.ADDALLTOLIBRARY, rootFolder, base_url)
-            addContextMenuCommand(commands, "Move", constants.MOVE, pathN[0])
-            addContextMenuCommand(commands, "Search", constants.SEARCH, rootFolder, base_url)
-            addContextMenuCommand(commands, "Refresh", constants.REFRESH, rootFolder, base_url)
+            self.addContextMenuCommand(commands, 30106, constants.TV_SHOWS, pathN[0])
+            self.addContextMenuCommand(commands, 30107, constants.MUSIC_VIDEOS, pathN[0])
+            self.addContextMenuCommand(commands, 30108, constants.MOVIES, pathN[0])
+            self.addContextMenuCommand(commands, 30109, constants.ADDALLTOLIBRARY, rootFolder, base_url)
+            self.addContextMenuCommand(commands, 30101, constants.MOVE, pathN[0])
+            self.addContextMenuCommand(commands, 30110, constants.SEARCH, rootFolder, base_url)
+            self.addContextMenuCommand(commands, 30102, constants.REFRESH, rootFolder, base_url)
             li.addContextMenuItems( commands )
            
             xbmcplugin.addDirectoryItem(handle=addon_handle, url=url,
@@ -410,14 +410,16 @@ class kFolder:
         return libPath                     
 
 
-def addContextMenuCommand(commands, name, mode, url, arg3 = ''):
-        script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/contextMenu.py"
+  def addContextMenuCommand(self, commands, name, mode, url, arg3 = ''):
+#       script = "special://home/addons/plugin.video.vdr.recordings/resources/lib/contextMenu.py"
+        script = "plugin.video.vdr.recordings"
         if arg3 == '':
           runner = "RunScript(" + str(script)+ ", " + str(mode) + ", \"" + str(url) + "\")"
         else:
           runner = "RunScript(" + str(script)+ ", " + str(mode) + ", \"" + str(url) + "\", \"" + str(arg3) + "\")"
 #       xbmc.log("runner=" + str(runner), xbmc.LOGERROR)
-        commands.append(( str(name), runner, ))
+        name_text = self.addon.getLocalizedString(name)
+        commands.append(( name_text, runner, ))
 
 def build_url(base_url, query):
         return base_url + '?' + urllib.parse.urlencode(query)

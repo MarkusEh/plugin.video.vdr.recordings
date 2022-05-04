@@ -82,7 +82,7 @@ class main:
                 vdrRecordingFolder.description = relRecordingPath + '\n' + vdrRecordingFolder.description
 # add context menu
                 commands = []
-                kfolder.addContextMenuCommand(commands, "Delete", constants.DELETE, vdrRecordingFolder.path)
+                kfolder.addContextMenuCommand(commands, 30100, constants.DELETE, vdrRecordingFolder.path)
                 vdrRecordingFolder.addDirectoryItem(self.addon_handle, commands)                                
         xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
         xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)

@@ -16,6 +16,7 @@ YEAR = "Year"
 DELETE = "Delete"
 RENAME = "Rename"
 MOVE = "Move"
+MOVE_INTERNAL = "Move_internal"
 SEARCH = "Search"
 REFRESH = "Refresh"
 
