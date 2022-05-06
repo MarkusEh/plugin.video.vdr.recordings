@@ -30,17 +30,15 @@ msgctxt "#30001"
 msgid "Folder with VDR recordings"
 msgstr "Verzeichnis mit VDR Aufzeichnungen"
 
-msgctxt "#30002"
-msgid "Debug output"
-msgstr "Debug Meldungen ausgeben"
+#context menu
 
 msgctxt "#30100"
-msgid "Delete"
-msgstr "Aufzeichnung löschen"
+msgid "Delete VDR recording"
+msgstr "VDR Aufzeichnung löschen"
 
 msgctxt "#30101"
-msgid "Move"
-msgstr "Aufzeichnung verschieben"
+msgid "Move VDR recording"
+msgstr "VDR Aufzeichnung verschieben"
 
 msgctxt "#30102"
 msgid "Refresh"
@@ -71,9 +69,58 @@ msgid "Set content: Movies"
 msgstr "Inhalt festlegen: Spielfilme"
 
 msgctxt "#30109"
-msgid "Add all recordings to Library"
-msgstr "Alle Aufzeichnungen zur KODI Bibliothek hinzufügen"
+msgid "Add all VDR recordings to Library"
+msgstr "Alle VDR Aufzeichnungen zur Bibliothek hinzufügen"
 
 msgctxt "#30110"
 msgid "Search recordings"
 msgstr "Suche nach Aufzeichnungen"
+
+# Notification messages
+
+msgctxt "#30200"
+msgid "Update library:"
+msgstr "Bibliothek updaten:"
+
+msgctxt "#30201"
+msgid "Update changed folders in library:"
+msgstr "Geänderte Verzeichnisse in Bibliothek updaten:"
+
+msgctxt "#30202"
+msgid "Update finished, library:"
+msgstr "Update beendet, Bibliothek:"
+
+msgctxt "#30203"
+msgid "Clean up video library"
+msgstr "Video Bibliothek bereinigen"
+
+# Data input
+
+msgctxt "#30210"
+msgid "Enter episode number"
+msgstr "Nummer der Episode eingeben"
+
+msgctxt "#30211"
+msgid "Enter season number"
+msgstr "Nummer der Season eingeben"
+
+msgctxt "#30212"
+msgid "Enter year"
+msgstr "Jahr eingeben"
+
+msgctxt "#30220"
+msgid "Delete VDR recording?"
+msgstr "VDR Aufzeichnung löschen?"
+
+msgctxt "#30221"
+msgid "Do you want to delete"
+msgstr "Möchtest Du löschen"
+
+msgctxt "#30222"
+msgid "Move VDR recording"
+msgstr "VDR Aufzeichnung verschieben"
+
+
+msgctxt "#30223"
+msgid "Enter search string"
+msgstr "Text für Suche eingeben"

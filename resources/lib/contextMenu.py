@@ -81,8 +81,8 @@ def scanIfRequired(rootFolder, changedDirs, text):
     for dir in changedDirs.keys():
       if dir.find(rootFolder) >= 0:
         waitForScan()
-        xbmc.log("ADDALLTOLIBRARY, VideoLibrary.Scan, " + text + " dir = " + str(rootFolder), xbmc.LOGERROR)
-        xbmc.executebuiltin('Notification(VDR Recordings, update ' + str(os.path.basename(rootFolder)) + ' in video library)', False)
+        xbmc.log("ADDALLTOLIBRARY, VideoLibrary.Scan, " + text + " dir = " + str(rootFolder), xbmc.LOGINFO)
+        xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30200) + ' ' + str(os.path.basename(rootFolder)) + ')', False)
         xbmc.executebuiltin('UpdateLibrary(video,'+ str(rootFolder) + ')', True)
         waitForScan()
         return
@@ -92,22 +92,22 @@ def scan(rootFolder, dirs, text, forceCompleteScan):
     if numChangedFolders == 0: return
     if numChangedFolders > 4 or forceCompleteScan:
 # update compleate library
-      xbmc.log("ADDALLTOLIBRARY, before scanning all " + text + " folders, number of paths = " + str(numChangedFolders), xbmc.LOGERROR)
+      xbmc.log("ADDALLTOLIBRARY, before scanning all " + text + " folders, number of paths = " + str(numChangedFolders), xbmc.LOGINFO)
       scanIfRequired(rootFolder, dirs, text)
     else:
-      xbmc.log("ADDALLTOLIBRARY, before scanning changed " + text + " folders, number of paths = " + str(numChangedFolders), xbmc.LOGERROR)
-      xbmc.executebuiltin('Notification(VDR Recordings, update ' + str(numChangedFolders) + ' changed ' + text + ' folders in video library)', False)
+      xbmc.log("ADDALLTOLIBRARY, before scanning changed " + text + " folders, number of paths = " + str(numChangedFolders), xbmc.LOGINFO)
+      xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30201) + ' ' + str(os.path.basename(rootFolder)) + ')', False)
       for dir in dirs.keys():
 # new files -> update library
         waitForScan()
-        xbmc.log("ADDALLTOLIBRARY, VideoLibrary.Scan, dir = " + str(dir), xbmc.LOGERROR)
+        xbmc.log("ADDALLTOLIBRARY, VideoLibrary.Scan, dir = " + str(dir), xbmc.LOGINFO)
         xbmc.executebuiltin('UpdateLibrary(video,'+ str(dir) + ')', True)
         waitForScan()
-    xbmc.log("ADDALLTOLIBRARY, after scanning changed " + text + " folders", xbmc.LOGERROR)
-    xbmc.executebuiltin('Notification(VDR Recordings, Update " + text + " Library finished)', False)
+    xbmc.log("ADDALLTOLIBRARY, after scanning changed " + text + " folders", xbmc.LOGINFO)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30202) + ' ' + str(os.path.basename(rootFolder)) + ')', False)
 
 def move_dir(source, destination):
-  xbmc.log("contextMenu move_dir, source = " + source + " destination = " + destination, xbmc.LOGERROR)
+  xbmc.log("contextMenu move_dir, source = " + source + " destination = " + destination, xbmc.LOGINFO)
   if not xbmcvfs.exists(source + "/"):
     xbmc.log("ERROR: contextMenu move_dir, source = " + source + " does not exist!", xbmc.LOGERROR)
     return False
@@ -144,14 +144,11 @@ def GetFolderSize(path):
 mode = sys.argv[1]
 #xbmc.log("mode=" + str(mode), xbmc.LOGERROR)
 
-if mode == 1243409579357905:
-    dir = "/var/lib/vdr/.kodi/userdata/addon_data/plugin.video.vdr.recordings/TV shows/MacGyver (1985)"
-    xbmc.executebuiltin('UpdateLibrary(video,'+ str(dir) + ')', True)
 if mode == constants.ADDALLTOLIBRARY:
     rootFolder = sys.argv[2]
     base_url   = sys.argv[3]
-    xbmc.log("Start of ADDALLTOLIBRARY, rootFolder=" + str(rootFolder), xbmc.LOGERROR)
-    xbmc.executebuiltin('Notification(VDR Recordings, Update Library files)', False)
+    xbmc.log("Start of ADDALLTOLIBRARY, rootFolder=" + str(rootFolder), xbmc.LOGINFO)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30109) + ')', False)
 # create list of old files
     old_files = {}
     recursive_add_files(constants.LIBRARY_MOVIES, old_files)
@@ -163,9 +160,9 @@ if mode == constants.ADDALLTOLIBRARY:
     xbmcvfs.mkdirs(constants.LIBRARY_MUSIC_VIDEOS)
 # add current (new) files
     new_files = {}
-    xbmc.log("ADDALLTOLIBRARY, before adding all files", xbmc.LOGERROR)
+    xbmc.log("ADDALLTOLIBRARY, before adding all files", xbmc.LOGINFO)
     kfolder.kFolder(rootFolder).parseFolder(-10, base_url, rootFolder, new_files)
-    xbmc.log("ADDALLTOLIBRARY, after adding all files", xbmc.LOGERROR)
+    xbmc.log("ADDALLTOLIBRARY, after adding all files", xbmc.LOGINFO)
 ## compare list of old files with list of new files, clean up library for files which do no longer exist
     for file in old_files.keys() - new_files.keys():
 # files do no longer exist -> delete
@@ -177,20 +174,20 @@ if mode == constants.ADDALLTOLIBRARY:
     recursive_delete_empty_dirs(constants.LIBRARY_TV_SHOWS)
     recursive_delete_empty_dirs(constants.LIBRARY_MUSIC_VIDEOS)
 # clean up library
-    xbmc.log("ADDALLTOLIBRARY, before clean up library", xbmc.LOGERROR)
-    xbmc.executebuiltin('Notification(VDR Recordings, clean up video library)', False)
+    xbmc.log("ADDALLTOLIBRARY, before clean up library", xbmc.LOGINFO)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30203) + ')', False)
     xbmc.executebuiltin('CleanLibrary(video,false)', True)
 # we cannot scrap / scan files. Create a list of dirs (don't scan the same dir 2 times ...)
     dirs = {}
     for file in new_files.keys() - old_files.keys():
-      xbmc.log("ADDALLTOLIBRARY, new file: " + str(file), xbmc.LOGERROR)
+      xbmc.log("ADDALLTOLIBRARY, new file: " + str(file), xbmc.LOGINFO)
       dirs[os.path.dirname(file)] = True
     dirs_movies = {}
     dirs_tv_shows = {}
     dirs_music_videos = {}
 # create list of dirs belonging to each of LIBRARY_MOVIES, LIBRARY_TV_SHOWS, LIBRARY_MUSIC_VIDEOS
     for dir in dirs.keys():
-      xbmc.log("ADDALLTOLIBRARY, new folder: " + str(dir), xbmc.LOGERROR)
+      xbmc.log("ADDALLTOLIBRARY, new folder: " + str(dir), xbmc.LOGINFO)
       if dir.find(constants.LIBRARY_MOVIES) >= 0: dirs_movies[dir] = True
       if dir.find(constants.LIBRARY_TV_SHOWS) >= 0: dirs_tv_shows[dir] = True
       if dir.find(constants.LIBRARY_MUSIC_VIDEOS) >= 0: dirs_music_videos[dir] = True
@@ -210,9 +207,9 @@ if mode == constants.ADDALLTOLIBRARY:
           scanCompleteTvShows = True
           break
       if scanCompleteTvShows:
-        xbmc.log("ADDALLTOLIBRARY, completely new tv show " + str(dir), xbmc.LOGERROR)
+        xbmc.log("ADDALLTOLIBRARY, completely new tv show " + str(dir), xbmc.LOGINFO)
       else:
-        xbmc.log("ADDALLTOLIBRARY, no completely new tv show", xbmc.LOGERROR)
+        xbmc.log("ADDALLTOLIBRARY, no completely new tv show", xbmc.LOGINFO)
               
 # update LIBRARY
     scan(constants.LIBRARY_MOVIES, dirs_movies, "movies", False)
@@ -226,7 +223,7 @@ if mode == constants.TV_SHOWS:
 
 if mode == constants.MOVIES:
     recordingFolderPath = sys.argv[2]
-#   xbmc.log("contextMenu, movies" + str(recordingFolderPath), xbmc.LOGERROR)    
+#   xbmc.log("contextMenu, movies" + str(recordingFolderPath), xbmc.LOGINFO)    
     k_Folder = kfolder.kFolder(recordingFolderPath)    
     k_Folder.setContentType(constants.MOVIES)    
 
@@ -240,7 +237,7 @@ if mode == constants.EPISODE:
     episode = sys.argv[3]
     k_Folder = kfolder.kFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
-    d = dialog.numeric(0, 'Enter episode number', str(k_Folder.getEpisode(episode)))
+    d = dialog.numeric(0, xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30210), str(k_Folder.getEpisode(episode)))
     if d != '':
         k_Folder.setEpisode(int(d))
         xbmc.executebuiltin("Container.Refresh")
@@ -250,7 +247,7 @@ if mode == constants.SEASON:
     season = sys.argv[3]
     k_Folder = kfolder.kFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
-    d = dialog.numeric(0, 'Enter season number', str(k_Folder.getSeason(season)))
+    d = dialog.numeric(0, xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30211), str(k_Folder.getSeason(season)))
     if d != '':
         k_Folder.setSeason(int(d))
         xbmc.executebuiltin("Container.Refresh")
@@ -262,7 +259,7 @@ if mode == constants.YEAR:
         year = ''
     k_Folder = kfolder.kFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
-    d = dialog.numeric(0, 'Enter year', year)
+    d = dialog.numeric(0, xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30212), year)
     if d != '':
         k_Folder.setYear(int(d))
         xbmc.executebuiltin("Container.Refresh")
@@ -275,7 +272,7 @@ if mode == constants.DELETE:
 # Confirmation dialog
         dialog = xbmcgui.Dialog()
         rf = vdrrecordingfolder.VdrRecordingFolder(recordingFolderPath)
-        d = dialog.yesno('Delete recording?', 'Do you want to delete "'
+        d = dialog.yesno(xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30220), xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30221) + ' "'
             + rf.title
             + '"?')
         if d == True:    
@@ -292,7 +289,7 @@ if mode == constants.MOVE:
     (fd, fn) = os.path.split(fp)
     k_Folder = kfolder.kFolder(fd)
     dest = k_Folder.selectFolder(getRootFolder())
-    xbmc.log("constants.MOVE, dest = " + str(dest), xbmc.LOGERROR) 
+    xbmc.log("constants.MOVE, dest = " + str(dest), xbmc.LOGINFO) 
     if dest != None:
         d1 = fp + ".move"
         dfin = os.path.join(dest, fn)
@@ -314,7 +311,7 @@ if mode == constants.MOVE_INTERNAL:
   tz = os.path.join(dest, os.path.split(src)[1])
   t = threading.Thread(target=move, args=(src, dest, tz, final))
   t.start()
-  pDialog.create('Move recording', src)
+  pDialog.create(xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30222), src)
 
   while t.is_alive() and not xbmc.Monitor().abortRequested():
       xbmc.sleep(2000)
@@ -330,7 +327,7 @@ if mode == constants.MOVE_INTERNAL:
 if mode == constants.SEARCH:
     rootFolder = sys.argv[2]
     base_url = sys.argv[3]
-    sString = GUIEditExportName("Enter search string")
+    sString = GUIEditExportName(xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30223))
     if sString != None:
        p_url = base_url + '?' + urllib.parse.urlencode({'mode': 'search', 'searchString': sString})
 #     xbmc.log("p_url=" + str(p_url), xbmc.LOGERROR)

@@ -74,6 +74,7 @@ class main:
 #                                listitem=li, isFolder=True)
         searchList = []
         self.createSeachList(self.rootFolder, searchList)
+        kf = kfolder.kFolder(self.rootFolder)
 
         searchStringL = searchString.lower()
         for vdrRecordingFolder in searchList:
@@ -82,8 +83,8 @@ class main:
                 vdrRecordingFolder.description = relRecordingPath + '\n' + vdrRecordingFolder.description
 # add context menu
                 commands = []
-                kfolder.addContextMenuCommand(commands, 30100, constants.DELETE, vdrRecordingFolder.path)
-                vdrRecordingFolder.addDirectoryItem(self.addon_handle, commands)                                
+                kf.addContextMenuCommand(commands, 30100, constants.DELETE, vdrRecordingFolder.path)
+                vdrRecordingFolder.addDirectoryItem(self.addon_handle, commands, 0)
         xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
         xbmcplugin.addSortMethod(self.addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
         xbmcplugin.endOfDirectory(self.addon_handle)

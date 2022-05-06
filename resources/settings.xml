@@ -8,11 +8,6 @@
           <default>/video/</default>
           <control type="button" format="path" />
         </setting>
-        <setting id="debug"      type="boolean" label="30002">
-          <level>3</level>
-          <default>false</default>
-          <control type="toggle" />
-        </setting>
       </group>
     </category>
   </section>
