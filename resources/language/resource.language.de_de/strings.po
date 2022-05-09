@@ -17,12 +17,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 msgctxt "Addon Summary"
-msgid "VDR Recordings"
-msgstr "VDR Aufzeichnungen"
-
-msgctxt "Addon Description"
-msgid "Play VDR recordings."
-msgstr "Abspielen von VDR Aufzeichnungen."
+msgid "Play VDR recordings"
+msgstr "VDR Aufzeichnungen wiedergeben"
 
 #settings labels
 

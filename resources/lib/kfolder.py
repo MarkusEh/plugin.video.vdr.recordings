@@ -197,12 +197,11 @@ class kFolder:
 
   def selectFolder(self, rootFolder):
     FOLDER_UP = ".."
-    THIS_FOLDER = "<select this folder>"
-    CREATE_FOLDER = "<create folder>"
-    DELETE_FOLDER = "<delete this folder>"
+    THIS_FOLDER = xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30300)
+    CREATE_FOLDER = xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30301)
+    DELETE_FOLDER = xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30302)
     self.subFolders = []
     self.subFolders.append(THIS_FOLDER)
-#   if os.access(self.path, os.W_OK):
     self.subFolders.append(CREATE_FOLDER)
     dirs, files = xbmcvfs.listdir(self.path)
     if len(dirs) == 0 and len(files) == 0:
@@ -246,7 +245,7 @@ class kFolder:
 
 
   def parseFolder(self, addon_handle, base_url, rootFolder, current_files):
-        if addon_handle >= 0: xbmc.log("parseFolder: Start, path: " + str(self.path), xbmc.LOGERROR)
+        if addon_handle >= 0: xbmc.log("parseFolder: Start, path: " + str(self.path), xbmc.LOGINFO)
         onlySameTitle = True
         firstTitle = None
         recordingsList = []
@@ -256,11 +255,10 @@ class kFolder:
           if os.path.splitext(rec_name)[1] == ".move": continue
           path = os.path.join(self.path, rec_name)
           rec_timestamps, files = xbmcvfs.listdir(path)
-          subfolder = False
+          subfolder = True
           for rec_timestamp in rec_timestamps:
-            if os.path.splitext(rec_timestamp)[1] != ".rec":
-              subfolder = True
-            else:
+            if os.path.splitext(rec_timestamp)[1] == ".rec":
+              subfolder = False
               vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(os.path.join(path,rec_timestamp))
               if firstTitle == None:
                 firstTitle = vdrRecordingFolder.title
@@ -273,10 +271,10 @@ class kFolder:
 
         totalItems = len(recordingsList) + len(subfolderList)
         if addon_handle >= 0:
-          xbmc.log("parseFolder: finished analysing VDR structure, number of recordings: " + str(len(recordingsList)) + " number of folders: " + str(len(subfolderList)), xbmc.LOGERROR)
-          xbmc.log("parseFolder: Start add recordings", xbmc.LOGERROR)
+          xbmc.log("parseFolder: finished analysing VDR structure, number of recordings: " + str(len(recordingsList)) + " number of folders: " + str(len(subfolderList)), xbmc.LOGINFO)
+          xbmc.log("parseFolder: Start add recordings", xbmc.LOGINFO)
         if onlySameTitle and len(recordingsList) > 1:
-#           xbmc.log("onlySameTitle: " + str(self.path), xbmc.LOGERROR)            
+#           xbmc.log("onlySameTitle: " + str(self.path), xbmc.LOGINFO)
             contentType = self.getContentType(constants.TV_SHOWS)
         else:
             contentType = self.getContentType(constants.MOVIES)

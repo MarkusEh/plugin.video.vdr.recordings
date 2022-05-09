@@ -17,11 +17,11 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 msgctxt "Addon Summary"
-msgid "VDR Recordings"
+msgid "Play VDR recordings"
 msgstr ""
 
 msgctxt "Addon Description"
-msgid "Play VDR recordings."
+msgid "If you use Klaus Schmidingers VDR http://www.tvdr.de to create TV recorings, you can use this plugin to watch them in KODI.[CR]You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin."
 msgstr ""
 
 #settings labels
@@ -123,3 +123,18 @@ msgstr ""
 msgctxt "#30223"
 msgid "Enter search string"
 msgstr ""
+
+# folder selection
+
+msgctxt "#30300"
+msgid "<select this folder>"
+msgstr ""
+
+msgctxt "#30301"
+msgid "<create folder>"
+msgstr ""
+
+msgctxt "#30302"
+msgid "<delete this folder>"
+msgstr ""
+

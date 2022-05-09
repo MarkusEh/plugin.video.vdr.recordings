@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="0.4.0" provider-name="Markus Ehrnsperger">
+<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="0.4.1" provider-name="Markus Ehrnsperger">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
   </requires>
@@ -9,9 +9,9 @@
   <extension point="xbmc.python.library" library="resources/lib/contextMenu.py"/>
   <extension point="xbmc.addon.metadata">
     <summary lang="en_GB">Play VDR recordings</summary>
-    <description lang="en_GB">Currently beta</description>
+    <description lang="en_GB">If you use Klaus Schmidingers VDR http://www.tvdr.de to create TV recorings, you can use this plugin to watch them in KODI.
+You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin.</description>
     <disclaimer lang="en_GB"></disclaimer>
-    <language></language>
     <platform>all</platform>
     <license>Copyright: GNU GPLv3</license>
     <forum></forum>
@@ -62,5 +62,6 @@ v0.1.1
         <clearlogo></clearlogo>
         <screenshot></screenshot>
     </assets>
+    <reuselanguageinvoker>true</reuselanguageinvoker>
   </extension>
 </addon>
