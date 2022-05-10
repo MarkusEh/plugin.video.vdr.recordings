@@ -20,6 +20,10 @@ msgctxt "Addon Summary"
 msgid "Play VDR recordings"
 msgstr "VDR Aufzeichnungen wiedergeben"
 
+msgctxt "Addon Description"
+msgid "Play VDR recordings."
+msgstr "Abspielen von VDR Aufzeichnungen."
+
 #settings labels
 
 msgctxt "#30001"

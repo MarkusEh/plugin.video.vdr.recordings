@@ -106,6 +106,12 @@ def scan(rootFolder, dirs, text, forceCompleteScan):
     xbmc.log("ADDALLTOLIBRARY, after scanning changed " + text + " folders", xbmc.LOGINFO)
     xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30202) + ' ' + str(os.path.basename(rootFolder)) + ')', False)
 
+def check_dir_not_exists(dir, context, messageNumber):
+    if not xbmcvfs.exists(dir + "/"): return True
+    xbmc.log("ERROR: " + dir + " already exists!, context: " + context, xbmc.LOGERROR)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30224) + ')', False)
+    return False
+
 def move_dir(source, destination):
   xbmc.log("contextMenu move_dir, source = " + source + " destination = " + destination, xbmc.LOGINFO)
   if not xbmcvfs.exists(source + "/"):
@@ -125,10 +131,15 @@ def move_dir(source, destination):
       return False
   return False
 
-def move(t1, t2, tz, t3):
-  if move_dir(t1, tz) == True:
-    if move_dir (tz, t3) == False:
-      move_dir(tz, t1)
+def move(src, t1, t2, final):
+  if move_dir(src, t1) == False: return
+  xbmc.executebuiltin("Container.Refresh")       
+  if move_dir(t1 , t2) == False:
+    move_dir(t1, src)
+    return
+  if move_dir(t2 , final) == False:
+    if move_dir(t2, t1): move_dir(t1, src)
+    return
 
 def GetFolderSize(path):
     TotalSize = 0.0
@@ -279,10 +290,9 @@ if mode == constants.DELETE:
             recursive_delete_dir(recordingFolderPath)
         xbmc.executebuiltin("Container.Refresh")       
 
-if mode == constants.MOVE:
+def do_move():
     recordingFolderPath = sys.argv[2]
-    ps = os.path.splitext(recordingFolderPath)
-    if ps[1] == ".rec":
+    if os.path.splitext(recordingFolderPath)[1] == ".rec":
         fp = os.path.split(recordingFolderPath)[0]
     else:
         fp = recordingFolderPath
@@ -290,33 +300,42 @@ if mode == constants.MOVE:
     k_Folder = kfolder.kFolder(fd)
     dest = k_Folder.selectFolder(getRootFolder())
     xbmc.log("constants.MOVE, dest = " + str(dest), xbmc.LOGINFO) 
-    if dest != None:
-        d1 = fp + ".move"
-        dfin = os.path.join(dest, fn)
-        if xbmcvfs.rename(fp, d1) == False:
-            xbmc.log("constants.MOVE, fp = " + fp, xbmc.LOGERROR) 
-            xbmc.log("constants.MOVE, d1 = " + d1, xbmc.LOGERROR)
-        else:
-            xbmc.executebuiltin("RunScript(plugin.video.vdr.recordings, " + str(constants.MOVE_INTERNAL) + ", \"" + d1 + "\", \"" + dest + "\", \"" + dfin + "\")")
-            xbmc.sleep(10) 
-            xbmc.executebuiltin("Container.Refresh")       
+    if dest == None: return
+# fp: source file name (with    path)
+# fn: source file name (without path)
+# dest: Destination folder
+# Create the following "helpers" ++++++
+#  d1: first  intermediate file, in same file system as source, with extension .move
+#  d2: second intermediate file, in same file system as destination, with extension .move
+#  dfin: destination file name (with path)
+    dfin = os.path.join(dest, fn)
+    d1 = fp + ".move"
+    d2 = dfin + ".move"
+# verify that these don't extist. Note: if any of them exists, something will go wrong. So abort in this case.
+    if check_dir_not_exists(dfin, "contextMenu constants.MOVE dfin", 30224) == False: return
+    if check_dir_not_exists(d1  , "contextMenu constants.MOVE d1  ", 30224) == False: return
+    if check_dir_not_exists(d2  , "contextMenu constants.MOVE d2  ", 30224) == False: return
+# now do the move, async
+    xbmc.executebuiltin("RunScript(plugin.video.vdr.recordings, " + str(constants.MOVE_INTERNAL) + ", \"" + fp + "\", \"" + d1 + "\", \"" + d2 + "\", \"" + dfin + "\")")
 
+if mode == constants.MOVE:
+   do_move()
 
 if mode == constants.MOVE_INTERNAL:
   src = sys.argv[2]
-  dest = sys.argv[3]
-  final = sys.argv[4]
+  d1 = sys.argv[3]
+  d2 = sys.argv[4]
+  final = sys.argv[5]
   pDialog = xbmcgui.DialogProgressBG()
 
-  tz = os.path.join(dest, os.path.split(src)[1])
-  t = threading.Thread(target=move, args=(src, dest, tz, final))
+  t = threading.Thread(target=move, args=(src, d1, d2, final))
   t.start()
   pDialog.create(xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30222), src)
 
   while t.is_alive() and not xbmc.Monitor().abortRequested():
       xbmc.sleep(2000)
-      s = GetFolderSize(src)
-      d = GetFolderSize(tz)
+      s = GetFolderSize(d1)
+      d = GetFolderSize(d2)
       if d == 0:
         d = GetFolderSize(final)
       if s + d != 0:
