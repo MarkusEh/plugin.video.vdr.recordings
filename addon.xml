@@ -8,7 +8,6 @@
   </extension>
   <extension point="xbmc.python.library" library="resources/lib/contextMenu.py"/>
   <extension point="xbmc.addon.metadata">
-You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin.</description>
     <platform>all</platform>
     <license>Copyright: GNU GPLv3</license>
     <forum></forum>
