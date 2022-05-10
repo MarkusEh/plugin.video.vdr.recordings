@@ -56,11 +56,13 @@ v0.1.1
 - Added support for KODI libraries
     </news>
     <assets>
-        <icon></icon>
+        <icon>resources/vdr-logo_bigPlayRecordings.png</icon>
         <fanart></fanart>
         <banner></banner>
         <clearlogo></clearlogo>
-        <screenshot></screenshot>
+        <screenshot>resources/screenshot00001.png</screenshot>
+        <screenshot>resources/screenshot00010.png</screenshot>
+        <screenshot>resources/screenshot00011.png</screenshot>
     </assets>
     <reuselanguageinvoker>true</reuselanguageinvoker>
   </extension>
