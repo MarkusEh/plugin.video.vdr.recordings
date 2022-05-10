@@ -363,12 +363,12 @@ class kFolder:
           if addon_handle == -20:
             for pathN in subfolderList:
                 self.subFolders.append(pathN[0])
-#               xbmc.log("subFolders= " + str(subFolders), xbmc.LOGERROR)
+#               xbmc.log("subFolders= " + str(subFolders), xbmc.LOGINFO)
           else:   
             for pathN in subfolderList:
               kFolder(pathN[0]).parseFolder(addon_handle, base_url, rootFolder, current_files)
         else:
-          xbmc.log("parseFolder: Start add folders", xbmc.LOGERROR)
+          xbmc.log("parseFolder: Start add folders", xbmc.LOGINFO)
           for pathN in subfolderList:
             url = build_url(base_url, {'mode': 'folder', 'currentFolder': pathN[0]})
             name = pathN[1].replace('_', ' ')
@@ -392,7 +392,7 @@ class kFolder:
             xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
             xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_DATEADDED)
             xbmcplugin.endOfDirectory(addon_handle)
-            xbmc.log("parseFolder: End", xbmc.LOGERROR)
+            xbmc.log("parseFolder: End", xbmc.LOGINFO)
 
   def getLibPath(self, contentType, baseFolderVDR):
         relPath = self.path[len(baseFolderVDR)+1:]
@@ -413,7 +413,7 @@ class kFolder:
           runner = "RunScript(plugin.video.vdr.recordings, " + str(mode) + ", \"" + str(url) + "\")"
         else:
           runner = "RunScript(plugin.video.vdr.recordings, " + str(mode) + ", \"" + str(url) + "\", \"" + str(arg3) + "\")"
-#       xbmc.log("runner=" + str(runner), xbmc.LOGERROR)
+#       xbmc.log("runner=" + str(runner), xbmc.LOGINFO)
         name_text = self.addon.getLocalizedString(name)
         commands.append(( name_text, runner, ))
 

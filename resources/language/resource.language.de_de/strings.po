@@ -21,8 +21,8 @@ msgid "Play VDR recordings"
 msgstr "VDR Aufzeichnungen wiedergeben"
 
 msgctxt "Addon Description"
-msgid "Play VDR recordings."
-msgstr "Abspielen von VDR Aufzeichnungen."
+msgid "If you use Klaus Schmidingers VDR http://www.tvdr.de to create TV recorings, you can use this plugin to watch them in KODI.[CR]You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin."
+msgstr "Abspielen von TV Aufzeichnungen, die mit Klaus Schmidingers VDR http://www.tvdr.de erstellt wurden. [CR]Voraussetzung: KODI benötigt Zugriff auf das Dateisystem mit den Aufzeichnungen, z.B. über NFS. Zur Wiedergabe der Aufzeichnungen mit diesem Plugin wird VDR nicht benötigt."
 
 #settings labels
 
@@ -124,3 +124,20 @@ msgstr "VDR Aufzeichnung verschieben"
 msgctxt "#30223"
 msgid "Enter search string"
 msgstr "Text für Suche eingeben"
+
+# folder selection
+
+msgctxt "#30300"
+msgid "<select this folder>"
+msgstr "<dieses Verzeichnis wählen>"
+
+msgctxt "#30301"
+msgid "<create folder>"
+msgstr "<Verzeichnis anlegen>"
+
+msgctxt "#30302"
+msgid "<delete this folder>"
+msgstr "<dieses Verzeichnis löschen>"
+
+~                                                                                                                                     
+~                            

@@ -151,9 +151,9 @@ def GetFolderSize(path):
       TotalSize = TotalSize + xbmcvfs.Stat(os.path.join(path, file)).st_size()
     return TotalSize
 
-#xbmc.log("contextMenu: sys.argv=" + str(sys.argv), xbmc.LOGERROR)
+#xbmc.log("contextMenu: sys.argv=" + str(sys.argv), xbmc.LOGINFO)
 mode = sys.argv[1]
-#xbmc.log("mode=" + str(mode), xbmc.LOGERROR)
+#xbmc.log("mode=" + str(mode), xbmc.LOGINFO)
 
 if mode == constants.ADDALLTOLIBRARY:
     rootFolder = sys.argv[2]
@@ -349,7 +349,7 @@ if mode == constants.SEARCH:
     sString = GUIEditExportName(xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30223))
     if sString != None:
        p_url = base_url + '?' + urllib.parse.urlencode({'mode': 'search', 'searchString': sString})
-#     xbmc.log("p_url=" + str(p_url), xbmc.LOGERROR)
+#     xbmc.log("p_url=" + str(p_url), xbmc.LOGINFO)
        runner = "ActivateWindow(10025," + str(p_url) + ",return)"
        xbmc.executebuiltin(runner)   
  

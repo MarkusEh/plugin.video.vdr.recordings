@@ -60,11 +60,11 @@ class VdrRecordingFolder:
         self.framerate = 25
 # Recording date / time
         rt = os.path.split(self.path)[1]
-#       xbmc.log("rectime_sort= " + rt, xbmc.LOGERROR)
+#       xbmc.log("rectime_sort= " + rt, xbmc.LOGINFO)
         try:
           self.RecordingTime = datetime.datetime(year = int(rt[0:4]), month = int(rt[5:7]),
             day = int(rt[8:10]), hour = int(rt[11:13]), minute = int(rt[14:16]), second = 0)
-#           xbmc.log("rectime= " + str(self.RecordingTime), xbmc.LOGERROR)
+#           xbmc.log("rectime= " + str(self.RecordingTime), xbmc.LOGINFO)
         except:
           xbmc.log("Error: Unknown format of rec folder name:" + rt, xbmc.LOGERROR)
           self.RecordingTime = datetime.datetime(year = 1960, month = 1,
@@ -169,7 +169,7 @@ class VdrRecordingFolder:
     li.setPath(url)
     xbmcplugin.setResolvedUrl(int(sys.argv[ 1 ]),True,li)
 #    rt = li.getProperty('ResumeTime')
-#    xbmc.log("play, resume position " + str(rt) + " url " + str(url), xbmc.LOGERROR)
+#    xbmc.log("play, resume position " + str(rt) + " url " + str(url), xbmc.LOGINFO)
 # note: resume position is alway 0.0000
 # see https://forum.kodi.tv/showthread.php?tid=358049
 # if resume:
@@ -193,11 +193,11 @@ class VdrRecordingFolder:
         except:
           xbmc.log("non-utf8 characters in file " + marksFile, xbmc.LOGERROR)
           marks_content = ""
-#       xbmc.log("marks_content: " + str(marks_content), xbmc.LOGERROR)
+#       xbmc.log("marks_content: " + str(marks_content), xbmc.LOGINFO)
         for marks_line in marks_content.splitlines():
           if marks_line[1] == ':':
             m_time_sec = ((float(marks_line[0]) * 60) + float(marks_line[2:4]) ) * 60 + float(marks_line[5:10])
-#           xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGERROR)
+#           xbmc.log("m_time_sec: " + str(m_time_sec), xbmc.LOGINFO)
             self.marks.append(m_time_sec)
 
   def sanitizeMarks(self):
@@ -205,13 +205,13 @@ class VdrRecordingFolder:
     self.getMarks()   
     lastMarkComStart = 0
     lastMarkMovieCont = -1
-#   xbmc.log("sanitizeMarks, path: " + str(self.path), xbmc.LOGERROR)        
+#   xbmc.log("sanitizeMarks, path: " + str(self.path), xbmc.LOGINFO)        
 
     for mark in self.marks:
 #     if mark < 5: continue
       if lastMarkMovieCont == -1:
         comLen = mark - lastMarkComStart
-#       xbmc.log("sanitizeMarks, comLen: " + str(comLen), xbmc.LOGERROR)        
+#       xbmc.log("sanitizeMarks, comLen: " + str(comLen), xbmc.LOGINFO)        
         if comLen > 15*60:
           if lastMarkComStart == 0:
             lastMarkComStart = mark
@@ -222,7 +222,7 @@ class VdrRecordingFolder:
           lastMarkMovieCont = mark
       else:
         movLen =  mark - lastMarkMovieCont
-#       xbmc.log("sanitizeMarks, movLen: " + str(movLen), xbmc.LOGERROR)        
+#       xbmc.log("sanitizeMarks, movLen: " + str(movLen), xbmc.LOGINFO)        
         if movLen < 5*60: continue
         lastMarkComStart = mark
         lastMarkMovieCont = -1
@@ -230,12 +230,12 @@ class VdrRecordingFolder:
   def updateComskip(self):
     if xbmcvfs.exists(os.path.join(self.path, "00001.edl") ): return
     if xbmcvfs.exists(os.path.join(self.path, "001.edl") ): return
-#   xbmc.log("Start creating commercials file" + self.path, xbmc.LOGERROR)
+#   xbmc.log("Start creating commercials file" + self.path, xbmc.LOGINFO)
     self.getMarks()
     self.sanitizeMarks()
     if self.marksS == []: return
 #   for mark in self.marksS:      
-#       xbmc.log("updateComskip, mark: " + str(mark[0]) + " " + str(mark[1]), xbmc.LOGERROR)        
+#       xbmc.log("updateComskip, mark: " + str(mark[0]) + " " + str(mark[1]), xbmc.LOGINFO)        
 
     self.getTsFiles()
     if len(self.ts_f) == 0: return
@@ -379,7 +379,7 @@ class VdrRecordingFolder:
         self.ts_l = []
       else:
         index_len = f_index.size()
-#       xbmc.log("index file size= " + str(index_len), xbmc.LOGERROR)
+#       xbmc.log("index file size= " + str(index_len), xbmc.LOGINFO)
         index = array( 'B', f_index.readBytes() )
         f_index.close
         numbersPerEntry = 8
@@ -388,14 +388,14 @@ class VdrRecordingFolder:
         else:
           offsetRight = 3
 #       index_len = len(index)
-#       xbmc.log("index_len= " + str(index_len), xbmc.LOGERROR)
+#       xbmc.log("index_len= " + str(index_len), xbmc.LOGINFO)
         number_of_entries = index_len / numbersPerEntry
-#       xbmc.log("number_of_entries= " + str(number_of_entries), xbmc.LOGERROR)
+#       xbmc.log("number_of_entries= " + str(number_of_entries), xbmc.LOGINFO)
         self.frameNumbers = number_of_entries
         len_sec = number_of_entries / self.framerate
         self.len_sec = len_sec
         numberOfTsFiles = index[index_len - offsetRight]
-#       xbmc.log("numberOfTsFiles= " + str(numberOfTsFiles), xbmc.LOGERROR)
+#       xbmc.log("numberOfTsFiles= " + str(numberOfTsFiles), xbmc.LOGINFO)
 # find length (sec) for each ts file
         self.ts_l = []
         for i in range(1, numberOfTsFiles):
@@ -404,9 +404,9 @@ class VdrRecordingFolder:
           testPos =  int(number_of_entries * i/ numberOfTsFiles)
           found = False
           while found == False:
-#           xbmc.log("testPos= " + str(testPos), xbmc.LOGERROR)
-#           xbmc.log("numbersPerEntry= " + str(numbersPerEntry), xbmc.LOGERROR)
-#           xbmc.log("offsetRight= " + str(offsetRight), xbmc.LOGERROR)
+#           xbmc.log("testPos= " + str(testPos), xbmc.LOGINFO)
+#           xbmc.log("numbersPerEntry= " + str(numbersPerEntry), xbmc.LOGINFO)
+#           xbmc.log("offsetRight= " + str(offsetRight), xbmc.LOGINFO)
             
             ts_file_at_test_pos = index[testPos * numbersPerEntry - offsetRight]
             if ts_file_at_test_pos > i:

@@ -59,7 +59,7 @@ class main:
         dirs, files = xbmcvfs.listdir(sPath)
         for dirName in dirs:
             if dirName[-4:] == ".rec":
-#               xbmc.log("createSeachList, recDirName= " + dirName, xbmc.LOGERROR)
+#               xbmc.log("createSeachList, recDirName= " + dirName, xbmc.LOGINFO)
                 searchList.append(VdrRecordingFolder(os.path.join(sPath, dirName)))
             else:
                 self.createSeachList(os.path.join(sPath, dirName), searchList)
@@ -98,7 +98,7 @@ class main:
         if (searchStringx == None):
             self.modeFolder()
         else:
-#           xbmc.log("searchString " + str(searchStringx), xbmc.LOGERROR)
+#           xbmc.log("searchString " + str(searchStringx), xbmc.LOGINFO)
             self.doSearch(searchStringx)
 
     def modePlay(self):
