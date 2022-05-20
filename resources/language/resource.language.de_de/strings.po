@@ -138,6 +138,3 @@ msgstr "<Verzeichnis anlegen>"
 msgctxt "#30302"
 msgid "<delete this folder>"
 msgstr "<dieses Verzeichnis löschen>"
-
-~                                                                                                                                     
-~                            
