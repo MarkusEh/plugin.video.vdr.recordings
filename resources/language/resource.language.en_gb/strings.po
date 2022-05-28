@@ -153,4 +153,3 @@ msgstr ""
 msgctxt "#30303"
 msgid "Name of new folder?"
 msgstr ""
-
