@@ -17,7 +17,7 @@ import time
 import datetime
 import xbmcplugin
 import json
-import kfolder
+import folder
 import constants
 
 def countDigits(dStr):
@@ -40,16 +40,15 @@ def getYear(yStr):
           i += 1
     return -1
 
-class VdrRecordingFolder:
+class VdrRecordingFolder(folder.cFolder):
   """All about one Vdr Recording"""
 
   def __init__(self, vdrRecordingFolder):
-    self.path = vdrRecordingFolder
+    super().__init__(vdrRecordingFolder)
     self.infoInitialized = False
     self.tsInitialized = False 
     self.marksInitialized = False
     self.indexInitialized = False
-    self.dirs, self.files = xbmcvfs.listdir(self.path)
     self.initializeInfo()
 
   def initializeInfo(self):
@@ -365,9 +364,8 @@ class VdrRecordingFolder:
           xbmc.log("Cannot update time of strm file: " + str(strmFileName), xbmc.LOGERROR)        
         current_files[strmFileName] = True
 
-
-  def getYear(self):
-    year = kfolder.kFolder(self.path, True, self.dirs, self.files).getYear()
+  def getYearR(self):
+    year = self.getYear()
     if year <= 0: 
       year = getYear(self.subtitle[1:])
     if year <= 0: 

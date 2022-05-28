@@ -5,16 +5,12 @@
 
 import os
 import string
-import urllib
 import json
 import xbmc
-import xbmcplugin
-import xbmcaddon
-import xbmcgui
 import xbmcvfs
 import constants
 
-class folder:
+class cFolder:
 
   def __init__(self, folder, filesFoldersProvided = False, dirs = [], files = []):
     self.path = folder

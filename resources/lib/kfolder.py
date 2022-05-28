@@ -13,185 +13,16 @@ import xbmcaddon
 import xbmcgui
 import xbmcvfs
 import constants
+import folder
 import vdrrecordingfolder
 
-class kFolder:
+class kFolder(folder.cFolder):
 
   def __init__(self, folder, filesFoldersProvided = False, dirs = [], files = []):
-    self.path = folder
-    self.fileRead = False
-    self.scraperFileRead = False
+    super().__init__(folder, filesFoldersProvided, dirs, files)
     self.rootFolder = None
-    self.source = ""
     self.addon = xbmcaddon.Addon('plugin.video.vdr.recordings')
     self.contextMenuCommandYearText = self.addon.getLocalizedString(30105)
-    if filesFoldersProvided:
-      self.dirs = dirs
-      self.files = files
-    else:
-      self.dirs, self.files = xbmcvfs.listdir(self.path)
-
-  def readScrapperFiles(self):
-    self.readKodiFile()
-    self.readTvscrapperFile()
-
-  def readTvscrapperFile(self):
-    if self.scraperFileRead == True: return
-    self.scraperFileRead = True
-    self.tvscrapperData = {}
-    if not "tvscrapper.json" in self.files: return
-    j_filename = os.path.join(self.path, "tvscrapper.json")
-    with xbmcvfs.File(j_filename, "r") as j_file:
-      try:
-        j_string = j_file.read()
-      except:
-        xbmc.log("non-utf8 characters in file " + j_filename, xbmc.LOGERROR)
-        return
-      try:
-        data = json.loads(j_string)
-      except:
-        xbmc.log("ERROR parsing json file " + j_filename, xbmc.LOGERROR)
-        return
-      keys0 = list(data.keys() )
-      self.source = ''
-      if 'thetvdb' in keys0: self.source = 'thetvdb'
-      if 'themoviedb' in keys0: self.source = 'themoviedb'
-      if self.source == '' :
-        xbmc.log("ERROR readTvscrapperFile, source == '', file = " + j_filename, xbmc.LOGERROR)
-        return
-# ignore tvscraper data if there is no name
-      r = data[self.source].get('name')
-      if r == None: return
-      if r == "": return
-      self.tvscrapperData = data[self.source]
-
-  def readKodiFile(self):
-    if self.fileRead == True:
-      return
-    self.fileRead = True
-    self.kodiLines = {}
-    if not "kodi" in self.files: return
-    kodiFileName = os.path.join(self.path, "kodi")
-    try:
-      f_kodi = xbmcvfs.File(kodiFileName, "rb")
-    except IOError:
-      xbmc.log("Cannot open for read: " + str(kodiFileName), xbmc.LOGERROR)
-      pass
-    else:
-# exists
-      try:
-        kodi_content = f_kodi.read()
-      except:
-        xbmc.log("non-utf8 characters in file " + kodiFileName, xbmc.LOGERROR)
-        kodi_content = ""
-
-      f_kodi.close()
-      for kodi_line in kodi_content.splitlines():
-        try:
-          self.kodiLines[kodi_line[0]] = kodi_line[2:].strip()
-        except:
-          pass
- 
-  def writeKodiFile(self):
-    kodiFileName = os.path.join(self.path, "kodi")
-    try:
-        f_kodi = xbmcvfs.File(kodiFileName, "w")
-    except IOError:
-# cannot open for write
-        xbmc.log("Cannot open for write: " + str(kodiFileName), xbmc.LOGERROR)        
-        return -1
-    else:
-# can open file for write
-        for kodiLine in self.kodiLines:
-          f_kodi.write(kodiLine + " " + self.kodiLines[kodiLine] + "\n")
-        f_kodi.close()
-  
-  def getContentType(self, default = constants.MOVIES):
-    self.readScrapperFiles()
-    r = self.kodiLines.get('C')
-    if r != None: return r
-    r = self.tvscrapperData.get('type')
-    if r == 'movie': return constants.MOVIES
-    if r == 'tv show': return constants.TV_SHOWS
-
-    return default
-
-  def setContentType(self, contentType):
-    self.readKodiFile()
-    self.kodiLines['C'] = contentType
-    self.writeKodiFile()
-
-  def getEpisode(self, default):
-    self.readScrapperFiles()
-    r = self.kodiLines.get('E')
-    if r != None: return int(r)
-    r = self.tvscrapperData.get('episode_number')
-    if r == None: return default
-    return r
-
-  def getEpisodeName(self, default = ""):
-    self.readScrapperFiles()
-    r = self.tvscrapperData.get('episode_name')
-    if r == None: return default
-    return r
-
-  def setEpisode(self, Episode):
-    self.readKodiFile()
-    self.kodiLines['E'] = str(Episode)
-    self.writeKodiFile()
-
-  def getSeason(self, default):
-    self.readScrapperFiles()
-    r = self.kodiLines.get('S')
-    if r != None: return int(r)
-    r = self.tvscrapperData.get('season_number')
-    if r == None: return default
-    return r
-
-  def setSeason(self, Season):
-    self.readKodiFile()
-    self.kodiLines['S'] = str(Season)
-    self.writeKodiFile()
-
-  def getYear(self):
-    self.readScrapperFiles()
-    r = self.kodiLines.get('Y')
-    if r != None:
-      if not r.isdigit(): xbmc.log("kfolder, file kodi, year not integer, year = " + str(r) + " path " + self.path, xbmc.LOGERROR)
-    if r != None: return int(r)
-    r = self.tvscrapperData.get('year')
-    if r == None: return -1
-    if type(r) != int: xbmc.log("kfolder, year not integer, year = " + str(r) + " path " + self.path, xbmc.LOGERROR)
-    return r
-
-  def getName(self, default):
-    self.readScrapperFiles()
-    r = self.tvscrapperData.get('name')
-    if r == None: return default
-    return r
-
-  def getDbUrl(self):
-    self.readScrapperFiles()
-    r = self.tvscrapperData.get('movie_tv_id')
-    if r == None: return ""
-    if self.source == 'themoviedb': return "https://www.themoviedb.org/movie/" + str(r)
-    if self.source == 'thetvdb': return "https://www.thetvdb.com/index.php?tab=series&id=" + str(r)
-    return ""
-
-
-  def setYear(self, Year):
-    self.readKodiFile()
-    self.kodiLines['Y'] = str(Year)
-    self.writeKodiFile()
-
-  def SetStrmFileName(self, strmFileName):
-    self.readKodiFile()
-    self.kodiLines['F'] = str(strmFileName).strip()
-    self.writeKodiFile()
-
-  def getStrmFileName(self):
-    self.readKodiFile()
-    return self.kodiLines.get('F')
 
   def getRootFolder(self):
     if self.rootFolder == None:
@@ -310,18 +141,16 @@ class kFolder:
             season = 1
             episode = 0
             for vdrRecordingFolder in sorted(recordingsList, key=lambda rec: rec.sortRecordingTimestamp):
-              kf = kFolder(vdrRecordingFolder.path, True, vdrRecordingFolder.dirs, vdrRecordingFolder.files)
-              year = kf.getYear()
-              if year <= 0: year = vdrRecordingFolder.getYear()
-              finalContentType = kf.getContentType(contentType)
+              year = vdrRecordingFolder.getYearR()
+              finalContentType = vdrRecordingFolder.getContentType(contentType)
               if finalContentType == constants.TV_SHOWS:
 # TV shows
-                final_TV_show_name = kf.getName(TV_show_name)
+                final_TV_show_name = vdrRecordingFolder.getName(TV_show_name)
                 if year > 0: final_TV_show_name = final_TV_show_name + ' (' + str(year) + ')'
                 libPath = os.path.join(constants.LIBRARY_TV_SHOWS, final_TV_show_name)
                 if contentType == constants.TV_SHOWS:
 # automatically count episodes, but only if folder is explicitly marked as TV Shows or all recordings have the same name
-                  season_n = kf.getSeason(season)
+                  season_n = vdrRecordingFolder.getSeason(season)
                   if season_n == season:
                     episode = episode + 1
                   else:
@@ -329,18 +158,18 @@ class kFolder:
                     season = season_n
                 else:
 # don't automatically count episodes, use season = 1 and episode = 1 if on other information is available
-                  season = kf.getSeason(1)
+                  season = vdrRecordingFolder.getSeason(1)
                   episode = 1
-                episode = kf.getEpisode(episode)
+                episode = vdrRecordingFolder.getEpisode(episode)
 
                 se = 'S' + str(season).zfill(2) + 'E' + str(episode).zfill(2)
                 vdrRecordingFolder.title = vdrRecordingFolder.title + ' ' + se
                 if addon_handle == -10:
-                    filename = kf.getEpisodeName(vdrRecordingFolder.subtitle)
+                    filename = vdrRecordingFolder.getEpisodeName(vdrRecordingFolder.subtitle)
                     if filename == "":
                       filename =  os.path.split(os.path.split(vdrRecordingFolder.path)[0])[1].replace('_', ' ').strip()
                       if filename[:1] == "%": filename = filename[1:]
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename + ' ' + se, current_files, base_url, False, kf.getDbUrl() )
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename + ' ' + se, current_files, base_url, False, vdrRecordingFolder.getDbUrl() )
                 elif addon_handle >= 0:
 # add context menu
                     commands = []
@@ -354,10 +183,10 @@ class kFolder:
 # Movies
                 libPath = self.getLibPath(finalContentType, rootFolder)          
                 if addon_handle == -10:
-                    filename =  kf.getName(vdrRecordingFolder.title)
+                    filename =  vdrRecordingFolder.getName(vdrRecordingFolder.title)
                     if year > 0:
                        filename = filename + ' (' + str(year) + ')'
-                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files, base_url, True, kf.getDbUrl() )
+                    vdrRecordingFolder.addRecordingToLibrary(libPath, filename, current_files, base_url, True, vdrRecordingFolder.getDbUrl() )
                 elif addon_handle >= 0:
                   if year > 0:
                      vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
