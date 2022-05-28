@@ -203,7 +203,8 @@ class kFolder:
     DELETE_FOLDER = xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30302)
     self.subFolders = []
     if not ignoreThisFolder:
-      self.subFolders.append(THIS_FOLDER)
+      if self.path != os.path.split(ignoreSubfoldersOfThisFolder)[0]:
+        self.subFolders.append(THIS_FOLDER)
       self.subFolders.append(CREATE_FOLDER)
       dirs, files = xbmcvfs.listdir(self.path)
       if len(dirs) == 0 and len(files) == 0:
@@ -252,20 +253,18 @@ class kFolder:
         subfolderList = []
         rec_names, files = xbmcvfs.listdir(self.path)
         for rec_name in rec_names:
-          if os.path.splitext(rec_name)[1] == ".move":
-            continue
+          if rec_name.endswith(".move"): continue
           path = os.path.join(self.path, rec_name)
           rec_timestamps, files = xbmcvfs.listdir(path)
           subContainsMovFolders = False
           subContainsNonMovFolders = False
           subfolder = True
           for rec_timestamp in rec_timestamps:
-            folder_ext = os.path.splitext(rec_timestamp)[1]
-            if folder_ext == ".move":
-              subContainsMovFolders = True
+            if rec_timestamp.endswith(".move"):
+              if rec_timestamp.endswith(".rec.move"): subContainsMovFolders = True
               continue
             subContainsNonMovFolders = True
-            if folder_ext == ".rec":
+            if rec_timestamp.endswith(".rec"):
               subfolder = False
               vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(os.path.join(path,rec_timestamp))
               if firstTitle == None:
@@ -388,7 +387,7 @@ class kFolder:
             self.addContextMenuCommand(commands, 30107, constants.MUSIC_VIDEOS, pathN[0])
             self.addContextMenuCommand(commands, 30108, constants.MOVIES, pathN[0])
             self.addContextMenuCommand(commands, 30109, constants.ADDALLTOLIBRARY, rootFolder, base_url)
-            self.addContextMenuCommand(commands, 30101, constants.MOVE, pathN[0])
+            self.addContextMenuCommand(commands, 30111, constants.MOVE, pathN[0])
             self.addContextMenuCommand(commands, 30110, constants.SEARCH, rootFolder, base_url)
             self.addContextMenuCommand(commands, 30102, constants.REFRESH, rootFolder, base_url)
             li.addContextMenuItems( commands )
