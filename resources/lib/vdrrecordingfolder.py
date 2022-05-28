@@ -49,6 +49,7 @@ class VdrRecordingFolder:
     self.tsInitialized = False 
     self.marksInitialized = False
     self.indexInitialized = False
+    self.dirs, self.files = xbmcvfs.listdir(self.path)
     self.initializeInfo()
 
   def initializeInfo(self):
@@ -70,17 +71,21 @@ class VdrRecordingFolder:
           self.RecordingTime = datetime.datetime(year = 1960, month = 1,
             day = 1, hour = 0, minute = 0, second = 0)
         self.sortRecordingTimestamp = str(self.RecordingTime)
-        infoFileName = os.path.join(self.path, "info")
-        if not xbmcvfs.exists(infoFileName):
+        if "info" in self.files:
+          infoFileName = os.path.join(self.path, "info")
+        elif "info.vdr" in self.files:
           infoFileName = os.path.join(self.path, "info.vdr")
-        if not xbmcvfs.exists(infoFileName):
+        elif "info.txt" in self.files:
           infoFileName = os.path.join(self.path, "info.txt")
-        with xbmcvfs.File(infoFileName, "r") as f_info:
-          try:
-            info_str = f_info.read()
-          except:
-            xbmc.log("non-utf8 characters in file " + infoFileName, xbmc.LOGERROR)
-            info_str = ""
+        else:
+          infoFileName = ""
+        if infoFileName != "":
+          with xbmcvfs.File(infoFileName, "r") as f_info:
+            try:
+              info_str = f_info.read()
+            except:
+              xbmc.log("non-utf8 characters in file " + infoFileName, xbmc.LOGERROR)
+              info_str = ""
 
         for info_line in info_str.splitlines():
             if info_line[0] == 'T':
@@ -95,7 +100,7 @@ class VdrRecordingFolder:
         if self.title == '':
           self.title = os.path.split(os.path.split(self.path)[0])[1].replace('_', ' ').strip()
           if self.title[:1] == "%": self.title = self.title[1:]
-        if self.description == '':
+        if self.description == '' and "summary.vdr" in self.files:
           with xbmcvfs.File(os.path.join(self.path, "summary.vdr"), "r") as f_summary:
             try:
               self.description = f_summary.read().strip()
@@ -112,12 +117,12 @@ class VdrRecordingFolder:
     li.setProperty('IsPlayable', 'true')
 
     dict_art = {}
-    poster_path = os.path.join(self.path, "poster.jpg")
-    if xbmcvfs.exists(poster_path):
+    if "poster.jpg" in self.files:
+      poster_path = os.path.join(self.path, "poster.jpg")
       dict_art['poster'] = poster_path
       dict_art['thumb'] = poster_path
-    fanart_path = os.path.join(self.path, "fanart.jpg")
-    if xbmcvfs.exists(fanart_path):
+    if "fanart.jpg" in self.files:
+      fanart_path = os.path.join(self.path, "fanart.jpg")
       dict_art['fanart'] = fanart_path
 
     li.setArt(dict_art)
@@ -131,12 +136,10 @@ class VdrRecordingFolder:
     if self.tsInitialized == False:
       self.tsInitialized = True
       self.ts_f = []
-      dirs, files = xbmcvfs.listdir(self.path)
-      for r_file in files:
-        ext = os.path.splitext(r_file)[1]
-        if ext == ".ts":
+      for r_file in self.files:
+        if r_file.endswith(".ts"):
           self.ts_f.append( os.path.join(self.path, r_file) )
-        if ext == ".vdr":
+        if r_file.endswith(".vdr"):
           if len(os.path.split(r_file)[1]) == 7:
             self.ts_f.append( os.path.join(self.path, r_file) )
       self.ts_f.sort()
@@ -184,9 +187,12 @@ class VdrRecordingFolder:
     if self.marksInitialized: return
     self.marksInitialized = True
     self.marks = []
-    marksFile = os.path.join(self.path, "marks")
-    if not xbmcvfs.exists(marksFile):
+    if "marks" in self.files:
+      marksFile = os.path.join(self.path, "marks")
+    elif "marks.vdr" in self.files:
       marksFile = os.path.join(self.path, "marks.vdr")
+    else:
+      return
     with xbmcvfs.File(marksFile, "r") as f_marks:
         try:
           marks_content = f_marks.read()
@@ -228,17 +234,27 @@ class VdrRecordingFolder:
         lastMarkMovieCont = -1
 
   def updateComskip(self):
-    if xbmcvfs.exists(os.path.join(self.path, "00001.edl") ): return
-    if xbmcvfs.exists(os.path.join(self.path, "001.edl") ): return
-#   xbmc.log("Start creating commercials file" + self.path, xbmc.LOGINFO)
+    if "00001.edl" in self.files: return
+    if "001.edl" in self.files: return
+    self.getTsFiles()
+    if self.ts_f == []: return
     self.getMarks()
+    if len(self.marks) == 0:
+      return
+    xbmc.log("Creating commercials file, marks not empty " + self.path, xbmc.LOGINFO)
     self.sanitizeMarks()
-    if self.marksS == []: return
+    if self.marksS == []:
+# create empty *.edl file, to avoid to check here again
+      ts_file = self.ts_f[0]
+      with xbmcvfs.File((os.path.splitext(ts_file)[0] + ".edl"), "w") as f_com:
+        try:
+          f_com.write('\n')
+        except:
+          xbmc.log("Error creating empty commercials file " + os.path.splitext(ts_file)[0] + ".edl", xbmc.LOGERROR)
+      return
 #   for mark in self.marksS:      
 #       xbmc.log("updateComskip, mark: " + str(mark[0]) + " " + str(mark[1]), xbmc.LOGINFO)        
 
-    self.getTsFiles()
-    if len(self.ts_f) == 0: return
     if len(self.ts_f) >  1:
       self.initializeIndex()
       if len(self.ts_f) != len(self.ts_l):
@@ -264,14 +280,21 @@ class VdrRecordingFolder:
                    + '\n')
               except:
                 xbmc.log("Error creating commercials file " + os.path.splitext(ts_file)[0] + ".edl", xbmc.LOGERROR)
+      else:
+        with xbmcvfs.File((os.path.splitext(ts_file)[0] + ".edl"), "w") as f_com:
+          try:
+            f_com.write('\n')
+          except:
+            xbmc.log("Error creating commercials file " + os.path.splitext(ts_file)[0] + ".edl", xbmc.LOGERROR)
       if len(self.ts_f) >  1:
         lengthOfPreviousFiles = self.ts_l[iIndex] / self.framerate
         iIndex = iIndex +1
+    xbmc.log("End creating commercials file " + self.path, xbmc.LOGINFO)
 
   def addRecordingToLibrary(self, libraryPath, filename, current_files, base_url, isMovie, nfoUrl):
       if len(self.getTsFiles() ) == 0: return
       self.updateComskip()
-      if not xbmcvfs.exists(libraryPath): xbmcvfs.mkdirs(libraryPath)
+      xbmcvfs.mkdirs(libraryPath)
 # can we use symlinks? (Otherwisae, edl / comskip does not work)
       use_symlinks = sys.platform.startswith('linux') and self.getTsFiles()[0].startswith('/')
       use_symlinks = use_symlinks and (isMovie or len(self.getTsFiles() ) == 1)
@@ -344,7 +367,7 @@ class VdrRecordingFolder:
 
 
   def getYear(self):
-    year = kfolder.kFolder(self.path).getYear()
+    year = kfolder.kFolder(self.path, True, self.dirs, self.files).getYear()
     if year <= 0: 
       year = getYear(self.subtitle[1:])
     if year <= 0: 
@@ -362,13 +385,14 @@ class VdrRecordingFolder:
   def initializeIndex(self):
     if self.indexInitialized == False:
       self.indexInitialized = True
-      newIndexFormat = True
-      indexFileName = os.path.join(self.path, "index")
-      if not xbmcvfs.exists(indexFileName):
+      if "index" in self.files:
+        newIndexFormat = True
+        indexFileName = os.path.join(self.path, "index")
+      elif "index.vdr" in self.files:
         newIndexFormat = False
         indexFileName = os.path.join(self.path, "index.vdr")
-      if not xbmcvfs.exists(indexFileName):
-        xbmc.log("Cannot open index file " + str(indexFileName), xbmc.LOGERROR)
+      else:
+        xbmc.log("No index or index.vdr file is in " + str(self.path), xbmc.LOGERROR)
         self.ts_l = []
         return
       try:

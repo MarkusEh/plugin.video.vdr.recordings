@@ -17,13 +17,19 @@ import vdrrecordingfolder
 
 class kFolder:
 
-  def __init__(self, folder):
+  def __init__(self, folder, filesFoldersProvided = False, dirs = [], files = []):
     self.path = folder
     self.fileRead = False
     self.scraperFileRead = False
     self.rootFolder = None
     self.source = ""
     self.addon = xbmcaddon.Addon('plugin.video.vdr.recordings')
+    self.contextMenuCommandYearText = self.addon.getLocalizedString(30105)
+    if filesFoldersProvided:
+      self.dirs = dirs
+      self.files = files
+    else:
+      self.dirs, self.files = xbmcvfs.listdir(self.path)
 
   def readScrapperFiles(self):
     self.readKodiFile()
@@ -33,8 +39,8 @@ class kFolder:
     if self.scraperFileRead == True: return
     self.scraperFileRead = True
     self.tvscrapperData = {}
+    if not "tvscrapper.json" in self.files: return
     j_filename = os.path.join(self.path, "tvscrapper.json")
-    if not xbmcvfs.exists(j_filename): return
     with xbmcvfs.File(j_filename, "r") as j_file:
       try:
         j_string = j_file.read()
@@ -64,27 +70,27 @@ class kFolder:
       return
     self.fileRead = True
     self.kodiLines = {}
+    if not "kodi" in self.files: return
     kodiFileName = os.path.join(self.path, "kodi")
-    if xbmcvfs.exists(kodiFileName):
-      try:
-        f_kodi = xbmcvfs.File(kodiFileName, "rb")
-      except IOError:
-        xbmc.log("Cannot open for read: " + str(kodiFileName), xbmc.LOGERROR)
-        pass
-      else:
+    try:
+      f_kodi = xbmcvfs.File(kodiFileName, "rb")
+    except IOError:
+      xbmc.log("Cannot open for read: " + str(kodiFileName), xbmc.LOGERROR)
+      pass
+    else:
 # exists
-        try:
-          kodi_content = f_kodi.read()
-        except:
-          xbmc.log("non-utf8 characters in file " + kodiFileName, xbmc.LOGERROR)
-          kodi_content = ""
+      try:
+        kodi_content = f_kodi.read()
+      except:
+        xbmc.log("non-utf8 characters in file " + kodiFileName, xbmc.LOGERROR)
+        kodi_content = ""
 
-        f_kodi.close()
-        for kodi_line in kodi_content.splitlines():
-          try:
-            self.kodiLines[kodi_line[0]] = kodi_line[2:].strip()
-          except:
-            pass
+      f_kodi.close()
+      for kodi_line in kodi_content.splitlines():
+        try:
+          self.kodiLines[kodi_line[0]] = kodi_line[2:].strip()
+        except:
+          pass
  
   def writeKodiFile(self):
     kodiFileName = os.path.join(self.path, "kodi")
@@ -206,8 +212,7 @@ class kFolder:
       if self.path != os.path.split(ignoreSubfoldersOfThisFolder)[0]:
         self.subFolders.append(THIS_FOLDER)
       self.subFolders.append(CREATE_FOLDER)
-      dirs, files = xbmcvfs.listdir(self.path)
-      if len(dirs) == 0 and len(files) == 0:
+      if len(self.dirs) == 0 and len(self.files) == 0:
         self.subFolders.append(DELETE_FOLDER)
     if self.path != rootFolder:
       self.subFolders.append(FOLDER_UP)
@@ -251,8 +256,7 @@ class kFolder:
         firstTitle = None
         recordingsList = []
         subfolderList = []
-        rec_names, files = xbmcvfs.listdir(self.path)
-        for rec_name in rec_names:
+        for rec_name in self.dirs:
           if rec_name.endswith(".move"): continue
           path = os.path.join(self.path, rec_name)
           rec_timestamps, files = xbmcvfs.listdir(path)
@@ -268,9 +272,9 @@ class kFolder:
               subfolder = False
               vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(os.path.join(path,rec_timestamp))
               if firstTitle == None:
-                firstTitle = vdrRecordingFolder.title
+                firstTitle = rec_name
               else:
-                if vdrRecordingFolder.title != firstTitle:
+                if rec_name != firstTitle:
                   onlySameTitle = False
               recordingsList.append(vdrRecordingFolder)
           if subfolder and (subContainsNonMovFolders or not subContainsMovFolders):
@@ -280,7 +284,7 @@ class kFolder:
         if addon_handle >= 0:
           xbmc.log("parseFolder: finished analysing VDR structure, number of recordings: " + str(len(recordingsList)) + " number of folders: " + str(len(subfolderList)), xbmc.LOGINFO)
           xbmc.log("parseFolder: Start add recordings", xbmc.LOGINFO)
-        if onlySameTitle and len(recordingsList) > 1:
+        if onlySameTitle and len(recordingsList) > 3:
 #           xbmc.log("onlySameTitle: " + str(self.path), xbmc.LOGINFO)
             contentType = self.getContentType(constants.TV_SHOWS)
         else:
@@ -302,11 +306,11 @@ class kFolder:
             if onlySameTitle:
               TV_show_name = firstTitle
             else:
-              TV_show_name = os.path.split(self.path)[1].strip()
+              TV_show_name = os.path.basename(self.path)
             season = 1
             episode = 0
             for vdrRecordingFolder in sorted(recordingsList, key=lambda rec: rec.sortRecordingTimestamp):
-              kf = kFolder(vdrRecordingFolder.path)
+              kf = kFolder(vdrRecordingFolder.path, True, vdrRecordingFolder.dirs, vdrRecordingFolder.files)
               year = kf.getYear()
               if year <= 0: year = vdrRecordingFolder.getYear()
               finalContentType = kf.getContentType(contentType)
@@ -316,7 +320,7 @@ class kFolder:
                 if year > 0: final_TV_show_name = final_TV_show_name + ' (' + str(year) + ')'
                 libPath = os.path.join(constants.LIBRARY_TV_SHOWS, final_TV_show_name)
                 if contentType == constants.TV_SHOWS:
-# automatically count episodes, but only if folder is explicitly marked as TV Shows or all recurdings have the same name
+# automatically count episodes, but only if folder is explicitly marked as TV Shows or all recordings have the same name
                   season_n = kf.getSeason(season)
                   if season_n == season:
                     episode = episode + 1
@@ -358,7 +362,7 @@ class kFolder:
                   if year > 0:
                      vdrRecordingFolder.title = vdrRecordingFolder.title + ' (' + str(year) + ')'
                   commands = []
-                  self.addContextMenuCommand(commands, 30105, constants.YEAR, vdrRecordingFolder.path, str(year))
+                  self.addContextMenuCommandYear(commands, vdrRecordingFolder.path, year)
                   self.addContextMenuCommand(commands, 30100, constants.DELETE, vdrRecordingFolder.path)
                   self.addContextMenuCommand(commands, 30101, constants.MOVE, vdrRecordingFolder.path)
                   self.addContextMenuCommand(commands, 30102, constants.REFRESH, rootFolder, base_url)
@@ -414,6 +418,11 @@ class kFolder:
             libPath = os.path.join(constants.LIBRARY_MOVIES, relPath)   
         return libPath                     
 
+  def addContextMenuCommandYear(self, commands, url, year):
+#   runner = "RunScript(plugin.video.vdr.recordings, Year, \"" + str(url) + "\", \"" + str(year) + "\")"
+#   runner = "RunScript(plugin.video.vdr.recordings, " + str(constants.YEAR) + ", \"" + str(url) + "\", \"" + str(year) + "\")"
+#   xbmc.log("runner=" + str(runner), xbmc.LOGINFO)
+    commands.append((self.contextMenuCommandYearText, "RunScript(plugin.video.vdr.recordings, Year, \"" + str(url) + "\", \"" + str(year) + "\")", ))
 
   def addContextMenuCommand(self, commands, name, mode, url, arg3 = ''):
         if arg3 == '':
