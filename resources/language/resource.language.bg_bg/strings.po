@@ -24,12 +24,12 @@ msgctxt "Addon Description"
 msgid "If you use Klaus Schmidingers VDR http://www.tvdr.de to create TV recorings, you can use this plugin to watch them in KODI.[CR]You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin."
 msgstr ""
 
-#settings labels
+# settings labels
 msgctxt "#30001"
 msgid "Folder with VDR recordings"
 msgstr ""
 
-#context menu
+# context menu
 msgctxt "#30100"
 msgid "Delete VDR recording"
 msgstr ""
@@ -72,6 +72,10 @@ msgstr ""
 
 msgctxt "#30110"
 msgid "Search recordings"
+msgstr ""
+
+msgctxt "#30111"
+msgid "Move VDR folder"
 msgstr ""
 
 # Notification messages
@@ -120,6 +124,14 @@ msgctxt "#30223"
 msgid "Enter search string"
 msgstr ""
 
+msgctxt "#30224"
+msgid "Folder already exists:"
+msgstr ""
+
+msgctxt "#30225"
+msgid "Cannot create folder:"
+msgstr ""
+
 # folder selection
 msgctxt "#30300"
 msgid "<select this folder>"
@@ -131,4 +143,8 @@ msgstr ""
 
 msgctxt "#30302"
 msgid "<delete this folder>"
+msgstr ""
+
+msgctxt "#30303"
+msgid "Name of new folder?"
 msgstr ""

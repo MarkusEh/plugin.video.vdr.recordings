@@ -124,6 +124,14 @@ msgctxt "#30223"
 msgid "Enter search string"
 msgstr "Text für Suche eingeben"
 
+msgctxt "#30224"
+msgid "Folder already exists:"
+msgstr ""
+
+msgctxt "#30225"
+msgid "Cannot create folder:"
+msgstr ""
+
 # folder selection
 msgctxt "#30300"
 msgid "<select this folder>"
