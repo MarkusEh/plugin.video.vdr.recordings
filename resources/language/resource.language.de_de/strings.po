@@ -74,6 +74,10 @@ msgctxt "#30110"
 msgid "Search recordings"
 msgstr "Suche nach Aufzeichnungen"
 
+msgctxt "#30111"
+msgid "Move VDR folder"
+msgstr "VDR Verzeichnis verschieben"
+
 # Notification messages
 msgctxt "#30200"
 msgid "Update library:"
@@ -132,3 +136,7 @@ msgstr "<Verzeichnis anlegen>"
 msgctxt "#30302"
 msgid "<delete this folder>"
 msgstr "<dieses Verzeichnis löschen>"
+
+msgctxt "#30303"
+msgid "Name of new folder?"
+msgstr "Name des neuen Verzeichnisses?"

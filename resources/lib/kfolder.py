@@ -195,50 +195,50 @@ class kFolder:
         self.rootFolder = self.rootFolder[:-1]
     return self.rootFolder
 
-  def selectFolder(self, rootFolder):
+  def selectFolder(self, rootFolder, ignoreSubfoldersOfThisFolder):
+    ignoreThisFolder = self.path.startswith(ignoreSubfoldersOfThisFolder)
     FOLDER_UP = ".."
     THIS_FOLDER = xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30300)
     CREATE_FOLDER = xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30301)
     DELETE_FOLDER = xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30302)
     self.subFolders = []
-    self.subFolders.append(THIS_FOLDER)
-    self.subFolders.append(CREATE_FOLDER)
-    dirs, files = xbmcvfs.listdir(self.path)
-    if len(dirs) == 0 and len(files) == 0:
-      self.subFolders.append(DELETE_FOLDER)
+    if not ignoreThisFolder:
+      self.subFolders.append(THIS_FOLDER)
+      self.subFolders.append(CREATE_FOLDER)
+      dirs, files = xbmcvfs.listdir(self.path)
+      if len(dirs) == 0 and len(files) == 0:
+        self.subFolders.append(DELETE_FOLDER)
     if self.path != rootFolder:
       self.subFolders.append(FOLDER_UP)
     prefolders = len(self.subFolders)
-    self.parseFolder(-20, rootFolder, rootFolder, {})
+    if not ignoreThisFolder:
+      self.parseFolder(-20, rootFolder, rootFolder, {})
     dialog = xbmcgui.Dialog()
     d = dialog.select(self.path, self.subFolders)
     if d == None: return d
     if d == -1: return None
     if d >= prefolders:
-      return kFolder(self.subFolders[d]).selectFolder(rootFolder)
+      return kFolder(self.subFolders[d]).selectFolder(rootFolder, ignoreSubfoldersOfThisFolder)
     if self.subFolders[d] == FOLDER_UP:
-      return kFolder(os.path.split(self.path)[0]).selectFolder(rootFolder)
+      return kFolder(os.path.split(self.path)[0]).selectFolder(rootFolder, ignoreSubfoldersOfThisFolder)
     if self.subFolders[d] == THIS_FOLDER:
       return self.path
     if self.subFolders[d] == DELETE_FOLDER:
-      try:
-        xbmcvfs.rmdir(self.path)
-      except:
+      if xbmcvfs.rmdir(self.path):
+        return kFolder(os.path.split(self.path)[0]).selectFolder(rootFolder, ignoreSubfoldersOfThisFolder)
+      else:
         xbmc.log("Error deleting directory " + str(self.path), xbmc.LOGERROR)            
-        return self.selectFolder(rootFolder)
-      return kFolder(os.path.split(self.path)[0]).selectFolder(rootFolder)
+        return self.selectFolder(rootFolder, ignoreSubfoldersOfThisFolder)
 
     if self.subFolders[d] == CREATE_FOLDER:
-      d2 = dialog.input("Enter name of new folder")
-      if d2 == "": return self.selectFolder(rootFolder)
+      d2 = dialog.input(xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30303) )
+      if d2 == "": return self.selectFolder(rootFolder, ignoreSubfoldersOfThisFolder)
       newpath = os.path.join(self.path, d2)
+      xbmcvfs.mkdirs(newpath)
       if not xbmcvfs.exists(newpath + "/"):
-        try:
-          xbmcvfs.makedirs(newpath)
-        except:
-          xbmc.log("Error creating directory " + str(newpath), xbmc.LOGERROR)            
-          return self.selectFolder(rootFolder)
-      return kFolder(newpath).selectFolder(rootFolder)
+        xbmc.log("Error creating directory " + str(newpath), xbmc.LOGERROR)            
+        return self.selectFolder(rootFolder, ignoreSubfoldersOfThisFolder)
+      return kFolder(newpath).selectFolder(rootFolder, ignoreSubfoldersOfThisFolder)
 
     xbmc.log("Error in selectFolder, d= " + str(d), xbmc.LOGERROR)            
     return None
@@ -252,12 +252,20 @@ class kFolder:
         subfolderList = []
         rec_names, files = xbmcvfs.listdir(self.path)
         for rec_name in rec_names:
-          if os.path.splitext(rec_name)[1] == ".move": continue
+          if os.path.splitext(rec_name)[1] == ".move":
+            continue
           path = os.path.join(self.path, rec_name)
           rec_timestamps, files = xbmcvfs.listdir(path)
+          subContainsMovFolders = False
+          subContainsNonMovFolders = False
           subfolder = True
           for rec_timestamp in rec_timestamps:
-            if os.path.splitext(rec_timestamp)[1] == ".rec":
+            folder_ext = os.path.splitext(rec_timestamp)[1]
+            if folder_ext == ".move":
+              subContainsMovFolders = True
+              continue
+            subContainsNonMovFolders = True
+            if folder_ext == ".rec":
               subfolder = False
               vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(os.path.join(path,rec_timestamp))
               if firstTitle == None:
@@ -266,7 +274,7 @@ class kFolder:
                 if vdrRecordingFolder.title != firstTitle:
                   onlySameTitle = False
               recordingsList.append(vdrRecordingFolder)
-          if subfolder:
+          if subfolder and (subContainsNonMovFolders or not subContainsMovFolders):
              subfolderList.append([path, rec_name])
 
         totalItems = len(recordingsList) + len(subfolderList)
@@ -374,7 +382,7 @@ class kFolder:
             name = pathN[1].replace('_', ' ')
             li = xbmcgui.ListItem(name)
             li.setArt({ 'icon' : 'DefaultFolder.png' })
-# add context menu
+# add context menu for folders
             commands = []
             self.addContextMenuCommand(commands, 30106, constants.TV_SHOWS, pathN[0])
             self.addContextMenuCommand(commands, 30107, constants.MUSIC_VIDEOS, pathN[0])

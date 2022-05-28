@@ -106,10 +106,17 @@ def scan(rootFolder, dirs, text, forceCompleteScan):
     xbmc.log("ADDALLTOLIBRARY, after scanning changed " + text + " folders", xbmc.LOGINFO)
     xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30202) + ' ' + str(os.path.basename(rootFolder)) + ')', False)
 
+def check_dir_exists(dir, context):
+# return True, if directory dir exists
+# otherwise, return false and display error message (context will be part of the error message)
+    if xbmcvfs.exists(dir + "/"): return True
+    xbmc.log("ERROR: " + dir + " does not exist. Context: " + context, xbmc.LOGERROR)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30225) + ' ' + dir + ')', False)
+
 def check_dir_not_exists(dir, context, messageNumber):
     if not xbmcvfs.exists(dir + "/"): return True
-    xbmc.log("ERROR: " + dir + " already exists!, context: " + context, xbmc.LOGERROR)
-    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30224) + ')', False)
+    xbmc.log("ERROR: " + dir + " already exists. Context: " + context, xbmc.LOGERROR)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30224) + ' ' + dir + ')', False)
     return False
 
 def move_dir(source, destination):
@@ -140,6 +147,13 @@ def move(src, t1, t2, final):
   if move_dir(t2 , final) == False:
     if move_dir(t2, t1): move_dir(t1, src)
     return
+  else:
+# remove rec_name, if empty
+    rec_folder_name = os.path.split(src)[0]
+    dirs, files = xbmcvfs.listdir(rec_folder_name)
+    if len(dirs) == 0 and len(files) == 0:
+      xbmcvfs.rmdir(rec_folder_name, False)
+    xbmc.executebuiltin("Container.Refresh")       
 
 def GetFolderSize(path):
     TotalSize = 0.0
@@ -290,36 +304,64 @@ if mode == constants.DELETE:
             recursive_delete_dir(recordingFolderPath)
         xbmc.executebuiltin("Container.Refresh")       
 
-def do_move():
-    recordingFolderPath = sys.argv[2]
-    if os.path.splitext(recordingFolderPath)[1] == ".rec":
-        fp = os.path.split(recordingFolderPath)[0]
-    else:
-        fp = recordingFolderPath
-    (fd, fn) = os.path.split(fp)
-    k_Folder = kfolder.kFolder(fd)
-    dest = k_Folder.selectFolder(getRootFolder())
+def move_folder_async(src, dest):
+# src: full path to folder
+# dest: destination folder. Without the name part: dest will be created before the move, if it does not exist
+# example: src = /data/a i, dest = /data2/de   -> new folder: /data2/de/a
+
+    if not check_dir_exists(src, "move_folder_async, src"): return
+    xbmcvfs.mkdirs(dest)
+    if not check_dir_exists(dest, "move_folder_async, dest"): return
+
+# src_name: source folder name without path
+# dest_with_name: destination path, including name
+    src_name = os.path.split(src)[1]
+    dest_with_name = os.path.join(dest, src_name)
+
+# Create the following "helpers" ++++++
+#  src_move: first  intermediate file, in same file system as source, with extension .move
+#  dest_with_name_move: second intermediate file, in same file system as destination, with extension .move
+    src_move = src + ".move"
+    dest_with_name_move = dest_with_name + ".move"
+# verify that these don't extist. Note: if any of them exists, something will go wrong. So abort in this case.
+    if check_dir_not_exists(dest_with_name, "contextMenu constants.MOVE dest_with_name", 30224) == False: return
+    if check_dir_not_exists(src_move  , "contextMenu constants.MOVE src_move  ", 30224) == False: return
+    if check_dir_not_exists(dest_with_name_move  , "contextMenu constants.MOVE dest_with_name_move  ", 30224) == False: return
+# now do the move, async
+    xbmc.executebuiltin("RunScript(plugin.video.vdr.recordings, " + str(constants.MOVE_INTERNAL) + ", \"" + src + "\", \"" + src_move + "\", \"" + dest_with_name_move + "\", \"" + dest_with_name + "\")")
+
+
+def do_move_rec(recordingFolderPath):
+# move recording: a recording was selected
+
+# igore the *.rec part. Split the other part in rec_folder, rec_name:
+    rec_folder_name = os.path.split(recordingFolderPath)[0]
+    (rec_folder, rec_name) = os.path.split(rec_folder_name)
+# UI to select dest folder. Start with rec_folder
+    k_Folder = kfolder.kFolder(rec_folder)
+    dest_s = k_Folder.selectFolder(getRootFolder(), rec_folder_name)
+    xbmc.log("constants.MOVE, dest_s = " + str(dest_s), xbmc.LOGINFO) 
+    if dest_s == None: return
+# do nothing if the recording is already in the destination folder
+    if dest_s == rec_folder: return
+    move_folder_async(recordingFolderPath, os.path.join(dest_s, rec_name) )
+
+def do_move(recordingFolderPath):
+# move folder: a folder was selected, not a recording
+    k_Folder = kfolder.kFolder(os.path.split(recordingFolderPath)[0] )
+    dest = k_Folder.selectFolder(getRootFolder(), recordingFolderPath)
     xbmc.log("constants.MOVE, dest = " + str(dest), xbmc.LOGINFO) 
     if dest == None: return
-# fp: source file name (with    path)
-# fn: source file name (without path)
-# dest: Destination folder
-# Create the following "helpers" ++++++
-#  d1: first  intermediate file, in same file system as source, with extension .move
-#  d2: second intermediate file, in same file system as destination, with extension .move
-#  dfin: destination file name (with path)
-    dfin = os.path.join(dest, fn)
-    d1 = fp + ".move"
-    d2 = dfin + ".move"
-# verify that these don't extist. Note: if any of them exists, something will go wrong. So abort in this case.
-    if check_dir_not_exists(dfin, "contextMenu constants.MOVE dfin", 30224) == False: return
-    if check_dir_not_exists(d1  , "contextMenu constants.MOVE d1  ", 30224) == False: return
-    if check_dir_not_exists(d2  , "contextMenu constants.MOVE d2  ", 30224) == False: return
-# now do the move, async
-    xbmc.executebuiltin("RunScript(plugin.video.vdr.recordings, " + str(constants.MOVE_INTERNAL) + ", \"" + fp + "\", \"" + d1 + "\", \"" + d2 + "\", \"" + dfin + "\")")
+# do nothing if the source path is equal to destination path
+    if dest == os.path.split(recordingFolderPath)[0]: return
+    move_folder_async(recordingFolderPath, dest)
 
 if mode == constants.MOVE:
-   do_move()
+    recordingFolderPath = sys.argv[2]
+    if os.path.splitext(recordingFolderPath)[1] == ".rec":
+        do_move_rec(recordingFolderPath)
+    else:
+        do_move(recordingFolderPath)
 
 if mode == constants.MOVE_INTERNAL:
   src = sys.argv[2]
