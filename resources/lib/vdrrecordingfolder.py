@@ -78,13 +78,13 @@ class VdrRecordingFolder(folder.cFolder):
           infoFileName = os.path.join(self.path, "info.txt")
         else:
           infoFileName = ""
+        info_str = ""
         if infoFileName != "":
           with xbmcvfs.File(infoFileName, "r") as f_info:
             try:
               info_str = f_info.read()
             except:
               xbmc.log("non-utf8 characters in file " + infoFileName, xbmc.LOGERROR)
-              info_str = ""
 
         for info_line in info_str.splitlines():
             if info_line[0] == 'T':
@@ -108,9 +108,11 @@ class VdrRecordingFolder(folder.cFolder):
 
   def getListitem(self):
     self.initializeInfo()
-    li = xbmcgui.ListItem(self.title)
-    li.setInfo(type='video', infoLabels={'plot': self.sortRecordingTimestamp + '\n' + self.description,
-        'title':self.title + '\n' + self.subtitle,
+# note: setting offscreen = True is a real performance booster here !!!
+    li = xbmcgui.ListItem(self.title, offscreen = True)
+    li.setInfo(type='video', infoLabels={
+        'plot': "{}\n{}".format(self.sortRecordingTimestamp, self.description),
+        'title': "{}\n{}".format(self.title, self.subtitle),
         'dateadded': self.sortRecordingTimestamp})
     li.setContentLookup(True)
     li.setProperty('IsPlayable', 'true')
@@ -138,7 +140,7 @@ class VdrRecordingFolder(folder.cFolder):
       for r_file in self.files:
         if r_file.endswith(".ts"):
           self.ts_f.append( os.path.join(self.path, r_file) )
-        if r_file.endswith(".vdr"):
+        elif r_file.endswith(".vdr"):
           if len(os.path.split(r_file)[1]) == 7:
             self.ts_f.append( os.path.join(self.path, r_file) )
       self.ts_f.sort()
@@ -147,15 +149,9 @@ class VdrRecordingFolder(folder.cFolder):
   def getStackUrl(self):
     self.getTsFiles()
 #   url = "stack://file:/" + url1 + " , file:/" + url2
-    isFirst = True
-    url = ""
-    for r_file in self.ts_f:
-      if isFirst:
-        url = "stack://" + r_file
-        isFirst = False
-      else:
-        url = url + " , " + r_file
-    return url
+    if self.ts_f == []: return ""
+    if len(self.ts_f) == 1: return "stack://{}".format(self.ts_f[0])
+    return "stack://{}".format(" , ".join(self.ts_f))
 
   def addDirectoryItem(self, addon_handle, commands, totalItems):
     li = self.getListitem()
@@ -290,7 +286,7 @@ class VdrRecordingFolder(folder.cFolder):
         iIndex = iIndex +1
     xbmc.log("End creating commercials file " + self.path, xbmc.LOGINFO)
 
-  def addRecordingToLibrary(self, libraryPath, filename, current_files, base_url, isMovie, nfoUrl):
+  def addRecordingToLibrary(self, libraryPath, filename, current_files, isMovie, nfoUrl):
       if len(self.getTsFiles() ) == 0: return
       self.updateComskip()
       xbmcvfs.mkdirs(libraryPath)
@@ -351,7 +347,7 @@ class VdrRecordingFolder(folder.cFolder):
         xbmcvfs.delete(strmFileName)
         with xbmcvfs.File(strmFileName, "w") as f_strm:
           try:
-            plu = base_url + '?' + urllib.parse.urlencode({'mode': 'play', 'recordingFolder': self.path})
+            plu = constants.BASE_URL + '?' + urllib.parse.urlencode({'mode': 'play', 'recordingFolder': self.path})
             f_strm.write(plu)
 ## use the plugin to play files with multiple *.ts files. Putting all these ts files in an strm file is broken for too many ts files
 #           f_strm.write(self.getStackUrl())
@@ -366,18 +362,19 @@ class VdrRecordingFolder(folder.cFolder):
 
   def getYearR(self):
     year = self.getYear()
-    if year <= 0: 
-      year = getYear(self.subtitle[1:])
-    if year <= 0: 
-      yp = self.description.find("Jahr")
-      if yp >= 0:
-        year = getYear(self.description[yp+4:yp+15])
-    if year <= 0: 
-      yp = self.description.find("Year")
-      if yp >= 0:
-        year = getYear(self.description[yp+4:yp+15])
-    if year <= 0: 
-      year = getYear(self.description[1:])
+    if year > 0: return year
+    self.initializeInfo()
+    year = getYear(self.subtitle[1:])
+    if year > 0: return year
+    yp = self.description.find("Jahr")
+    if yp >= 0:
+      year = getYear(self.description[yp+4:yp+15])
+      if year > 0: return year
+    yp = self.description.find("Year")
+    if yp >= 0:
+      year = getYear(self.description[yp+4:yp+15])
+      if year > 0: return year
+    year = getYear(self.description[1:])
     return year
 
   def initializeIndex(self):

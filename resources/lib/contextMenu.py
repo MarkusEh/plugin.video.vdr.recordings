@@ -15,6 +15,7 @@ import xbmcaddon
 import xbmcgui
 import xbmcvfs
 import json
+import folder
 import kfolder
 import vdrrecordingfolder
 import constants
@@ -166,14 +167,13 @@ def GetFolderSize(path):
     return TotalSize
 
 #xbmc.log("contextMenu: sys.argv=" + str(sys.argv), xbmc.LOGINFO)
+#base_url = sys.argv[0] : only empty string
 mode = sys.argv[1]
-#xbmc.log("mode=" + str(mode), xbmc.LOGINFO)
+#xbmc.log("base_url: " + str(base_url) + " mode: " + str(mode), xbmc.LOGINFO)
 
 if mode == constants.ADDALLTOLIBRARY:
-    rootFolder = sys.argv[2]
-    base_url   = sys.argv[3]
-    xbmc.log("Start of ADDALLTOLIBRARY, rootFolder=" + str(rootFolder), xbmc.LOGINFO)
-    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30109) + ')', False)
+    xbmc.log("Start of ADDALLTOLIBRARY, rootFolder=" + str(getRootFolder() ), xbmc.LOGINFO)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon(constants.ADDON_NAME).getLocalizedString(30109) + ')', False)
 # create list of old files
     old_files = {}
     recursive_add_files(constants.LIBRARY_MOVIES, old_files)
@@ -186,7 +186,7 @@ if mode == constants.ADDALLTOLIBRARY:
 # add current (new) files
     new_files = {}
     xbmc.log("ADDALLTOLIBRARY, before adding all files", xbmc.LOGINFO)
-    kfolder.kFolder(rootFolder).parseFolder(-10, base_url, rootFolder, new_files)
+    kfolder.kFolder(getRootFolder() ).parseFolder(-10, new_files)
     xbmc.log("ADDALLTOLIBRARY, after adding all files", xbmc.LOGINFO)
 ## compare list of old files with list of new files, clean up library for files which do no longer exist
     for file in old_files.keys() - new_files.keys():
@@ -243,38 +243,38 @@ if mode == constants.ADDALLTOLIBRARY:
 
 if mode == constants.TV_SHOWS:
     recordingFolderPath = sys.argv[2]
-    k_Folder = kfolder.kFolder(recordingFolderPath)    
-    k_Folder.setContentType(constants.TV_SHOWS)
+    iFolder = folder.cFolder(recordingFolderPath)    
+    iFolder.setContentType(constants.TV_SHOWS)
 
 if mode == constants.MOVIES:
     recordingFolderPath = sys.argv[2]
 #   xbmc.log("contextMenu, movies" + str(recordingFolderPath), xbmc.LOGINFO)    
-    k_Folder = kfolder.kFolder(recordingFolderPath)    
-    k_Folder.setContentType(constants.MOVIES)    
+    iFolder = folder.cFolder(recordingFolderPath)
+    iFolder.setContentType(constants.MOVIES)    
 
 if mode == constants.MUSIC_VIDEOS:
     recordingFolderPath = sys.argv[2]
-    k_Folder = kfolder.kFolder(recordingFolderPath)    
-    k_Folder.setContentType(constants.MUSIC_VIDEOS)   
+    iFolder = folder.cFolder(recordingFolderPath)
+    iFolder.setContentType(constants.MUSIC_VIDEOS)   
 
 if mode == constants.EPISODE:
     recordingFolderPath = sys.argv[2]
     episode = sys.argv[3]
-    k_Folder = kfolder.kFolder(recordingFolderPath)
+    iFolder = folder.cFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
-    d = dialog.numeric(0, xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30210), str(k_Folder.getEpisode(episode)))
+    d = dialog.numeric(0, xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30210), str(iFolder.getEpisode(episode)))
     if d != '':
-        k_Folder.setEpisode(int(d))
+        iFolder.setEpisode(int(d))
         xbmc.executebuiltin("Container.Refresh")
 
 if mode == constants.SEASON:
     recordingFolderPath = sys.argv[2]
     season = sys.argv[3]
-    k_Folder = kfolder.kFolder(recordingFolderPath)
+    iFolder = folder.cFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
-    d = dialog.numeric(0, xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30211), str(k_Folder.getSeason(season)))
+    d = dialog.numeric(0, xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30211), str(iFolder.getSeason(season)))
     if d != '':
-        k_Folder.setSeason(int(d))
+        iFolder.setSeason(int(d))
         xbmc.executebuiltin("Container.Refresh")
 
 if mode == constants.YEAR:
@@ -282,11 +282,11 @@ if mode == constants.YEAR:
     year = sys.argv[3]
     if int(year) <= 0:
         year = ''
-    k_Folder = kfolder.kFolder(recordingFolderPath)
+    iFolder = folder.cFolder(recordingFolderPath)
     dialog = xbmcgui.Dialog()
     d = dialog.numeric(0, xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30212), year)
     if d != '':
-        k_Folder.setYear(int(d))
+        iFolder.setYear(int(d))
         xbmc.executebuiltin("Container.Refresh")
 
 
@@ -339,7 +339,7 @@ def do_move_rec(recordingFolderPath):
     (rec_folder, rec_name) = os.path.split(rec_folder_name)
 # UI to select dest folder. Start with rec_folder
     k_Folder = kfolder.kFolder(rec_folder)
-    dest_s = k_Folder.selectFolder(getRootFolder(), rec_folder_name)
+    dest_s = k_Folder.selectFolder(rec_folder_name)
     xbmc.log("constants.MOVE, dest_s = " + str(dest_s), xbmc.LOGINFO) 
     if dest_s == None: return
 # do nothing if the recording is already in the destination folder
@@ -349,7 +349,7 @@ def do_move_rec(recordingFolderPath):
 def do_move(recordingFolderPath):
 # move folder: a folder was selected, not a recording
     k_Folder = kfolder.kFolder(os.path.split(recordingFolderPath)[0] )
-    dest = k_Folder.selectFolder(getRootFolder(), recordingFolderPath)
+    dest = k_Folder.selectFolder(recordingFolderPath)
     xbmc.log("constants.MOVE, dest = " + str(dest), xbmc.LOGINFO) 
     if dest == None: return
 # do nothing if the source path is equal to destination path
@@ -386,11 +386,9 @@ if mode == constants.MOVE_INTERNAL:
   pDialog.close()
 
 if mode == constants.SEARCH:
-    rootFolder = sys.argv[2]
-    base_url = sys.argv[3]
     sString = GUIEditExportName(xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30223))
     if sString != None:
-       p_url = base_url + '?' + urllib.parse.urlencode({'mode': 'search', 'searchString': sString})
+       p_url = constants.BASE_URL + '?' + urllib.parse.urlencode({'mode': 'search', 'searchString': sString})
 #     xbmc.log("p_url=" + str(p_url), xbmc.LOGINFO)
        runner = "ActivateWindow(10025," + str(p_url) + ",return)"
        xbmc.executebuiltin(runner)   

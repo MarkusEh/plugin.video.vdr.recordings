@@ -20,8 +20,9 @@ MOVE_INTERNAL = "Move_internal"
 SEARCH = "Search"
 REFRESH = "Refresh"
 
-LIBRARY_BASEPATH = xbmcvfs.translatePath(
-        "special://userdata/addon_data/plugin.video.vdr.recordings/")
+ADDON_NAME = "plugin.video.vdr.recordings"
+BASE_URL = "plugin://" + ADDON_NAME + "/"
+LIBRARY_BASEPATH = xbmcvfs.translatePath("special://userdata/addon_data/" + ADDON_NAME)
 LIBRARY_MOVIES = os.path.join(LIBRARY_BASEPATH, "Movies/")
 LIBRARY_TV_SHOWS = os.path.join(LIBRARY_BASEPATH, "TV shows/")
 LIBRARY_MUSIC_VIDEOS = os.path.join(LIBRARY_BASEPATH, "Music videos/")

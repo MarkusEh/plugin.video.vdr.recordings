@@ -31,6 +31,10 @@ class main:
     def __init__(self, argv):
         self.argv = argv
         self.base_url = self.argv[0]
+        if self.base_url != constants.BASE_URL:
+          xbmc.log("ERROR main, base_url: " + str(self.base_url), xbmc.LOGERROR)
+          xbmc.log("ERROR main, BASE_URL: " + str(constants.BASE_URL), xbmc.LOGERROR)
+        
         self.addon_handle = int(self.argv[1])
         self.args = parse.parse_qs(self.argv[2][1:])
         self.mode = self.args.get('mode', ['folder'])[0]
@@ -48,7 +52,7 @@ class main:
     def modeFolder(self):
         currentFolder = self.args.get('currentFolder', [self.rootFolder])[0]
         kf = kfolder.kFolder(currentFolder)
-        kf.parseFolder(self.addon_handle, self.base_url, self.rootFolder, {})
+        kf.parseFolder(self.addon_handle, {})
 # Add special (search) folder
 #        url = self.build_url({'mode': 'search', 'currentFolder': currentFolder})
 #        li = xbmcgui.ListItem(" search", iconImage = 'DefaultFolder.png')
