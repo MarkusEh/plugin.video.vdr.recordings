@@ -83,7 +83,7 @@ def scanIfRequired(rootFolder, changedDirs, text):
       if dir.find(rootFolder) >= 0:
         waitForScan()
         xbmc.log("ADDALLTOLIBRARY, VideoLibrary.Scan, " + text + " dir = " + str(rootFolder), xbmc.LOGINFO)
-        xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30200) + ' ' + str(os.path.basename(rootFolder)) + ')', False)
+        xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30200).format(str(os.path.basename(rootFolder))) + ')', False)
         xbmc.executebuiltin('UpdateLibrary(video,'+ str(rootFolder) + ')', True)
         waitForScan()
         return
@@ -97,7 +97,7 @@ def scan(rootFolder, dirs, text, forceCompleteScan):
       scanIfRequired(rootFolder, dirs, text)
     else:
       xbmc.log("ADDALLTOLIBRARY, before scanning changed " + text + " folders, number of paths = " + str(numChangedFolders), xbmc.LOGINFO)
-      xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30201) + ' ' + str(os.path.basename(rootFolder)) + ')', False)
+      xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30201).format(str(os.path.basename(rootFolder))) + ')', False)
       for dir in dirs.keys():
 # new files -> update library
         waitForScan()
@@ -105,19 +105,19 @@ def scan(rootFolder, dirs, text, forceCompleteScan):
         xbmc.executebuiltin('UpdateLibrary(video,'+ str(dir) + ')', True)
         waitForScan()
     xbmc.log("ADDALLTOLIBRARY, after scanning changed " + text + " folders", xbmc.LOGINFO)
-    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30202) + ' ' + str(os.path.basename(rootFolder)) + ')', False)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30202).format(str(os.path.basename(rootFolder))) + ')', False)
 
 def check_dir_exists(dir, context):
 # return True, if directory dir exists
 # otherwise, return false and display error message (context will be part of the error message)
     if xbmcvfs.exists(dir + "/"): return True
     xbmc.log("ERROR: " + dir + " does not exist. Context: " + context, xbmc.LOGERROR)
-    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30225) + ' ' + dir + ')', False)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30225).format(dir) + ')', False)
 
 def check_dir_not_exists(dir, context, messageNumber):
     if not xbmcvfs.exists(dir + "/"): return True
     xbmc.log("ERROR: " + dir + " already exists. Context: " + context, xbmc.LOGERROR)
-    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30224) + ' ' + dir + ')', False)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30224).format(dir) + ')', False)
     return False
 
 def move_dir(source, destination):
@@ -297,9 +297,7 @@ if mode == constants.DELETE:
 # Confirmation dialog
         dialog = xbmcgui.Dialog()
         rf = vdrrecordingfolder.VdrRecordingFolder(recordingFolderPath)
-        d = dialog.yesno(xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30220), xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30221) + ' "'
-            + rf.title
-            + '"?')
+        d = dialog.yesno(xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30220), xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30221).format(rf.title))
         if d == True:    
             recursive_delete_dir(recordingFolderPath)
         xbmc.executebuiltin("Container.Refresh")       

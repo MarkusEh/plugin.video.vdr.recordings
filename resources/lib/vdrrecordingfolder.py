@@ -127,11 +127,11 @@ class VdrRecordingFolder(folder.cFolder):
       dict_art['fanart'] = fanart_path
 
     li.setArt(dict_art)
+    return li
 # fanart: Hintergrund unter der Liste. Auch Bild im fanart Anzeigemodus
 # clearlogo: Als Bild waehrend der Wiedergabe rechts oben, anstelle des Titels
 # thumb (?): erscheint beim Anzeigen des Plots waehrend dem Abspielen links neben Plot
 # thumb: last resort, wird z.B. auf Favoritenliste angezeigt
-    return li
 
   def getTsFiles(self):
     if self.tsInitialized == False:

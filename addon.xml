@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="0.4.1" provider-name="Markus Ehrnsperger">
+<addon id="plugin.video.vdr.recordings" name="VDR Recordings" version="1.0.0" provider-name="Markus Ehrnsperger">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
   </requires>
@@ -15,6 +15,12 @@
     <email></email>
     <source>https://github.com/MarkusEh/plugin.video.vdr.recordings</source>
     <news>
+v1.0.0
+- Language support
+- Improve performance
+- Support https://github.com/MarkusEh/vdr-plugin-tvscraper
+- Improve support of KODI libraries
+- Add plugin icon and screenshots
 v0.4.0
 - Support KODI 19, and stop support of KODI 18
 v0.3.6
@@ -61,13 +67,9 @@ v0.1.1
         <screenshot>resources/screenshot00011.png</screenshot>
     </assets>
     <reuselanguageinvoker>true</reuselanguageinvoker>
-    <summary lang="da_DK">Afspil VDR-optagelser</summary>
     <summary lang="de_DE">VDR Aufzeichnungen wiedergeben</summary>
     <summary lang="en_GB">Play VDR recordings</summary>
-    <summary lang="pl_PL">Odtwarzaj nagrania VDR</summary>
-    <description lang="da_DK">Hvis du bruger Klaus Schmidingers VDR (http://www.tvdr.de) for at oprette tv -optagelser, kan du bruge dette plugin til at se dem i Kodi.[CR]Du har brug for adgang til filsystemet, hvor VDR -optagelserne er gemt, f.eks. gennem NFS. En kørende VDR er ikke påkrævet under afspilning af optagelserne med dette plugin.</description>
     <description lang="de_DE">Abspielen von TV Aufzeichnungen, die mit Klaus Schmidingers VDR http://www.tvdr.de erstellt wurden. [CR]Voraussetzung: KODI benötigt Zugriff auf das Dateisystem mit den Aufzeichnungen, z.B. über NFS. Zur Wiedergabe der Aufzeichnungen mit diesem Plugin wird VDR nicht benötigt.</description>
     <description lang="en_GB">If you use Klaus Schmidingers VDR http://www.tvdr.de to create TV recorings, you can use this plugin to watch them in KODI.[CR]You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin.</description>
-    <description lang="pl_PL">Jeśli używasz VDR http://www.tvdr.de Klausa Schmidingera do tworzenia nagrań telewizyjnych, możesz użyć tej wtyczki, aby oglądać je w KODI.[CR]Potrzebujesz dostępu do systemu plików, w którym przechowywane są nagrania VDR, np. za pomocą NFS. Działający VDR nie jest wymagany podczas odtwarzania nagrań za pomocą tej wtyczki.</description>
   </extension>
 </addon>

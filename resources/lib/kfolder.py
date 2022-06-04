@@ -52,6 +52,7 @@ class kFolder(folder.cFolder):
     prefolders = len(self.subFolders)
     if not ignoreThisFolder:
       self.parseFolder(-20, {})
+    if ignoreSubfoldersOfThisFolder in self.subFolders: self.subFolders.remove(ignoreSubfoldersOfThisFolder)
     dialog = xbmcgui.Dialog()
     d = dialog.select(self.path, self.subFolders)
     if d == None: return d
@@ -89,6 +90,7 @@ class kFolder(folder.cFolder):
         self.libPathMovies = self.getLibPath(constants.MOVIES)          
         onlySameTitle = True
         firstTitle = None
+        totalItems = 0
         recordingsList = []
         recordingsListTV_shows = []
         subfolderList = []
@@ -97,26 +99,23 @@ class kFolder(folder.cFolder):
           path = os.path.join(self.path, rec_name)
           rec_timestamps, files = xbmcvfs.listdir(path)
           if addon_handle != -20 and contentType == constants.MOVIES and len(rec_timestamps) == 1 and rec_timestamps[0].endswith(".rec"):
+            totalItems = totalItems  + 1
             vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(os.path.join(path,rec_timestamps[0]))
             if vdrRecordingFolder.getContentType(contentType) == constants.TV_SHOWS:
               recordingsListTV_shows.append(vdrRecordingFolder)
             else:
-              self.addMovie(vdrRecordingFolder, addon_handle, 0, current_files)
+              self.addMovie(vdrRecordingFolder, addon_handle, totalItems, current_files)
             if firstTitle == None:
               firstTitle = rec_name
             else:
               if rec_name != firstTitle:
                 onlySameTitle = False
           else:
-            subContainsMovFolders = False
-            subContainsNonMovFolders = False
             subfolder = True
             for rec_timestamp in rec_timestamps:
-              if rec_timestamp.endswith(".move"):
-                if rec_timestamp.endswith(".rec.move"): subContainsMovFolders = True
-                continue
-              subContainsNonMovFolders = True
-              if rec_timestamp.endswith(".rec"):
+              if rec_timestamp.endswith(".del") or rec_timestamp.endswith(".rec.move"):
+                subfolder = False
+              elif rec_timestamp.endswith(".rec"):
                 subfolder = False
 #               vdrRecordingFolder = vdrrecordingfolder.VdrRecordingFolder(os.path.join(path,rec_timestamp))
 #               recordingsList.append(vdrRecordingFolder)
@@ -126,7 +125,7 @@ class kFolder(folder.cFolder):
                 else:
                   if rec_name != firstTitle:
                     onlySameTitle = False
-            if subfolder and (subContainsNonMovFolders or not subContainsMovFolders):
+            if subfolder:
                subfolderList.append([path, rec_name])
 
         totalItems = len(recordingsList) + len(subfolderList)
