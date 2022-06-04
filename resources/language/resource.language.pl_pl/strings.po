@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: KODI-Addons\n"
-"Report-Msgid-Bugs-To: translations@kodi.tv\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-29 21:08+0000\n"
 "PO-Revision-Date: 2022-06-02 10:14+0000\n"
 "Last-Translator: Marek Adamski <fevbew@wp.pl>\n"
@@ -81,16 +81,16 @@ msgstr "Przenieś folder VDR"
 
 # Notification messages
 msgctxt "#30200"
-msgid "Update library:"
-msgstr "Aktualizuj bibliotekę:"
+msgid "Update library \"{}\""
+msgstr ""
 
 msgctxt "#30201"
-msgid "Update changed folders in library:"
-msgstr "Zaktualizuj zmienione foldery w bibliotece:"
+msgid "Update changed folders in library \"{}\""
+msgstr ""
 
 msgctxt "#30202"
-msgid "Update finished, library:"
-msgstr "Aktualizacja zakończona, biblioteka:"
+msgid "Update of library \"{}\" finished"
+msgstr ""
 
 msgctxt "#30203"
 msgid "Clean up video library"
@@ -114,8 +114,8 @@ msgid "Delete VDR recording?"
 msgstr "Usunąć nagranie VDR?"
 
 msgctxt "#30221"
-msgid "Do you want to delete"
-msgstr "Czy chcesz usunąć"
+msgid "Do you want to delete \"{}\"?"
+msgstr ""
 
 msgctxt "#30222"
 msgid "Move VDR recording"
@@ -126,12 +126,12 @@ msgid "Enter search string"
 msgstr "Wpisz szukany ciąg"
 
 msgctxt "#30224"
-msgid "Folder already exists:"
-msgstr "Folder już istnieje:"
+msgid "Folder \"{}\" already exists"
+msgstr ""
 
 msgctxt "#30225"
-msgid "Cannot create folder:"
-msgstr "Nie można utworzyć folderu:"
+msgid "Cannot create folder \"{}\""
+msgstr ""
 
 # folder selection
 msgctxt "#30300"
@@ -149,3 +149,28 @@ msgstr "<usuń ten folder>"
 msgctxt "#30303"
 msgid "Name of new folder?"
 msgstr "Nazwa nowego folderu?"
+
+# Notification messages
+#~ msgctxt "#30200"
+#~ msgid "Update library:"
+#~ msgstr "Aktualizuj bibliotekę:"
+
+#~ msgctxt "#30201"
+#~ msgid "Update changed folders in library:"
+#~ msgstr "Zaktualizuj zmienione foldery w bibliotece:"
+
+#~ msgctxt "#30202"
+#~ msgid "Update finished, library:"
+#~ msgstr "Aktualizacja zakończona, biblioteka:"
+
+#~ msgctxt "#30221"
+#~ msgid "Do you want to delete"
+#~ msgstr "Czy chcesz usunąć"
+
+#~ msgctxt "#30224"
+#~ msgid "Folder already exists:"
+#~ msgstr "Folder już istnieje:"
+
+#~ msgctxt "#30225"
+#~ msgid "Cannot create folder:"
+#~ msgstr "Nie można utworzyć folderu:"

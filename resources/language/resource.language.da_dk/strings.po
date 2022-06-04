@@ -81,16 +81,16 @@ msgstr ""
 
 # Notification messages
 msgctxt "#30200"
-msgid "Update library:"
-msgstr "Oodater bibliotek:"
+msgid "Update library \"{}\""
+msgstr ""
 
 msgctxt "#30201"
-msgid "Update changed folders in library:"
-msgstr "Opdater ændrede mapper i biblioteket:"
+msgid "Update changed folders in library \"{}\""
+msgstr ""
 
 msgctxt "#30202"
-msgid "Update finished, library:"
-msgstr "Opdatering færdig, bibliotek:"
+msgid "Update of library \"{}\" finished"
+msgstr ""
 
 msgctxt "#30203"
 msgid "Clean up video library"
@@ -114,8 +114,8 @@ msgid "Delete VDR recording?"
 msgstr "Slet VDR-optagelse?"
 
 msgctxt "#30221"
-msgid "Do you want to delete"
-msgstr "Vil du slette"
+msgid "Do you want to delete \"{}\"?"
+msgstr ""
 
 msgctxt "#30222"
 msgid "Move VDR recording"
@@ -126,11 +126,11 @@ msgid "Enter search string"
 msgstr "Indtast søgeord"
 
 msgctxt "#30224"
-msgid "Folder already exists:"
+msgid "Folder \"{}\" already exists"
 msgstr ""
 
 msgctxt "#30225"
-msgid "Cannot create folder:"
+msgid "Cannot create folder \"{}\""
 msgstr ""
 
 # folder selection
@@ -149,3 +149,20 @@ msgstr "<slet denne mappe>"
 msgctxt "#30303"
 msgid "Name of new folder?"
 msgstr ""
+
+# Notification messages
+#~ msgctxt "#30200"
+#~ msgid "Update library:"
+#~ msgstr "Oodater bibliotek:"
+
+#~ msgctxt "#30201"
+#~ msgid "Update changed folders in library:"
+#~ msgstr "Opdater ændrede mapper i biblioteket:"
+
+#~ msgctxt "#30202"
+#~ msgid "Update finished, library:"
+#~ msgstr "Opdatering færdig, bibliotek:"
+
+#~ msgctxt "#30221"
+#~ msgid "Do you want to delete"
+#~ msgstr "Vil du slette"

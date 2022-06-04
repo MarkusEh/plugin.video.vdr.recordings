@@ -80,15 +80,15 @@ msgstr ""
 
 # Notification messages
 msgctxt "#30200"
-msgid "Update library:"
+msgid "Update library \"{}\""
 msgstr ""
 
 msgctxt "#30201"
-msgid "Update changed folders in library:"
+msgid "Update changed folders in library \"{}\""
 msgstr ""
 
 msgctxt "#30202"
-msgid "Update finished, library:"
+msgid "Update of library \"{}\" finished"
 msgstr ""
 
 msgctxt "#30203"
@@ -113,7 +113,7 @@ msgid "Delete VDR recording?"
 msgstr ""
 
 msgctxt "#30221"
-msgid "Do you want to delete"
+msgid "Do you want to delete \"{}\"?"
 msgstr ""
 
 msgctxt "#30222"
@@ -125,11 +125,11 @@ msgid "Enter search string"
 msgstr ""
 
 msgctxt "#30224"
-msgid "Folder already exists:"
+msgid "Folder \"{}\" already exists"
 msgstr ""
 
 msgctxt "#30225"
-msgid "Cannot create folder:"
+msgid "Cannot create folder \"{}\""
 msgstr ""
 
 # folder selection
