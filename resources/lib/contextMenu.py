@@ -59,6 +59,12 @@ def recursive_add_files(fullpath, files_dict):
         recursive_add_files(os.path.join(fullpath, directory), files_dict)
     return
 
+def basename(folder):
+  if folder == "": return ""
+  path, base_name = os.path.split(folder)
+  if base_name != "": return base_name
+  return basename(path)
+
 def waitForScan():
   jsonCommand = {'jsonrpc': '2.0', 'method': 'XBMC.GetInfoBooleans', 'params': {"booleans":["Library.IsScanningVideo"]}, 'id': "waitForScan"}
   while True:
@@ -83,7 +89,7 @@ def scanIfRequired(rootFolder, changedDirs, text):
       if dir.find(rootFolder) >= 0:
         waitForScan()
         xbmc.log("ADDALLTOLIBRARY, VideoLibrary.Scan, " + text + " dir = " + str(rootFolder), xbmc.LOGINFO)
-        xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30200).format(str(os.path.basename(rootFolder))) + ')', False)
+        xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30200).format(str(basename(rootFolder))) + ')', False)
         xbmc.executebuiltin('UpdateLibrary(video,'+ str(rootFolder) + ')', True)
         waitForScan()
         return
@@ -97,7 +103,7 @@ def scan(rootFolder, dirs, text, forceCompleteScan):
       scanIfRequired(rootFolder, dirs, text)
     else:
       xbmc.log("ADDALLTOLIBRARY, before scanning changed " + text + " folders, number of paths = " + str(numChangedFolders), xbmc.LOGINFO)
-      xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30201).format(str(os.path.basename(rootFolder))) + ')', False)
+      xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30201).format(str(basename(rootFolder))) + ')', False)
       for dir in dirs.keys():
 # new files -> update library
         waitForScan()
@@ -105,7 +111,7 @@ def scan(rootFolder, dirs, text, forceCompleteScan):
         xbmc.executebuiltin('UpdateLibrary(video,'+ str(dir) + ')', True)
         waitForScan()
     xbmc.log("ADDALLTOLIBRARY, after scanning changed " + text + " folders", xbmc.LOGINFO)
-    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30202).format(str(os.path.basename(rootFolder))) + ')', False)
+    xbmc.executebuiltin('Notification(VDR Recordings, ' + xbmcaddon.Addon('plugin.video.vdr.recordings').getLocalizedString(30202).format(str(basename(rootFolder))) + ')', False)
 
 def check_dir_exists(dir, context):
 # return True, if directory dir exists
