@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: KODI-Addons\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: 2018-09-29 21:08+0000\n"
-"PO-Revision-Date: 2022-06-02 10:14+0000\n"
+"PO-Revision-Date: 2022-06-12 21:14+0000\n"
 "Last-Translator: Marek Adamski <fevbew@wp.pl>\n"
 "Language-Team: Polish <https://kodi.weblate.cloud/projects/kodi-add-ons-video/plugin-video-vdr-recordings/pl_pl/>\n"
 "Language: pl_pl\n"
@@ -82,15 +82,15 @@ msgstr "Przenieś folder VDR"
 # Notification messages
 msgctxt "#30200"
 msgid "Update library \"{}\""
-msgstr ""
+msgstr "Zaktualizuj bibliotekę \"{}\""
 
 msgctxt "#30201"
 msgid "Update changed folders in library \"{}\""
-msgstr ""
+msgstr "Zaktualizuj zmienione foldery w bibliotece \"{}\""
 
 msgctxt "#30202"
 msgid "Update of library \"{}\" finished"
-msgstr ""
+msgstr "Aktualizacja biblioteki \"{}\" zakończona"
 
 msgctxt "#30203"
 msgid "Clean up video library"
@@ -115,7 +115,7 @@ msgstr "Usunąć nagranie VDR?"
 
 msgctxt "#30221"
 msgid "Do you want to delete \"{}\"?"
-msgstr ""
+msgstr "Czy chcesz usunąć \"{}\"?"
 
 msgctxt "#30222"
 msgid "Move VDR recording"
@@ -127,11 +127,11 @@ msgstr "Wpisz szukany ciąg"
 
 msgctxt "#30224"
 msgid "Folder \"{}\" already exists"
-msgstr ""
+msgstr "Folder \"{}\" już istnieje"
 
 msgctxt "#30225"
 msgid "Cannot create folder \"{}\""
-msgstr ""
+msgstr "Nie można utworzyć folderu \"{}\""
 
 # folder selection
 msgctxt "#30300"
