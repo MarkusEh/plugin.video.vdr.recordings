@@ -24,14 +24,14 @@ class cFolder:
 
   def readScrapperFiles(self):
     self.readKodiFile()
-    self.readTvscrapperFile()
+    self.readTvscraperFile()
 
-  def readTvscrapperFile(self):
+  def readTvscraperFile(self):
     if self.scraperFileRead == True: return
     self.scraperFileRead = True
-    self.tvscrapperData = {}
-    if not "tvscrapper.json" in self.files: return
-    j_filename = os.path.join(self.path, "tvscrapper.json")
+    self.tvscraperData = {}
+    if not "tvscraper.json" in self.files: return
+    j_filename = os.path.join(self.path, "tvscraper.json")
     with xbmcvfs.File(j_filename, "r") as j_file:
       try:
         j_string = j_file.read()
@@ -48,13 +48,13 @@ class cFolder:
       if 'thetvdb' in keys0: self.source = 'thetvdb'
       if 'themoviedb' in keys0: self.source = 'themoviedb'
       if self.source == '' :
-        xbmc.log("ERROR readTvscrapperFile, source == '', file = " + j_filename, xbmc.LOGERROR)
+        xbmc.log("ERROR readTvscraperFile, source == '', file = " + j_filename, xbmc.LOGERROR)
         return
 # ignore tvscraper data if there is no name
       r = data[self.source].get('name')
       if r == None: return
       if r == "": return
-      self.tvscrapperData = data[self.source]
+      self.tvscraperData = data[self.source]
 
   def readKodiFile(self):
     if self.fileRead == True:
@@ -101,7 +101,7 @@ class cFolder:
     self.readScrapperFiles()
     r = self.kodiLines.get('C')
     if r != None: return r
-    r = self.tvscrapperData.get('type')
+    r = self.tvscraperData.get('type')
     if r == 'movie': return constants.MOVIES
     if r == 'tv show': return constants.TV_SHOWS
 
@@ -116,13 +116,13 @@ class cFolder:
     self.readScrapperFiles()
     r = self.kodiLines.get('E')
     if r != None: return int(r)
-    r = self.tvscrapperData.get('episode_number')
+    r = self.tvscraperData.get('episode_number')
     if r == None: return default
     return r
 
   def getEpisodeName(self, default = ""):
     self.readScrapperFiles()
-    r = self.tvscrapperData.get('episode_name')
+    r = self.tvscraperData.get('episode_name')
     if r == None: return default
     return r
 
@@ -135,7 +135,7 @@ class cFolder:
     self.readScrapperFiles()
     r = self.kodiLines.get('S')
     if r != None: return int(r)
-    r = self.tvscrapperData.get('season_number')
+    r = self.tvscraperData.get('season_number')
     if r == None: return default
     return r
 
@@ -150,20 +150,20 @@ class cFolder:
     if r != None:
       if not r.isdigit(): xbmc.log("kfolder, file kodi, year not integer, year = " + str(r) + " path " + self.path, xbmc.LOGERROR)
     if r != None: return int(r)
-    r = self.tvscrapperData.get('year')
+    r = self.tvscraperData.get('year')
     if r == None: return -1
     if type(r) != int: xbmc.log("kfolder, year not integer, year = " + str(r) + " path " + self.path, xbmc.LOGERROR)
     return r
 
   def getName(self, default):
     self.readScrapperFiles()
-    r = self.tvscrapperData.get('name')
+    r = self.tvscraperData.get('name')
     if r == None: return default
     return r
 
   def getDbUrl(self):
     self.readScrapperFiles()
-    r = self.tvscrapperData.get('movie_tv_id')
+    r = self.tvscraperData.get('movie_tv_id')
     if r == None: return ""
     if self.source == 'themoviedb': return "https://www.themoviedb.org/movie/" + str(r)
     if self.source == 'thetvdb': return "https://www.thetvdb.com/index.php?tab=series&id=" + str(r)
