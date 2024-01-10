@@ -22,7 +22,7 @@ class cFolder:
     else:
       self.dirs, self.files = xbmcvfs.listdir(self.path)
 
-  def readScrapperFiles(self):
+  def readScraperFiles(self):
     self.readKodiFile()
     self.readTvscraperFile()
 
@@ -98,7 +98,7 @@ class cFolder:
         f_kodi.close()
   
   def getContentType(self, default = constants.MOVIES):
-    self.readScrapperFiles()
+    self.readScraperFiles()
     r = self.kodiLines.get('C')
     if r != None: return r
     r = self.tvscraperData.get('type')
@@ -113,7 +113,7 @@ class cFolder:
     self.writeKodiFile()
 
   def getEpisode(self, default):
-    self.readScrapperFiles()
+    self.readScraperFiles()
     r = self.kodiLines.get('E')
     if r != None: return int(r)
     r = self.tvscraperData.get('episode_number')
@@ -121,7 +121,7 @@ class cFolder:
     return r
 
   def getEpisodeName(self, default = ""):
-    self.readScrapperFiles()
+    self.readScraperFiles()
     r = self.tvscraperData.get('episode_name')
     if r == None: return default
     return r
@@ -132,7 +132,7 @@ class cFolder:
     self.writeKodiFile()
 
   def getSeason(self, default):
-    self.readScrapperFiles()
+    self.readScraperFiles()
     r = self.kodiLines.get('S')
     if r != None: return int(r)
     r = self.tvscraperData.get('season_number')
@@ -145,7 +145,7 @@ class cFolder:
     self.writeKodiFile()
 
   def getYear(self):
-    self.readScrapperFiles()
+    self.readScraperFiles()
     r = self.kodiLines.get('Y')
     if r != None:
       if not r.isdigit(): xbmc.log("kfolder, file kodi, year not integer, year = " + str(r) + " path " + self.path, xbmc.LOGERROR)
@@ -156,13 +156,13 @@ class cFolder:
     return r
 
   def getName(self, default):
-    self.readScrapperFiles()
+    self.readScraperFiles()
     r = self.tvscraperData.get('name')
     if r == None: return default
     return r
 
   def getDbUrl(self):
-    self.readScrapperFiles()
+    self.readScraperFiles()
     r = self.tvscraperData.get('movie_tv_id')
     if r == None: return ""
     if self.source == 'themoviedb': return "https://www.themoviedb.org/movie/" + str(r)
