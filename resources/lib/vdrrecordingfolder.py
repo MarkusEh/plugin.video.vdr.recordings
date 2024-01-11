@@ -94,7 +94,7 @@ class VdrRecordingFolder(folder.cFolder):
             if info_line[0] == 'D':
               self.description = info_line[2:].strip()
             if info_line[0] == 'F':
-              this_line = split(/ /, info_line[2:])
+              this_line = info_line[2:].split(" ")
               self.framerate = float(this_line[0])
 
         if self.title == '':
