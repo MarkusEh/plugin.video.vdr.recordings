@@ -5,146 +5,147 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: KODI-Addons\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: 2018-09-29 21:08+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2025-04-07 16:55+0000\n"
+"Last-Translator: Daniel Nylander <daniel@danielnylander.se>\n"
+"Language-Team: Swedish <https://kodi.weblate.cloud/projects/kodi-add-ons-video/plugin-video-vdr-recordings/sv_se/>\n"
 "Language: sv_se\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.10.4\n"
 
 msgctxt "Addon Summary"
 msgid "Play VDR recordings"
-msgstr ""
+msgstr "Spela upp VDR-inspelningar"
 
 msgctxt "Addon Description"
 msgid "If you use Klaus Schmidingers VDR http://www.tvdr.de to create TV recorings, you can use this plugin to watch them in KODI.[CR]You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin."
-msgstr ""
+msgstr "Om du använder Klaus Schmidingers VDR http://www.tvdr.de för att skapa TV-inspelningar kan du använda det här insticksprogrammet för att titta på dem i KODI.[CR]Du behöver tillgång till filsystemet där VDR-inspelningarna lagras, t.ex. med hjälp av NFS. Det krävs inte att VDR är igång för att spela upp inspelningarna med det här insticksprogrammet."
 
 # settings labels
 msgctxt "#30001"
 msgid "Folder with VDR recordings"
-msgstr ""
+msgstr "Mapp med VDR-inspelningar"
 
 # context menu
 msgctxt "#30100"
 msgid "Delete VDR recording"
-msgstr ""
+msgstr "Ta bort VDR-inspelning"
 
 msgctxt "#30101"
 msgid "Move VDR recording"
-msgstr ""
+msgstr "Flytta VDR-inspelning"
 
 msgctxt "#30102"
 msgid "Refresh"
-msgstr ""
+msgstr "Uppdatera"
 
 msgctxt "#30103"
 msgid "Set season"
-msgstr ""
+msgstr "Ställ in säsong"
 
 msgctxt "#30104"
 msgid "Set episode"
-msgstr ""
+msgstr "Ställ in avsnitt"
 
 msgctxt "#30105"
 msgid "Set year"
-msgstr ""
+msgstr "Ställ in år"
 
 msgctxt "#30106"
 msgid "Set content: TV shows"
-msgstr ""
+msgstr "Ställ in innehåll: TV-serier"
 
 msgctxt "#30107"
 msgid "Set content: Music videos"
-msgstr ""
+msgstr "Ställ in innehåll: Musikvideor"
 
 msgctxt "#30108"
 msgid "Set content: Movies"
-msgstr ""
+msgstr "Ställ in innehåll: Filmer"
 
 msgctxt "#30109"
 msgid "Add all VDR recordings to Library"
-msgstr ""
+msgstr "Lägg till alla VDR-inspelningar i biblioteket"
 
 msgctxt "#30110"
 msgid "Search recordings"
-msgstr ""
+msgstr "Sök efter inspelningar"
 
 msgctxt "#30111"
 msgid "Move VDR folder"
-msgstr ""
+msgstr "Flytta VDR-mappen"
 
 # Notification messages
 msgctxt "#30200"
 msgid "Update library \"{}\""
-msgstr ""
+msgstr "Uppdatera biblioteket \"{}\""
 
 msgctxt "#30201"
 msgid "Update changed folders in library \"{}\""
-msgstr ""
+msgstr "Uppdatera ändrade mappar i biblioteket ”{}”"
 
 msgctxt "#30202"
 msgid "Update of library \"{}\" finished"
-msgstr ""
+msgstr "Uppdatering av biblioteket ”{}” slutförd"
 
 msgctxt "#30203"
 msgid "Clean up video library"
-msgstr ""
+msgstr "Städa upp i videobiblioteket"
 
 # Data input
 msgctxt "#30210"
 msgid "Enter episode number"
-msgstr ""
+msgstr "Ange avsnittsnummer"
 
 msgctxt "#30211"
 msgid "Enter season number"
-msgstr ""
+msgstr "Ange säsongsnummer"
 
 msgctxt "#30212"
 msgid "Enter year"
-msgstr ""
+msgstr "Ange år"
 
 msgctxt "#30220"
 msgid "Delete VDR recording?"
-msgstr ""
+msgstr "Ta bort VDR-inspelning?"
 
 msgctxt "#30221"
 msgid "Do you want to delete \"{}\"?"
-msgstr ""
+msgstr "Vill du verkligen ta bort \"{}\"?"
 
 msgctxt "#30222"
 msgid "Move VDR recording"
-msgstr ""
+msgstr "Flytta VDR-inspelning"
 
 msgctxt "#30223"
 msgid "Enter search string"
-msgstr ""
+msgstr "Ange söksträng"
 
 msgctxt "#30224"
 msgid "Folder \"{}\" already exists"
-msgstr ""
+msgstr "Mappen \"{}\" finns redan"
 
 msgctxt "#30225"
 msgid "Cannot create folder \"{}\""
-msgstr ""
+msgstr "Kan inte skapa mappen \"{}\""
 
 # folder selection
 msgctxt "#30300"
 msgid "<select this folder>"
-msgstr ""
+msgstr "<välj denna mapp>"
 
 msgctxt "#30301"
 msgid "<create folder>"
-msgstr ""
+msgstr "<skapa mapp>"
 
 msgctxt "#30302"
 msgid "<delete this folder>"
-msgstr ""
+msgstr "<ta bort denna mapp>"
 
 msgctxt "#30303"
 msgid "Name of new folder?"
-msgstr ""
+msgstr "Namn på ny mapp?"
