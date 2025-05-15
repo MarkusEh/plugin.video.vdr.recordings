@@ -74,6 +74,7 @@ v0.1.1
     <summary lang="it_IT">Riproduci registrazioni VDR</summary>
     <summary lang="pl_PL">Odtwarzaj nagrania VDR</summary>
     <summary lang="sv_SE">Spela upp VDR-inspelningar</summary>
+    <summary lang="zh_CN">播放 VDR 录制内容</summary>
     <description lang="ca_ES">Si utilitzes Klaus Schmidingers VDR http://www.tvdr.de per crear gravacions de TV, podeu utilitzar aquest connector per veure-les a KODI.[CR]Necessiteu accedir al sistema de fitxers on s&apos;emmagatzemen les gravacions VDR, per exemple, utilitzant NFS. No cal executar un VDR durant la reproducció de les gravacions amb aquest connector.</description>
     <description lang="da_DK">Hvis du bruger Klaus Schmidingers VDR (http://www.tvdr.de) for at oprette tv -optagelser, kan du bruge dette plugin til at se dem i Kodi.[CR]Du har brug for adgang til filsystemet, hvor VDR -optagelserne er gemt, f.eks. gennem NFS. En kørende VDR er ikke påkrævet under afspilning af optagelserne med dette plugin.</description>
     <description lang="de_DE">Abspielen von TV Aufzeichnungen, die mit Klaus Schmidingers VDR http://www.tvdr.de erstellt wurden. [CR]Voraussetzung: KODI benötigt Zugriff auf das Dateisystem mit den Aufzeichnungen, z.B. über NFS. Zur Wiedergabe der Aufzeichnungen mit diesem Plugin wird VDR nicht benötigt.</description>
@@ -82,5 +83,6 @@ v0.1.1
     <description lang="it_IT">Se utilizzi Klaus Schmidingers VDR http://www.tvdr.de per creare registrazioni TV, puoi usare questo plugin per guardarle su KODI.[CR]Devi accedere al file system in cui sono archiviate le registrazioni VDR, ad es. usando NFS. Con questo plugin non è necessario avere VDR in esecuzione durante la riproduzione delle registrazioni.</description>
     <description lang="pl_PL">Jeśli używasz VDR http://www.tvdr.de Klausa Schmidingera do tworzenia nagrań telewizyjnych, możesz użyć tej wtyczki, aby oglądać je w KODI.[CR]Potrzebujesz dostępu do systemu plików, w którym przechowywane są nagrania VDR, np. za pomocą NFS. Działający VDR nie jest wymagany podczas odtwarzania nagrań za pomocą tej wtyczki.</description>
     <description lang="sv_SE">Om du använder Klaus Schmidingers VDR http://www.tvdr.de för att skapa TV-inspelningar kan du använda det här insticksprogrammet för att titta på dem i KODI.[CR]Du behöver tillgång till filsystemet där VDR-inspelningarna lagras, t.ex. med hjälp av NFS. Det krävs inte att VDR är igång för att spela upp inspelningarna med det här insticksprogrammet.</description>
+    <description lang="zh_CN">如果您使用 Klaus Schmidingers VDR http://www.tvdr.de 创建电视录像，则可以使用此插件在 KODI 中观看这些录像。[CR]您需要访问存储 VDR 录像的文件系统，例如使用 NFS。使用此插件播放录像时不需要运行 VDR。</description>
   </extension>
 </addon>
