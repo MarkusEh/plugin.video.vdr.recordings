@@ -67,6 +67,7 @@ v0.1.1
         <screenshot>resources/screenshot00011.png</screenshot>
     </assets>
     <reuselanguageinvoker>true</reuselanguageinvoker>
+    <summary lang="bs_BA">Reprodukcija VDR snimaka</summary>
     <summary lang="da_DK">Afspil VDR-optagelser</summary>
     <summary lang="de_DE">VDR Aufzeichnungen wiedergeben</summary>
     <summary lang="en_GB">Play VDR recordings</summary>
@@ -75,6 +76,7 @@ v0.1.1
     <summary lang="pl_PL">Odtwarzaj nagrania VDR</summary>
     <summary lang="sv_SE">Spela upp VDR-inspelningar</summary>
     <summary lang="zh_CN">播放 VDR 录制内容</summary>
+    <description lang="bs_BA">Ako koristite Klaus Schmidinger VDR http://www.tvdr.de za kreiranje TV snimaka, možete koristiti ovaj dodatak (plugin) da ih gledate u KODI-ju.[CR]Potreban vam je pristup datotečnom sistemu u kojem su pohranjeni VDR snimci, npr. korištenjem NFS-a. Pokrenuti VDR nije potreban tokom reprodukcije snimaka pomoću ovog dodatka.</description>
     <description lang="ca_ES">Si utilitzes Klaus Schmidingers VDR http://www.tvdr.de per crear gravacions de TV, podeu utilitzar aquest connector per veure-les a KODI.[CR]Necessiteu accedir al sistema de fitxers on s&apos;emmagatzemen les gravacions VDR, per exemple, utilitzant NFS. No cal executar un VDR durant la reproducció de les gravacions amb aquest connector.</description>
     <description lang="da_DK">Hvis du bruger Klaus Schmidingers VDR (http://www.tvdr.de) for at oprette tv -optagelser, kan du bruge dette plugin til at se dem i Kodi.[CR]Du har brug for adgang til filsystemet, hvor VDR -optagelserne er gemt, f.eks. gennem NFS. En kørende VDR er ikke påkrævet under afspilning af optagelserne med dette plugin.</description>
     <description lang="de_DE">Abspielen von TV Aufzeichnungen, die mit Klaus Schmidingers VDR http://www.tvdr.de erstellt wurden. [CR]Voraussetzung: KODI benötigt Zugriff auf das Dateisystem mit den Aufzeichnungen, z.B. über NFS. Zur Wiedergabe der Aufzeichnungen mit diesem Plugin wird VDR nicht benötigt.</description>
