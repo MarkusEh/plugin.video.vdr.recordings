@@ -1,0 +1,151 @@
+# KODI Media Center language file
+# Addon Name: VDR Recordings
+# Addon id: plugin.video.vdr.recording
+# Addon Provider: Markus Ehrnsperger
+msgid ""
+msgstr ""
+"Project-Id-Version: KODI-Addons\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-09-29 21:08+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: fil\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1 && n != 2 && n != 3 && (n % 10 == 4 "
+"|| n % 10 == 6 || n % 10 == 9);\n"
+
+msgctxt "Addon Summary"
+msgid "Play VDR recordings"
+msgstr ""
+
+msgctxt "Addon Description"
+msgid "If you use Klaus Schmidingers VDR http://www.tvdr.de to create TV recorings, you can use this plugin to watch them in KODI.[CR]You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin."
+msgstr ""
+
+#settings labels
+msgctxt "#30001"
+msgid "Folder with VDR recordings"
+msgstr ""
+
+#context menu
+msgctxt "#30100"
+msgid "Delete VDR recording"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Move VDR recording"
+msgstr ""
+
+msgctxt "#30102"
+msgid "Refresh"
+msgstr ""
+
+msgctxt "#30103"
+msgid "Set season"
+msgstr ""
+
+msgctxt "#30104"
+msgid "Set episode"
+msgstr ""
+
+msgctxt "#30105"
+msgid "Set year"
+msgstr ""
+
+msgctxt "#30106"
+msgid "Set content: TV shows"
+msgstr ""
+
+msgctxt "#30107"
+msgid "Set content: Music videos"
+msgstr ""
+
+msgctxt "#30108"
+msgid "Set content: Movies"
+msgstr ""
+
+msgctxt "#30109"
+msgid "Add all VDR recordings to Library"
+msgstr ""
+
+msgctxt "#30110"
+msgid "Search recordings"
+msgstr ""
+
+msgctxt "#30111"
+msgid "Move VDR folder"
+msgstr ""
+
+# Notification messages
+msgctxt "#30200"
+msgid "Update library \"{}\""
+msgstr ""
+
+msgctxt "#30201"
+msgid "Update changed folders in library \"{}\""
+msgstr ""
+
+msgctxt "#30202"
+msgid "Update of library \"{}\" finished"
+msgstr ""
+
+msgctxt "#30203"
+msgid "Clean up video library"
+msgstr ""
+
+# Data input
+msgctxt "#30210"
+msgid "Enter episode number"
+msgstr ""
+
+msgctxt "#30211"
+msgid "Enter season number"
+msgstr ""
+
+msgctxt "#30212"
+msgid "Enter year"
+msgstr ""
+
+msgctxt "#30220"
+msgid "Delete VDR recording?"
+msgstr ""
+
+msgctxt "#30221"
+msgid "Do you want to delete \"{}\"?"
+msgstr ""
+
+msgctxt "#30222"
+msgid "Move VDR recording"
+msgstr ""
+
+msgctxt "#30223"
+msgid "Enter search string"
+msgstr ""
+
+msgctxt "#30224"
+msgid "Folder \"{}\" already exists"
+msgstr ""
+
+msgctxt "#30225"
+msgid "Cannot create folder \"{}\""
+msgstr ""
+
+# folder selection
+msgctxt "#30300"
+msgid "<select this folder>"
+msgstr ""
+
+msgctxt "#30301"
+msgid "<create folder>"
+msgstr ""
+
+msgctxt "#30302"
+msgid "<delete this folder>"
+msgstr ""
+
+msgctxt "#30303"
+msgid "Name of new folder?"
+msgstr ""
