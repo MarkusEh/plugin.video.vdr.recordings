@@ -5,147 +5,147 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: KODI-Addons\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: 2018-09-29 21:08+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2025-09-14 09:29+0000\n"
+"Last-Translator: Aindriú Mac Giolla Eoin <aindriu80@gmail.com>\n"
+"Language-Team: Irish <https://kodi.weblate.cloud/projects/kodi-add-ons-video/plugin-video-vdr-recordings/ga/>\n"
 "Language: ga\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=5; plural=n==1 ? 0 : n==2 ? 1 : (n>2 && n<7) ? 2 :("
-"n>6 && n<11) ? 3 : 4;\n"
+"Plural-Forms: nplurals=5; plural=n==1 ? 0 : n==2 ? 1 : (n>2 && n<7) ? 2 :(n>6 && n<11) ? 3 : 4;\n"
+"X-Generator: Weblate 5.13.3\n"
 
 msgctxt "Addon Summary"
 msgid "Play VDR recordings"
-msgstr ""
+msgstr "Seinn taifeadtaí VDR"
 
 msgctxt "Addon Description"
 msgid "If you use Klaus Schmidingers VDR http://www.tvdr.de to create TV recorings, you can use this plugin to watch them in KODI.[CR]You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin."
-msgstr ""
+msgstr "Má úsáideann tú Klaus Schmidingers VDR http://www.tvdr.de chun taifeadtaí teilifíse a chruthú, is féidir leat an breiseán seo a úsáid chun féachaint orthu i KODI.[CR]Ní mór rochtain a bheith agat ar an gcóras comhad ina bhfuil na taifeadtaí VDR stóráilte, m.sh. ag baint úsáide as NFS. Ní gá VDR atá ag rith le linn athsheinm na dtaifeadtaí leis an mbreiseán seo."
 
 #settings labels
 msgctxt "#30001"
 msgid "Folder with VDR recordings"
-msgstr ""
+msgstr "Fillteán le taifeadtaí VDR"
 
 #context menu
 msgctxt "#30100"
 msgid "Delete VDR recording"
-msgstr ""
+msgstr "Scrios taifeadadh VDR"
 
 msgctxt "#30101"
 msgid "Move VDR recording"
-msgstr ""
+msgstr "Bog taifeadadh VDR"
 
 msgctxt "#30102"
 msgid "Refresh"
-msgstr ""
+msgstr "Athnuachan"
 
 msgctxt "#30103"
 msgid "Set season"
-msgstr ""
+msgstr "Socraigh séasúr"
 
 msgctxt "#30104"
 msgid "Set episode"
-msgstr ""
+msgstr "Socraigh eipeasóid"
 
 msgctxt "#30105"
 msgid "Set year"
-msgstr ""
+msgstr "Socraigh bliain"
 
 msgctxt "#30106"
 msgid "Set content: TV shows"
-msgstr ""
+msgstr "Ábhar socraithe: cláir teilifíse"
 
 msgctxt "#30107"
 msgid "Set content: Music videos"
-msgstr ""
+msgstr "Ábhar socraithe: Físeáin cheoil"
 
 msgctxt "#30108"
 msgid "Set content: Movies"
-msgstr ""
+msgstr "Ábhar an tacair: Scannáin"
 
 msgctxt "#30109"
 msgid "Add all VDR recordings to Library"
-msgstr ""
+msgstr "Cuir gach taifeadadh VDR leis an Leabharlann"
 
 msgctxt "#30110"
 msgid "Search recordings"
-msgstr ""
+msgstr "Cuardaigh taifeadtaí"
 
 msgctxt "#30111"
 msgid "Move VDR folder"
-msgstr ""
+msgstr "Bog fillteán VDR"
 
 # Notification messages
 msgctxt "#30200"
 msgid "Update library \"{}\""
-msgstr ""
+msgstr "Nuashonraigh leabharlann \"{}\""
 
 msgctxt "#30201"
 msgid "Update changed folders in library \"{}\""
-msgstr ""
+msgstr "Nuashonraigh fillteáin athraithe sa leabharlann \"{}\""
 
 msgctxt "#30202"
 msgid "Update of library \"{}\" finished"
-msgstr ""
+msgstr "Nuashonrú na leabharlainne \"{}\" críochnaithe"
 
 msgctxt "#30203"
 msgid "Clean up video library"
-msgstr ""
+msgstr "Glan suas an leabharlann físe"
 
 # Data input
 msgctxt "#30210"
 msgid "Enter episode number"
-msgstr ""
+msgstr "Cuir isteach uimhir na heachtra"
 
 msgctxt "#30211"
 msgid "Enter season number"
-msgstr ""
+msgstr "Cuir isteach uimhir an tséasúir"
 
 msgctxt "#30212"
 msgid "Enter year"
-msgstr ""
+msgstr "Cuir isteach bliain"
 
 msgctxt "#30220"
 msgid "Delete VDR recording?"
-msgstr ""
+msgstr "Scriosadh taifeadadh VDR?"
 
 msgctxt "#30221"
 msgid "Do you want to delete \"{}\"?"
-msgstr ""
+msgstr "Ar mhaith leat \"{}\" a scriosadh?"
 
 msgctxt "#30222"
 msgid "Move VDR recording"
-msgstr ""
+msgstr "Bog taifeadadh VDR"
 
 msgctxt "#30223"
 msgid "Enter search string"
-msgstr ""
+msgstr "Cuir isteach teaghrán cuardaigh"
 
 msgctxt "#30224"
 msgid "Folder \"{}\" already exists"
-msgstr ""
+msgstr "Tá fillteán \"{}\" ann cheana féin"
 
 msgctxt "#30225"
 msgid "Cannot create folder \"{}\""
-msgstr ""
+msgstr "Ní féidir fillteán \"{}\" a chruthú"
 
 # folder selection
 msgctxt "#30300"
 msgid "<select this folder>"
-msgstr ""
+msgstr "<roghnaigh an fillteán seo>"
 
 msgctxt "#30301"
 msgid "<create folder>"
-msgstr ""
+msgstr "<cruthaigh fillteán>"
 
 msgctxt "#30302"
 msgid "<delete this folder>"
-msgstr ""
+msgstr "<scrios an fillteán seo>"
 
 msgctxt "#30303"
 msgid "Name of new folder?"
-msgstr ""
+msgstr "Ainm an fhillteáin nua?"
