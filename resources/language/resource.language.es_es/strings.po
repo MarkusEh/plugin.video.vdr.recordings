@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: KODI-Addons\n"
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: 2018-09-29 21:08+0000\n"
-"PO-Revision-Date: 2026-03-30 10:52+0000\n"
+"PO-Revision-Date: 2026-04-01 00:40+0000\n"
 "Last-Translator: Alfonso Cachero <alfonso.cachero@gmail.com>\n"
 "Language-Team: Spanish (Spain) <https://kodi.weblate.cloud/projects/kodi-add-ons-video/plugin-video-vdr-recordings/es_es/>\n"
 "Language: es_es\n"
@@ -69,7 +69,7 @@ msgstr "Establecer contenido: Películas"
 
 msgctxt "#30109"
 msgid "Add all VDR recordings to Library"
-msgstr "Añadir todas las grabaciones VDR a la biblioteca"
+msgstr "Añadir todas las grabaciones VDR a la colección"
 
 msgctxt "#30110"
 msgid "Search recordings"
@@ -82,19 +82,19 @@ msgstr "Mover carpeta VDR"
 # Notification messages
 msgctxt "#30200"
 msgid "Update library \"{}\""
-msgstr "Actualizar biblioteca \"{}\""
+msgstr "Actualizar colección \"{}\""
 
 msgctxt "#30201"
 msgid "Update changed folders in library \"{}\""
-msgstr "Actualizar carpetas cambiadas en la biblioteca \"{}\""
+msgstr "Actualizar carpetas cambiadas en la colección \"{}\""
 
 msgctxt "#30202"
 msgid "Update of library \"{}\" finished"
-msgstr "Actualización de biblioteca \"{}\" finalizada"
+msgstr "Actualización de colección \"{}\" finalizada"
 
 msgctxt "#30203"
 msgid "Clean up video library"
-msgstr "Limpiar la biblioteca de vídeo"
+msgstr "Limpiar la colección de vídeo"
 
 # Data input
 msgctxt "#30210"
