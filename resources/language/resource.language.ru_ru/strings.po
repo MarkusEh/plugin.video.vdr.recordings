@@ -7,37 +7,37 @@ msgstr ""
 "Project-Id-Version: KODI-Addons\n"
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: 2018-09-29 21:08+0000\n"
-"PO-Revision-Date: 2022-06-12 21:14+0000\n"
-"Last-Translator: Christian Gade <gade@kodi.tv>\n"
+"PO-Revision-Date: 2026-05-25 06:16+0000\n"
+"Last-Translator: Andrei Stepanov <adem4ik@gmail.com>\n"
 "Language-Team: Russian <https://kodi.weblate.cloud/projects/kodi-add-ons-video/plugin-video-vdr-recordings/ru_ru/>\n"
 "Language: ru_ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 4.12.2\n"
+"X-Generator: Weblate 2026.5\n"
 
 msgctxt "Addon Summary"
 msgid "Play VDR recordings"
-msgstr ""
+msgstr "Воспроизводить записи VDR"
 
 msgctxt "Addon Description"
 msgid "If you use Klaus Schmidingers VDR http://www.tvdr.de to create TV recorings, you can use this plugin to watch them in KODI.[CR]You do need access to the file system where the VDR recordings are stored, e.g. using NFS. A running VDR is not required during playback of the recordings with this plugin."
-msgstr ""
+msgstr "Если вы используете VDR Клауса Шмидингера http://www.tvdr.de для создания записей эфира, вы можете использовать этот плагин для их просмотра в KODI.[CR]Вам необходим доступ к файловой системе, где хранятся записи VDR, например, через NFS. Запущенный VDR не требуется во время воспроизведения записей с помощью этого плагина."
 
 # settings labels
 msgctxt "#30001"
 msgid "Folder with VDR recordings"
-msgstr ""
+msgstr "Папка с записями VDR"
 
 # context menu
 msgctxt "#30100"
 msgid "Delete VDR recording"
-msgstr ""
+msgstr "Удалить запись VDR"
 
 msgctxt "#30101"
 msgid "Move VDR recording"
-msgstr ""
+msgstr "Переместить запись VDR"
 
 msgctxt "#30102"
 msgid "Refresh"
@@ -45,107 +45,107 @@ msgstr "Обновить"
 
 msgctxt "#30103"
 msgid "Set season"
-msgstr ""
+msgstr "Установить сезон"
 
 msgctxt "#30104"
 msgid "Set episode"
-msgstr ""
+msgstr "Установить серию"
 
 msgctxt "#30105"
 msgid "Set year"
-msgstr ""
+msgstr "Установить год"
 
 msgctxt "#30106"
 msgid "Set content: TV shows"
-msgstr ""
+msgstr "Установить содержимое: ТВ-передачи"
 
 msgctxt "#30107"
 msgid "Set content: Music videos"
-msgstr ""
+msgstr "Установить содержимое: музыкальные клипы"
 
 msgctxt "#30108"
 msgid "Set content: Movies"
-msgstr ""
+msgstr "Установить содержимое: фильмы"
 
 msgctxt "#30109"
 msgid "Add all VDR recordings to Library"
-msgstr ""
+msgstr "Добавить все записи VDR в медиатеку"
 
 msgctxt "#30110"
 msgid "Search recordings"
-msgstr ""
+msgstr "Поиск записей"
 
 msgctxt "#30111"
 msgid "Move VDR folder"
-msgstr ""
+msgstr "Переместить папку VDR"
 
 # Notification messages
 msgctxt "#30200"
 msgid "Update library \"{}\""
-msgstr ""
+msgstr "Обновление медиатеки «{}»"
 
 msgctxt "#30201"
 msgid "Update changed folders in library \"{}\""
-msgstr ""
+msgstr "Обновление изменённых папок в медиатеке «{}»"
 
 msgctxt "#30202"
 msgid "Update of library \"{}\" finished"
-msgstr ""
+msgstr "Обновление медиатеки «{}» завершено"
 
 msgctxt "#30203"
 msgid "Clean up video library"
-msgstr ""
+msgstr "Очистка медиатеки видео"
 
 # Data input
 msgctxt "#30210"
 msgid "Enter episode number"
-msgstr ""
+msgstr "Введите номер серии"
 
 msgctxt "#30211"
 msgid "Enter season number"
-msgstr ""
+msgstr "Введите номер сезона"
 
 msgctxt "#30212"
 msgid "Enter year"
-msgstr ""
+msgstr "Введите год"
 
 msgctxt "#30220"
 msgid "Delete VDR recording?"
-msgstr ""
+msgstr "Удалить запись VDR?"
 
 msgctxt "#30221"
 msgid "Do you want to delete \"{}\"?"
-msgstr ""
+msgstr "Хотите удалить «{}»?"
 
 msgctxt "#30222"
 msgid "Move VDR recording"
-msgstr ""
+msgstr "Переместить запись VDR"
 
 msgctxt "#30223"
 msgid "Enter search string"
-msgstr ""
+msgstr "Введите поисковую строку"
 
 msgctxt "#30224"
 msgid "Folder \"{}\" already exists"
-msgstr ""
+msgstr "Папка «{}» уже существует"
 
 msgctxt "#30225"
 msgid "Cannot create folder \"{}\""
-msgstr ""
+msgstr "Не удаётся создать папку «{}»"
 
 # folder selection
 msgctxt "#30300"
 msgid "<select this folder>"
-msgstr ""
+msgstr "<выбрать эту папку>"
 
 msgctxt "#30301"
 msgid "<create folder>"
-msgstr ""
+msgstr "<создать папку>"
 
 msgctxt "#30302"
 msgid "<delete this folder>"
-msgstr ""
+msgstr "<удалить эту папку>"
 
 msgctxt "#30303"
 msgid "Name of new folder?"
-msgstr ""
+msgstr "Имя новой папки?"
